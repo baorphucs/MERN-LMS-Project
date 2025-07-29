@@ -1,5 +1,8 @@
 # MERN Learning Management System
 
+<img width="5000" height="3333" alt="359f83e6-0095-4ff6-b079-72a3b2a6019b" src="https://github.com/user-attachments/assets/95db1c7c-bbd2-40f2-86cf-302f1b9a98ec" />
+
+
 A modern, production-ready Learning Management System built with the MERN stack (MongoDB, Express, React, Node.js).
 
 ## Features
