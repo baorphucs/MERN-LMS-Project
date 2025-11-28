@@ -146,13 +146,13 @@ const Home = () => {
           transition={{ duration: 1 }}
         >
           <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6 drop-shadow-lg">
-            Modern Learning, <span className="text-primary-500">Reimagined</span>
+            Hi there!, <span className="text-primary-500">I'm PhamNgocBaoPhuc</span>
           </h1>
           <p className="text-lg md:text-2xl text-gray-700 mb-8 max-w-2xl mx-auto">
-            Experience a next-generation LMS with animated, interactive, and visually stunning features for students and teachers.
+            We bring together world-class instructors, interactive content, and a supportive community to help you achieve your personal and professional goals.
           </p>
           <a
-            href={isAuthenticated ? "/dashboard" : "/register"}
+            href={isAuthenticated ? "/dashboard" : "/login"}
             className="inline-block px-8 py-4 rounded-full bg-primary-500 text-white font-semibold text-lg shadow-lg hover:bg-primary-600 transition-all duration-300 backdrop-blur-md"
           >
             {isAuthenticated ? "Go to Dashboard" : "Get Started"}

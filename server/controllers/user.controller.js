@@ -27,7 +27,6 @@ exports.getUser = async (req, res) => {
     // User is already available in req.user from auth middleware
     const user = await User.findById(req.user.id).select('-password')
                        .populate('courses', 'title code');
-    
     res.json({
       success: true,
       user
