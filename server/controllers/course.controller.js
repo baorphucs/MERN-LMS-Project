@@ -113,38 +113,19 @@ exports.createCourse = async (req, res) => {
 exports.updateCourse = async (req, res) => {
   try {
     let course = await Course.findById(req.params.id);
-    
     if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found'
-      });
+      return res.status(404).json({ success: false, message: 'Course not found' });
     }
-    
-    // Check ownership
-    if (course.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to update this course'
-      });
-    }
-    
-    course = await Course.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    
-    return res.status(200).json({
-      success: true,
-      data: course
+
+    course = await Course.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
     });
+
+    return res.status(200).json({ success: true, data: course });
   } catch (error) {
     console.error('Error updating course:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error updating course'
-    });
+    return res.status(500).json({ success: false, message: 'Error updating course' });
   }
 };
 
@@ -154,41 +135,17 @@ exports.updateCourse = async (req, res) => {
 exports.deleteCourse = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
-    
     if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found'
-      });
+      return res.status(404).json({ success: false, message: 'Course not found' });
     }
-    
-    // Check if user is course teacher
-    if (course.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to delete this course'
-      });
-    }
-    
-    // Remove course from all users
-    await User.updateMany(
-      { courses: course._id },
-      { $pull: { courses: course._id } }
-    );
-    
-    // Delete course
+
+    await User.updateMany({ courses: course._id }, { $pull: { courses: course._id } });
     await Course.deleteOne({ _id: course._id });
-    
-    return res.status(200).json({
-      success: true,
-      message: 'Course deleted successfully'
-    });
+
+    return res.status(200).json({ success: true, message: 'Course deleted successfully' });
   } catch (error) {
     console.error('Error deleting course:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error deleting course'
-    });
+    return res.status(500).json({ success: false, message: 'Error deleting course' });
   }
 };
 

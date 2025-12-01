@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const Notification = require('../models/notification.model');
 
-// Helper function to create directories if they don't exist
+// Helper function
 const ensureDirectoryExists = (directory) => {
   if (!fs.existsSync(directory)) {
     fs.mkdirSync(directory, { recursive: true });
@@ -13,21 +13,18 @@ const ensureDirectoryExists = (directory) => {
 
 // @desc    Create new notice
 // @route   POST /api/notices
-// @access  Private/Teacher
+// @access  Private/Teacher (bây giờ teacher nào cũng tạo được)
 exports.createNotice = async (req, res) => {
   try {
-    console.log('Creating notice with data:', req.body);
     const { title, content, courseId, priority, pinned, attachments } = req.body;
-    
-    // Validate required fields
+
     if (!title || !content || !courseId) {
       return res.status(400).json({
         success: false,
         message: 'Please provide title, content and course ID'
       });
     }
-    
-    // Check if course exists
+
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({
@@ -35,39 +32,27 @@ exports.createNotice = async (req, res) => {
         message: 'Course not found'
       });
     }
-    
-    // Check if user is the teacher of the course
-    if (course.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to create notices for this course'
-      });
-    }
-    
+
+    // ĐÃ XÓA kiểm tra ownership → Teacher nào cũng tạo được
+
     let files = [];
-    
-    // Handle file uploads
     if (req.files && req.files.attachments) {
-      const attachments = Array.isArray(req.files.attachments) 
-        ? req.files.attachments 
+      const atts = Array.isArray(req.files.attachments)
+        ? req.files.attachments
         : [req.files.attachments];
-        
-      // Ensure uploads directory exists
+
       const uploadsDir = path.join(__dirname, '../uploads/notices');
       ensureDirectoryExists(uploadsDir);
-      
-      // Save each file
-      for (const file of attachments) {
+
+      for (const file of atts) {
         const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
         const filename = `notice_${uniqueSuffix}_${file.name.replace(/\s+/g, '_')}`;
         const filepath = path.join(uploadsDir, filename);
-        
         await file.mv(filepath);
         files.push(`notices/${filename}`);
       }
     }
-    
-    // Create notice
+
     const notice = await Notice.create({
       title,
       content,
@@ -77,20 +62,17 @@ exports.createNotice = async (req, res) => {
       pinned: pinned || false,
       attachments: files
     });
-    
-    // Notify all students in the course
+
+    // Gửi thông báo cho học sinh
     for (const studentId of course.students) {
       await Notification.create({
         user: studentId,
-        text: `A new notice "${notice.title}" has been posted in ${course.title}.`,
+        text: `Thông báo mới "${notice.title}" trong môn ${course.title}`,
         link: `/notices/${notice._id}`
       });
     }
-    
-    res.status(201).json({
-      success: true,
-      notice: notice
-    });
+
+    res.status(201).json({ success: true, notice });
   } catch (error) {
     console.error('Error creating notice:', error);
     res.status(500).json({
@@ -101,144 +83,24 @@ exports.createNotice = async (req, res) => {
   }
 };
 
-// @desc    Get all notices (global or for a specific course)
-// @route   GET /api/notices
-// @route   GET /api/notices/course/:courseId
-// @access  Private
-exports.getNotices = async (req, res) => {
-  try {
-    let notices;
-    if (req.user.role === 'teacher') {
-      const teacherCourses = await Course.find({ teacher: req.user.id }).select('_id');
-      const courseIds = teacherCourses.map(course => course._id);
-      if (!courseIds.length) {
-        return res.status(200).json({ success: true, count: 0, notices: [] });
-    }
-      notices = await Notice.find({ course: { $in: courseIds } })
-        .populate('course', 'title code')
-        .sort('-createdAt');
-      if (!notices) {
-        return res.status(200).json({ success: true, count: 0, notices: [] });
-      }
-    } else if (req.user.role === 'student') {
-      const studentCourses = await Course.find({ students: req.user.id }).select('_id');
-      const courseIds = studentCourses.map(course => course._id);
-      notices = await Notice.find({ course: { $in: courseIds } })
-        .populate('course', 'title code')
-        .sort('-createdAt');
-      if (!notices) {
-        return res.status(200).json({ success: true, count: 0, notices: [] });
-      }
-    } else {
-      notices = await Notice.find()
-        .populate('course', 'title code')
-        .sort('-createdAt');
-      if (!notices) {
-        return res.status(200).json({ success: true, count: 0, notices: [] });
-      }
-    }
-    res.status(200).json({
-      success: true,
-      count: notices.length,
-      notices: notices
-    });
-  } catch (error) {
-    console.error('Error getting notices:', error);
-    if (error && error.stack) console.error(error.stack);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
-  }
-};
-
-// @desc    Get all notices for a course
-// @route   GET /api/notices/course/:courseId
-// @access  Private
-exports.getNoticesForCourse = async (req, res) => {
-  try {
-    console.log('Getting notices for course:', req.params.courseId);
-    
-    const notices = await Notice.find({ courseId: req.params.courseId })
-      .populate('author', 'name avatar')
-      .sort('-pinned -createdAt');
-    
-    res.status(200).json({
-      success: true,
-      count: notices.length,
-      notices: notices
-    });
-  } catch (error) {
-    console.error('Error getting notices:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
-  }
-};
-
-// @desc    Get single notice
-// @route   GET /api/notices/:id
-// @access  Private
-exports.getNotice = async (req, res) => {
-  try {
-    const notice = await Notice.findById(req.params.id)
-      .populate('course', 'title code teacher');
-    if (!notice) {
-      return res.status(404).json({
-        success: false,
-        message: 'Notice not found'
-      });
-    }
-    return res.status(200).json({
-      success: true,
-      data: notice
-    });
-  } catch (error) {
-    console.error('Error getting notice:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error fetching notice details',
-      error: error.message
-    });
-  }
-};
-
 // @desc    Update notice
 // @route   PUT /api/notices/:id
-// @access  Private/Teacher
 exports.updateNotice = async (req, res) => {
   try {
-    let notice = await Notice.findById(req.params.id);
-    
+    const notice = await Notice.findById(req.params.id);
     if (!notice) {
-      return res.status(404).json({
-        success: false,
-        message: 'Notice not found'
-      });
+      return res.status(res.status(404).json({ success: false, message: 'Notice not found' }));
     }
-    
-    // Check course ownership
-    const course = await Course.findById(notice.courseId);
-    if (course.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to update this notice'
-      });
-    }
-    
-    notice = await Notice.findByIdAndUpdate(
+
+    // ĐÃ XÓA kiểm tra ownership → Teacher nào cũng sửa được
+
+    const updatedNotice = await Notice.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     ).populate('author', 'name avatar');
-    
-    res.status(200).json({
-      success: true,
-      notice: notice
-    });
+
+    res.status(200).json({ success: true, notice: updatedNotice });
   } catch (error) {
     console.error('Error updating notice:', error);
     res.status(500).json({
@@ -251,33 +113,17 @@ exports.updateNotice = async (req, res) => {
 
 // @desc    Delete notice
 // @route   DELETE /api/notices/:id
-// @access  Private/Teacher
 exports.deleteNotice = async (req, res) => {
   try {
     const notice = await Notice.findById(req.params.id);
-    
     if (!notice) {
-      return res.status(404).json({
-        success: false,
-        message: 'Notice not found'
-      });
+      return res.status(404).json({ success: false, message: 'Notice not found' });
     }
-    
-    // Check course ownership
-    const course = await Course.findById(notice.courseId);
-    if (course.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to delete this notice'
-      });
-    }
-    
+
+    // ĐÃ XÓA kiểm tra ownership → Teacher nào cũng xóa được
+
     await Notice.findByIdAndDelete(req.params.id);
-    
-    res.status(200).json({
-      success: true,
-      data: {}
-    });
+    res.status(200).json({ success: true, message: 'Notice deleted successfully' });
   } catch (error) {
     console.error('Error deleting notice:', error);
     res.status(500).json({
@@ -288,42 +134,88 @@ exports.deleteNotice = async (req, res) => {
   }
 };
 
-// @desc    Get unread notices count
-// @route   GET /api/notices/unread
-// @access  Private
-exports.getUnreadCount = async (req, res) => {
+// Các hàm còn lại giữ nguyên (getNotices, getNoticesForCourse, getNotice, getUnreadCount, ...)
+exports.getNotices = async (req, res) => {
   try {
-    // Find courses the user is in
-    let courseQuery = {};
-    
-    if (req.user.role === 'student') {
-      courseQuery.students = req.user.id;
-    } else if (req.user.role === 'teacher') {
-      courseQuery.teacher = req.user.id;
+    let notices;
+    if (req.user.role === 'teacher') {
+      const teacherCourses = await Course.find({ teacher: req.user.id }).select('_id');
+      const courseIds = teacherCourses.map(c => c._id);
+      notices = courseIds.length
+        ? await Notice.find({ courseId: { $in: courseIds } })
+            .populate('courseId', 'title code')
+            .sort('-createdAt')
+        : [];
+    } else if (req.user.role === 'student') {
+      const studentCourses = await Course.find({ students: req.user.id }).select('_id');
+      const courseIds = studentCourses.map(c => c._id);
+      notices = await Notice.find({ courseId: { $in: courseIds } })
+        .populate('courseId', 'title code')
+        .sort('-createdAt');
+    } else {
+      notices = await Notice.find().populate('courseId', 'title code').sort('-createdAt');
     }
-    
-    const courses = await Course.find(courseQuery);
-    const courseIds = courses.map(course => course._id);
-    
-    // Find notices that the user has not read yet
-    const unreadNoticesCount = await Notice.countDocuments({
-      $and: [
-        { readBy: { $ne: req.user.id } },
-        {
-          $or: [
-            { course: { $in: courseIds } },
-            { course: null } // Global notices
-          ]
-        }
-      ]
-    });
-    
-    res.json({
+
+    res.status(200).json({
       success: true,
-      unreadCount: unreadNoticesCount
+      count: notices.length,
+      notices
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error getting notices:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+exports.getNoticesForCourse = async (req, res) => {
+  try {
+    const notices = await Notice.find({ courseId: req.params.courseId })
+      .populate('author', 'name avatar')
+      .sort('-pinned -createdAt');
+
+    res.status(200).json({
+      success: true,
+      count: notices.length,
+      notices
+    });
+  } catch (error) {
+    console.error('Error getting notices for course:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+exports.getNotice = async (req, res) => {
+  try {
+    const notice = await Notice.findById(req.params.id)
+      .populate('courseId', 'title code')
+      .populate('author', 'name avatar');
+    if (!notice) return res.status(404).json({ success: false, message: 'Notice not found' });
+    res.status(200).json({ success: true, notice });
+  } catch (error) {
+    console.error('Error getting notice:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+exports.getUnreadCount = async (req, res) => {
+  try {
+    const courseQuery = req.user.role === 'student'
+      ? { students: req.user.id }
+      : { teacher: req.user.id };
+
+    const courses = await Course.find(courseQuery).select('_id');
+    const courseIds = courses.map(c => c._id);
+
+    const count = await Notice.countDocuments({
+      courseId: { $in: courseIds },
+      readBy: { $ne: req.user.id }
+    });
+
+    res.json({ success: true, unreadCount: count });
+  } catch (error) {
+    console.error('Error getting unread count:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+module.exports = exports;

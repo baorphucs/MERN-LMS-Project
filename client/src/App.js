@@ -30,6 +30,9 @@ import CourseDetails from './pages/courses/CourseDetails';
 import CreateCourse from './pages/teacher/CreateCourse';
 import EditCourse from './pages/teacher/EditCourse';
 
+// NEW: Quản lý người dùng cho Teacher
+import Users from './pages/teacher/Users';
+
 // Assignment Pages
 import Assignments from './pages/assignments/Assignments';
 import AssignmentDetails from './pages/assignments/AssignmentDetails';
@@ -44,11 +47,11 @@ import TakeQuiz from './pages/quizzes/TakeQuiz';
 import QuizResult from './pages/quizzes/QuizResult';
 import EditQuiz from './pages/teacher/EditQuiz';
 
-// Material Pages
+// Material
 import Materials from './pages/materials/Materials';
 import CreateMaterial from './pages/teacher/CreateMaterial';
 
-// Notice Pages
+// Notice
 import Notices from './pages/notices/Notices';
 import CreateNotice from './pages/teacher/CreateNotice';
 
@@ -63,23 +66,41 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Protected Routes - Both Roles */}
+          {/* Protected Routes - Cả Teacher & Student */}
           <Route element={<PrivateRoute />}>
             <Route path="/courses" element={<Layout><Courses /></Layout>} />
             <Route path="/courses/:id" element={<Layout><CourseDetails /></Layout>} />
             <Route path="/notices" element={<Layout><Notices /></Layout>} />
             <Route path="/materials" element={<Layout><Materials /></Layout>} />
+            <Route path="/assignments" element={<Layout><Assignments /></Layout>} />
+            <Route path="/assignments/:id" element={<Layout><AssignmentDetails /></Layout>} />
+            <Route path="/quizzes" element={<Layout><Quizzes /></Layout>} />
+            <Route path="/quizzes/:id" element={<Layout><QuizDetails /></Layout>} />
+            <Route path="/quizzes/:id/result" element={<Layout><QuizResult /></Layout>} />
           </Route>
 
-          {/* Teacher Routes */}
+          {/* Teacher Routes - Bao gồm cả Super Admin */}
           <Route element={<TeacherRoute />}>
             <Route path="/teacher/dashboard" element={<Layout><TeacherDashboard /></Layout>} />
-            <Route path="/teacher/courses/create" element={<Layout><CreateCourse /></Layout>} />
-            <Route path="/teacher/courses/:id/edit" element={<Layout><EditCourse /></Layout>} />
+            <Route path="/teacher/create-course" element={<Layout><CreateCourse /></Layout>} />
+            
+            {/* MỚI: Quản lý tất cả khóa học */}
+            <Route path="/teacher/courses" element={<Layout><Courses /></Layout>} />
+            
+            {/* MỚI: Sửa khóa học */}
+            <Route path="/teacher/edit-course/:id" element={<Layout><EditCourse /></Layout>} />
+            
+            {/* MỚI: Quản lý người dùng */}
+            <Route path="/teacher/users" element={<Layout><Users /></Layout>} />
+
+            {/* Các route tạo nội dung */}
             <Route path="/teacher/assignments/create/:courseId" element={<Layout><CreateAssignment /></Layout>} />
             <Route path="/teacher/quizzes/create/:courseId" element={<Layout><CreateQuiz /></Layout>} />
             <Route path="/teacher/materials/create/:courseId" element={<Layout><CreateMaterial /></Layout>} />
             <Route path="/teacher/notices/create/:courseId" element={<Layout><CreateNotice /></Layout>} />
+            
+            {/* Edit Quiz */}
+            <Route path="/quizzes/:id/edit" element={<Layout><EditQuiz /></Layout>} />
           </Route>
 
           {/* Student Routes */}
@@ -89,31 +110,7 @@ const App = () => {
             <Route path="/quizzes/:id/take" element={<Layout><TakeQuiz /></Layout>} />
           </Route>
 
-          {/* Assignment Routes - Both Roles */}
-          <Route element={<PrivateRoute />}>
-            <Route path="/assignments" element={<Layout><Assignments /></Layout>} />
-            <Route path="/assignments/:id" element={<Layout><AssignmentDetails /></Layout>} />
-          </Route>
-
-          {/* Quiz Routes - Both Roles */}
-          <Route element={<PrivateRoute />}>
-            <Route path="/quizzes" element={<Layout><Quizzes /></Layout>} />
-            <Route path="/quizzes/:id" element={<Layout><QuizDetails /></Layout>} />
-            <Route path="/quizzes/:id/edit" element={<Layout><EditQuiz /></Layout>} />
-            <Route path="/quizzes/:id/result" element={<Layout><QuizResult /></Layout>} />
-            <Route 
-              path="/quizzes/:id/take" 
-              element={
-                <PrivateRoute>
-                  <StudentRoute>
-                    <TakeQuiz />
-                  </StudentRoute>
-                </PrivateRoute>
-              } 
-            />
-          </Route>
-
-          {/* 404 Route */}
+          {/* 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

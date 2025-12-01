@@ -8,50 +8,26 @@ const mongoose = require('mongoose');
 // @access  Private/Teacher
 exports.createQuiz = async (req, res) => {
   try {
-    const { 
-      title, 
-      description, 
-      course, 
-      timeLimit, 
-      availableFrom,
-      availableTo,
-      isPublished,
-      questions
-    } = req.body;
-    
-    console.log('Creating quiz with questions:', JSON.stringify(questions, null, 2));
-    
-    // Check if user is the teacher of the course
+    const { title, description, course, timeLimit, availableFrom, availableTo, isPublished, questions } = req.body;
+
     const courseDoc = await Course.findById(course);
     if (!courseDoc) {
       return res.status(404).json({ message: 'Course not found' });
     }
-    
-    if (courseDoc.teacher.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'Not authorized to create quizzes for this course' });
-    }
-    
-    // Create quiz
+
+    // ĐÃ XÓA: kiểm tra courseDoc.teacher === req.user.id
+    // Bây giờ teacher nào cũng tạo được quiz ở mọi course
+
     const quiz = await Quiz.create({
-      title,
-      description,
-      course,
-      teacher: req.user.id,
+      title, description, course, teacher: req.user.id,
       timeLimit: timeLimit || null,
       availableFrom: availableFrom || Date.now(),
-      availableTo: availableTo || null,
-      isPublished: isPublished || false,
+      availableTo, isPublished: isPublished || false,
       questions
     });
-    
-    // Add quiz to course
-    await Course.findByIdAndUpdate(
-      course,
-      { $push: { quizzes: quiz._id } },
-      { new: true }
-    );
-    
-    // Notify all students in the course
+
+    await Course.findByIdAndUpdate(course, { $push: { quizzes: quiz._id } });
+
     for (const studentId of courseDoc.students) {
       await Notification.create({
         user: studentId,
@@ -59,19 +35,10 @@ exports.createQuiz = async (req, res) => {
         link: `/quizzes/${quiz._id}`
       });
     }
-    
-    res.status(201).json({
-      success: true,
-      quiz,
-    });
+
+    res.status(201).json({ success: true, quiz });
   } catch (error) {
     console.error('Error creating quiz:', error);
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ 
-        message: 'Validation error', 
-        errors: Object.values(error.errors).map(err => err.message)
-      });
-    }
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -219,127 +186,48 @@ exports.getQuiz = async (req, res) => {
 // @access  Private/Teacher
 exports.updateQuiz = async (req, res) => {
   try {
-    let quiz = await Quiz.findById(req.params.id);
-    
-    if (!quiz) {
-      return res.status(404).json({ message: 'Quiz not found' });
-    }
-    
-    // Check if user is the teacher who created the quiz
-    if (quiz.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Not authorized to update this quiz' });
-    }
-    
-    // Don't allow updating if there are already submissions
+    const quiz = await Quiz.findById(req.params.id);
+    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+
+    // ĐÃ XÓA: kiểm tra quiz.teacher === req.user.id
+
     if (quiz.results && quiz.results.length > 0) {
-      return res.status(400).json({ 
-        message: 'Cannot update quiz: students have already submitted answers' 
-      });
+      return res.status(400).json({ message: 'Cannot update quiz: students have already submitted answers' });
     }
-    
-    // Update quiz
-    quiz = await Quiz.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    
-    res.json({
-      success: true,
-      quiz: quiz,
-    });
+
+    const updated = await Quiz.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    res.json({ success: true, quiz: updated });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 // @desc    Delete quiz
 // @route   DELETE /api/quizzes/:id
 // @access  Private/Teacher
 exports.deleteQuiz = async (req, res) => {
   try {
-    console.log('=== DELETE QUIZ REQUEST ===');
-    console.log('Quiz ID:', req.params.id);
-    console.log('User ID:', req.user.id);
-    console.log('User Role:', req.user.role);
-    
-    // Validate ObjectId format
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      console.log('Invalid ObjectId format:', req.params.id);
       return res.status(400).json({ message: 'Invalid quiz ID format' });
     }
-    
-    // Step 1: Find the quiz
-    console.log('Step 1: Finding quiz...');
+
     const quiz = await Quiz.findById(req.params.id);
-    
-    if (!quiz) {
-      console.log('Quiz not found');
-      return res.status(404).json({ message: 'Quiz not found' });
-    }
-    
-    console.log('Quiz found:', {
-      id: quiz._id,
-      title: quiz.title,
-      teacher: quiz.teacher,
-      course: quiz.course
-    });
-    
-    // Step 2: Check authorization
-    console.log('Step 2: Checking authorization...');
-    if (quiz.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
-      console.log('Authorization failed');
-      return res.status(403).json({ message: 'Not authorized to delete this quiz' });
-    }
-    
-    console.log('Authorization passed');
-    
-    // Step 3: Delete the quiz first
-    console.log('Step 3: Deleting quiz...');
-    const deletedQuiz = await Quiz.findByIdAndDelete(req.params.id);
-    
-    if (!deletedQuiz) {
-      console.log('Quiz deletion failed - quiz not found');
-      return res.status(404).json({ message: 'Quiz not found for deletion' });
-    }
-    
-    console.log('Quiz deleted successfully');
-    
-    // Step 4: Remove from course (optional - don't fail if this doesn't work)
-    console.log('Step 4: Removing from course...');
+    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+
+    // ĐÃ XÓA: kiểm tra quiz.teacher === req.user.id
+
+    await Quiz.findByIdAndDelete(req.params.id);
+
     try {
-      await Course.findByIdAndUpdate(
-        quiz.course,
-        { $pull: { quizzes: quiz._id } }
-      );
-      console.log('Quiz removed from course successfully');
-    } catch (courseError) {
-      console.log('Warning: Could not remove quiz from course:', courseError.message);
-      // Don't fail the entire operation if course update fails
-    }
-    
-    console.log('=== QUIZ DELETION COMPLETED SUCCESSFULLY ===');
-    
-    res.json({
-      success: true,
-      message: 'Quiz deleted successfully',
-    });
-    
+      await Course.findByIdAndUpdate(quiz.course, { $pull: { quizzes: quiz._id } });
+    } catch (e) { /* không crash nếu lỗi */ }
+
+    res.json({ success: true, message: 'Quiz deleted successfully' });
   } catch (error) {
-    console.error('=== ERROR IN DELETE QUIZ ===');
-    console.error('Error type:', error.constructor.name);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
-    console.error('Full error object:', error);
-    
-    res.status(500).json({ 
-      message: 'Server error',
-      error: error.message 
-    });
+    console.error('Error deleting quiz:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
-
 // @desc    Submit quiz answers (student)
 // @route   POST /api/quizzes/:id/submit
 // @access  Private/Student

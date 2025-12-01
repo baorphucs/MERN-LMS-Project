@@ -16,7 +16,7 @@ const {
 } = require('../controllers/user.controller');
 
 // Routes for admin only
-router.get('/', protect, authorize('admin'), getUsers);
+router.get('/', protect, authorize('teacher', 'admin'), getUsers);
 
 // Routes for the user's own profile
 router.get('/me', protect, getUser);

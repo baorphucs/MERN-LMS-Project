@@ -99,50 +99,29 @@ exports.getAssignment = async (req, res) => {
 // @access  Private/Teacher
 exports.createAssignment = async (req, res) => {
   try {
-    console.log('Create assignment request:', req.body);
     const { title, description, courseId, dueDate, totalPoints, attachments } = req.body;
-    
-    // Validate required fields
     if (!title || !courseId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide title and course ID'
-      });
+      return res.status(400).json({ success: false, message: 'Please provide title and course ID' });
     }
-    
-    // Check if course exists
+
     const course = await Course.findById(courseId);
     if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found'
-      });
+      return res.status(404).json({ success: false, message: 'Course not found' });
     }
-    
-    // Check if user is the teacher of the course
-    if (course.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to create assignments for this course'
-      });
-    }
-    
-    // Create assignment
+
+    // ĐÃ XÓA kiểm tra teacher → ai là teacher cũng tạo được assignment ở mọi course
+
     const assignment = await Assignment.create({
-      title,
-      description,
-      courseId,
-      dueDate,
+      title, description, courseId, dueDate,
       totalPoints: totalPoints || 100,
       attachments: attachments || [],
       createdBy: req.user.id
     });
-    
-    // Add assignment to course
+
     course.assignments.push(assignment._id);
     await course.save();
-    
-    // Notify all students in the course
+
+    // Notify students...
     for (const studentId of course.students) {
       await Notification.create({
         user: studentId,
@@ -150,18 +129,11 @@ exports.createAssignment = async (req, res) => {
         link: `/assignments/${assignment._id}`
       });
     }
-    
-    res.status(201).json({
-      success: true,
-      assignment: assignment
-    });
+
+    res.status(201).json({ success: true, assignment });
   } catch (error) {
     console.error('Error creating assignment:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 };
 
@@ -170,49 +142,13 @@ exports.createAssignment = async (req, res) => {
 // @access  Private/Teacher
 exports.updateAssignment = async (req, res) => {
   try {
-    let assignment = await Assignment.findById(req.params.id);
-    
-    if (!assignment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Assignment not found'
-      });
-    }
-    
-    // Check course ownership
-    const course = await Course.findById(assignment.courseId);
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found'
-      });
-    }
-    
-    // Check if user is authorized
-    if (course.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to update this assignment'
-      });
-    }
-    
-    assignment = await Assignment.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    
-    res.status(200).json({
-      success: true,
-      assignment: assignment
-    });
+    const assignment = await Assignment.findById(req.params.id);
+    if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found' });
+
+    const updated = await Assignment.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.status(200).json({ success: true, assignment: updated });
   } catch (error) {
-    console.error('Error updating assignment:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -222,54 +158,18 @@ exports.updateAssignment = async (req, res) => {
 exports.deleteAssignment = async (req, res) => {
   try {
     const assignment = await Assignment.findById(req.params.id);
-    
-    if (!assignment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Assignment not found'
-      });
-    }
-    
-    // Check course ownership
+    if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found' });
+
     const course = await Course.findById(assignment.courseId);
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found'
-      });
-    }
-    
-    // Check if user is authorized
-    if (course.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to delete this assignment'
-      });
-    }
-    
-    // Remove assignment from course
-    course.assignments = course.assignments.filter(
-      id => id.toString() !== assignment._id.toString()
-    );
+    course.assignments.pull(assignment._id);
     await course.save();
-    
-    // Delete assignment
     await Assignment.findByIdAndDelete(req.params.id);
-    
-    res.status(200).json({
-      success: true,
-      message: 'Assignment deleted successfully'
-    });
+
+    res.status(200).json({ success: true, message: 'Assignment deleted successfully' });
   } catch (error) {
-    console.error('Error deleting assignment:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
 // @desc    Submit assignment
 // @route   POST /api/assignments/:id/submit
 // @access  Private/Student
@@ -350,54 +250,21 @@ exports.submitAssignment = async (req, res) => {
 // @access  Private/Teacher
 exports.gradeSubmission = async (req, res) => {
   try {
-    const { grade, feedback } = req.body;
     const assignment = await Assignment.findById(req.params.id);
-    
-    if (!assignment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Assignment not found'
-      });
-    }
-    
-    // Check course ownership
-    const course = await Course.findById(assignment.courseId);
-    if (course.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to grade submissions for this assignment'
-      });
-    }
-    
-    // Find submission by ID
+    if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found' });
+
     const submission = assignment.submissions.id(req.params.submissionId);
-    if (!submission) {
-      return res.status(404).json({
-        success: false,
-        message: 'Submission not found'
-      });
-    }
-    
-    // Update submission with grade and feedback
-    submission.grade = grade;
-    submission.feedback = feedback;
+    if (!submission) return res.status(404).json({ success: false, message: 'Submission not found' });
+
+    submission.grade = req.body.grade;
+    submission.feedback = req.body.feedback;
     submission.gradedAt = Date.now();
     submission.gradedBy = req.user.id;
-    
+
     await assignment.save();
-    
-    res.status(200).json({
-      success: true,
-      message: 'Submission graded successfully',
-      submission: submission,
-    });
+    res.json({ success: true, message: 'Submission graded successfully', submission });
   } catch (error) {
-    console.error('Error grading submission:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 

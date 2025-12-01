@@ -1,223 +1,125 @@
+// src/pages/courses/Courses.js (THAY THẾ HOÀN TOÀN FILE CŨ)
 import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import AuthContext from '../../context/AuthContext';
-import { PlusCircleIcon, BookOpenIcon, SearchIcon } from '@heroicons/react/outline';
+import { PlusCircleIcon, PencilIcon, TrashIcon } from '@heroicons/react/outline';
 
 const Courses = () => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
-  const [filteredCourses, setFilteredCourses] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const isTeacher = user?.role === 'teacher';
-  const isStudent = user?.role === 'student';
-
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        console.log('Fetching courses...');
-        
-        // Add error handling and timeout
-        const res = await axios.get('/api/courses', {
-          timeout: 15000, // Increase timeout
-          headers: { 
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache'
-          }
-        }).catch(error => {
-          console.error('Axios error details:', error.response || error);
-          throw error;
-        });
-        
-        console.log('API Response:', res?.data);
-        
-        if (res?.data?.success) {
-          // Make sure we handle the response data safely
-          const coursesData = res.data.courses || [];
-          console.log(`Successfully loaded ${coursesData.length} courses`);
-          setCourses(coursesData);
-          setFilteredCourses(coursesData);
-        } else {
-          console.warn('Unexpected API response format:', res?.data);
-          // Initialize with empty arrays to avoid UI errors
-          setCourses([]);
-          setFilteredCourses([]);
-        }
-      } catch (error) {
-        console.error('Error fetching courses:', error);
-        // Don't break UI - initialize with empty arrays
-        setCourses([]);
-        setFilteredCourses([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCourses();
+    fetchAllCourses();
   }, []);
 
-  // Handle safe filtering with optional chaining
-  useEffect(() => {
-    if (!courses || !courses.length) {
-      setFilteredCourses([]);
-      return;
-    }
-
-    if (searchTerm.trim() === '') {
-      setFilteredCourses(courses);
-      return;
-    }
-
-    const filtered = courses.filter(
-      (course) =>
-        course?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course?.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course?.code?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    setFilteredCourses(filtered);
-  }, [searchTerm, courses]);
-
-  // Handle course enrollment
-  const handleEnrollCourse = async (courseId) => {
+  const fetchAllCourses = async () => {
     try {
-      await axios.post(`/api/courses/${courseId}/enroll`);
-      // Update UI to reflect enrollment
-      setCourses((prevCourses) =>
-        prevCourses.map((course) =>
-          course._id === courseId
-            ? { ...course, students: [...(course.students || []), user._id] }
-            : course
-        )
-      );
-    } catch (error) {
-      console.error('Error enrolling in course:', error);
+      const token = localStorage.getItem('token');
+      const res = await axios.get('/api/courses', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCourses(res.data.courses || []);
+    } catch (err) {
+      toast.error('Không tải được danh sách khóa học');
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
-      </div>
-    );
-  }
+  const handleDelete = async (id) => {
+    if (!window.confirm('Xóa khóa học này? Toàn bộ dữ liệu sẽ mất!')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`/api/courses/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Xóa khóa học thành công!');
+      setCourses(courses.filter(c => c._id !== id));
+    } catch (err) {
+      toast.error('Không thể xóa khóa học');
+    }
+  };
+
+  if (loading) return <div className="text-center py-20 text-xl">Đang tải...</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Courses</h1>
-          <p className="text-gray-600">Browse and manage your courses</p>
+    <div className="max-w-7xl mx-auto py-10 px-4">
+      <div className="flex justify-between items-center mb-10">
+        <h1 className="text-4xl font-bold text-gray-900">
+          {user?.role === 'teacher' ? 'Quản Lý Tất Cả Khóa Học' : 'Danh Sách Khóa Học'}
+        </h1>
+        {user?.role === 'teacher' && (
+          <Link
+            to="/teacher/create-course"
+            className="flex items-center gap-3 bg-gradient-to-r from-primary-600 to-secondary-600 text-white px-6 py-3 rounded-xl hover:shadow-xl transition font-semibold"
+          >
+            <PlusCircleIcon className="w-6 h-6" />
+            Tạo Khóa Học Mới
+          </Link>
+        )}
+      </div>
+
+      {courses.length === 0 ? (
+        <div className="text-center py-20 bg-white rounded-2xl shadow">
+          <p className="text-2xl text-gray-500">Chưa có khóa học nào</p>
         </div>
-        {isTeacher && (
-          <div className="mt-4 md:mt-0">
-            <Link
-              to="/teacher/courses/create"
-              className="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {courses.map((course) => (
+            <motion.div
+              key={course._id}
+              whileHover={{ scale: 1.03 }}
+              className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100"
             >
-              <PlusCircleIcon className="mr-2 h-5 w-5" />
-              Create New Course
-            </Link>
-          </div>
-        )}
-      </div>
+              <div
+                className="h-48 bg-cover bg-center"
+                style={{
+                  backgroundImage: `url(${course.coverImageUrl || '/img/default-course.jpg'})`
+                }}
+              />
+              <div className="p-5">
+                <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">{course.title}</h3>
+                <p className="text-sm text-gray-600 mb-3">Mã: <strong>{course.code}</strong></p>
+                <p className="text-sm text-gray-600 mb-4">GV: {course.teacher?.name || 'N/A'}</p>
 
-      {/* Search Bar */}
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <SearchIcon className="h-5 w-5 text-gray-400" />
-        </div>
-        <input
-          type="text"
-          className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-          placeholder="Search courses by title, description or code..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
+                <div className="flex justify-between items-center">
+                  <Link
+                    to={`/courses/${course._id}`}
+                    className="text-primary-600 font-medium hover:underline"
+                  >
+                    Xem chi tiết
+                  </Link>
 
-      {/* Course Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCourses.length > 0 ? (
-          filteredCourses.map((course, index) => {
-            // Check if student is enrolled
-            const isEnrolled = isStudent && 
-              course.students?.some(studentId => studentId === user._id);
-            
-            return (
-              <motion.div
-                key={course._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="bg-white rounded-lg shadow-md overflow-hidden"
-              >
-                <div 
-                  className="h-40 bg-cover bg-center" 
-                  style={{ 
-                    backgroundImage: `url(${course.coverImageUrl && course.coverImageUrl.trim() !== '' ? course.coverImageUrl : '/img/default-course.jpg'})` 
-                  }}
-                ></div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                      {course.code}
-                    </span>
-                    {isTeacher && course.teacher === user._id && (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                        Instructor
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">{course.title}</h3>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                    {course.description}
-                  </p>
-                  <div className="flex items-center text-sm text-gray-500 mb-4">
-                    <span>{course.students?.length || 0} Students</span>
-                    <span className="mx-2">•</span>
-                    <span>Instructor: {course.teacher.name || 'Unknown'}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <Link
-                      to={`/courses/${course._id}`}
-                      className="text-primary-600 hover:text-primary-700 font-medium"
-                    >
-                      View Details
-                    </Link>
-                    
-                    {isStudent && !isEnrolled && (
-                      <button
-                        onClick={() => handleEnrollCourse(course._id)}
-                        className="px-3 py-1 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors"
+                  {user?.role === 'teacher' && (
+                    <div className="flex gap-3">
+                      <Link
+                        to={`/teacher/edit-course/${course._id}`}
+                        className="text-blue-600 hover:text-blue-800"
+                        title="Sửa"
                       >
-                        Enroll
+                        <PencilIcon className="w-5 h-5" />
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(course._id)}
+                        className="text-red-600 hover:text-red-800"
+                        title="Xóa"
+                      >
+                        <TrashIcon className="w-5 h-5" />
                       </button>
-                    )}
-                    
-                    {isEnrolled && (
-                      <span className="text-green-600 font-medium">
-                        Enrolled
-                      </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
-              </motion.div>
-            );
-          })
-        ) : (
-          <div className="col-span-full text-center py-12">
-            <p className="text-gray-500 text-lg">
-              No courses found. {isTeacher && "Create your first course!"}
-            </p>
-          </div>
-        )}
-      </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
