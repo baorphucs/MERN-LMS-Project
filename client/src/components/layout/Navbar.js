@@ -53,7 +53,7 @@ const Navbar = () => {
                       whileHover={{ scale: 1.05 }}
                       className="text-2xl font-extrabold font-heading text-primary-400 drop-shadow-lg tracking-tight bg-gradient-to-r from-primary-400 to-secondary-500 bg-clip-text text-transparent"
                     >
-                      IT HUB NTTU
+                      NTTU HUB
                     </motion.div>
                   </Link>
                 </div>

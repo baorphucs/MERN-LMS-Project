@@ -12,7 +12,7 @@ const Footer = () => (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:justify-between items-center gap-6">
       <div className="flex flex-col items-center md:items-start">
         <span className="text-2xl font-extrabold font-heading tracking-tight bg-gradient-to-r from-primary-300 to-accent-yellow bg-clip-text text-transparent mb-2">
-          IT HUB NTTU
+          NTTU HUB
         </span>
         <span className="text-sm text-primary-100">&copy; {new Date().getFullYear()} Modern LMS. All rights reserved.</span>
       </div>
