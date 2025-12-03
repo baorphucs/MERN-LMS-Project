@@ -1,3 +1,5 @@
+// FILE_PATH: client\src\pages\courses\Courses.js
+
 // src/pages/courses/Courses.js (THAY THẾ HOÀN TOÀN FILE CŨ)
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -15,15 +17,36 @@ const Courses = () => {
 
   useEffect(() => {
     fetchAllCourses();
-  }, []);
+  }, [user]); // Thêm user vào dependency array
 
   const fetchAllCourses = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('/api/courses', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setCourses(res.data.courses || []);
+      let res;
+      
+      // Teacher: Xem TẤT CẢ khóa học để quản lý (hoặc có thể đổi thành chỉ khóa học của họ)
+      // Hiện tại giữ nguyên logic cũ là fetch ALL courses cho teacher để quản lý
+      if (user?.role === 'teacher') {
+        // Teacher có thể thấy tất cả courses để quản lý chung (giả định)
+        res = await axios.get('/api/courses', { 
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCourses(res.data.courses || []);
+      } 
+      // Student: Chỉ xem các khóa học đã ghi danh
+      else if (user?.role === 'student') {
+        // Dùng endpoint /api/users/me/courses (course controller không có route này, user controller có [cite: 2395])
+        res = await axios.get('/api/users/me/courses', { 
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCourses(res.data.courses || []);
+      }
+      else {
+          // Public view hoặc Role khác: Dùng endpoint chung
+          res = await axios.get('/api/courses');
+          setCourses(res.data.courses || []);
+      }
+      
     } catch (err) {
       toast.error('Không tải được danh sách khóa học');
       console.error(err);
@@ -52,7 +75,7 @@ const Courses = () => {
     <div className="max-w-7xl mx-auto py-10 px-4">
       <div className="flex justify-between items-center mb-10">
         <h1 className="text-4xl font-bold text-gray-900">
-          {user?.role === 'teacher' ? 'Quản Lý Tất Cả Khóa Học' : 'Danh Sách Khóa Học'}
+          {user?.role === 'teacher' ? 'Quản Lý Tất Cả Khóa Học' : 'Danh Sách Khóa Học Đã Ghi Danh'}
         </h1>
         {user?.role === 'teacher' && (
           <Link
@@ -67,7 +90,14 @@ const Courses = () => {
 
       {courses.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-2xl shadow">
-          <p className="text-2xl text-gray-500">Chưa có khóa học nào</p>
+          <p className="text-2xl text-gray-500">
+            {user?.role === 'teacher' ? 'Chưa có khóa học nào được tạo.' : 'Bạn chưa ghi danh vào khóa học nào.'}
+          </p>
+          {user?.role === 'student' && (
+            <p className="mt-4 text-gray-600">
+              Vui lòng liên hệ giáo viên để được thêm vào khóa học.
+            </p>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -80,6 +110,7 @@ const Courses = () => {
               <div
                 className="h-48 bg-cover bg-center"
                 style={{
+                  // Sử dụng coverImageUrl nếu có, nếu không dùng ảnh mặc định
                   backgroundImage: `url(${course.coverImageUrl || '/img/default-course.jpg'})`
                 }}
               />

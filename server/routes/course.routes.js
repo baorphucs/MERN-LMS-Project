@@ -7,7 +7,9 @@ const {
   updateCourse,
   deleteCourse,
   getTeacherCourses,
-  enrollCourse
+  enrollCourse,
+  addStudentToCourse, // NEW
+  removeStudentFromCourse // NEW
 } = require('../controllers/course.controller');
 const { protect, authorize } = require('../middleware/auth.middleware');
 
@@ -25,6 +27,10 @@ router.get('/:id', protect, getCourse);
 router.post('/:id/enroll', protect, authorize('student'), enrollCourse);
 router.put('/:id', protect, authorize('teacher'), updateCourse);
 router.delete('/:id', protect, authorize('teacher'), deleteCourse);
+
+// NEW: Routes for managing students
+router.put('/:id/add-student', protect, authorize('teacher'), addStudentToCourse); // NEW
+router.put('/:id/remove-student', protect, authorize('teacher'), removeStudentFromCourse); // NEW
 
 // Course creation
 router.post('/', protect, authorize('teacher'), createCourse);

@@ -6,7 +6,13 @@ const bcrypt = require('bcryptjs');
 // @access  Private/Admin
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password');
+    let query = {};
+    // NEW: Allow filtering by role if requested in query params (e.g., /api/users?role=student)
+    if (req.query.role) {
+      query.role = req.query.role;
+    }
+    
+    const users = await User.find(query).select('-password');
     
     res.json({
       success: true,
@@ -18,7 +24,6 @@ exports.getUsers = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 // @desc    Get current user profile
 // @route   GET /api/users/me
 // @access  Private

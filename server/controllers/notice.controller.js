@@ -13,7 +13,7 @@ const ensureDirectoryExists = (directory) => {
 
 // @desc    Create new notice
 // @route   POST /api/notices
-// @access  Private/Teacher (bây giờ teacher nào cũng tạo được)
+// @access  Private/Teacher
 exports.createNotice = async (req, res) => {
   try {
     const { title, content, courseId, priority, pinned, attachments } = req.body;
@@ -63,14 +63,7 @@ exports.createNotice = async (req, res) => {
       attachments: files
     });
 
-    // Gửi thông báo cho học sinh
-    for (const studentId of course.students) {
-      await Notification.create({
-        user: studentId,
-        text: `Thông báo mới "${notice.title}" trong môn ${course.title}`,
-        link: `/notices/${notice._id}`
-      });
-    }
+    // [ĐÃ XÓA LOGIC GỬI THÔNG BÁO TỰ ĐỘNG CHO TẤT CẢ SINH VIÊN]
 
     res.status(201).json({ success: true, notice });
   } catch (error) {
@@ -82,7 +75,6 @@ exports.createNotice = async (req, res) => {
     });
   }
 };
-
 // @desc    Update notice
 // @route   PUT /api/notices/:id
 exports.updateNotice = async (req, res) => {

@@ -67,11 +67,9 @@ exports.getAssignments = async (req, res) => {
 exports.getAssignment = async (req, res) => {
   try {
     console.log('Getting assignment details for ID:', req.params.id);
-    
     const assignment = await Assignment.findById(req.params.id)
       .populate('courseId', 'title code teacher')
       .populate('submissions.student', 'name email avatar');
-      
     if (!assignment) {
       return res.status(404).json({
         success: false,
@@ -109,26 +107,16 @@ exports.createAssignment = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Course not found' });
     }
 
-    // ĐÃ XÓA kiểm tra teacher → ai là teacher cũng tạo được assignment ở mọi course
-
     const assignment = await Assignment.create({
       title, description, courseId, dueDate,
       totalPoints: totalPoints || 100,
       attachments: attachments || [],
       createdBy: req.user.id
     });
-
     course.assignments.push(assignment._id);
     await course.save();
 
-    // Notify students...
-    for (const studentId of course.students) {
-      await Notification.create({
-        user: studentId,
-        text: `A new assignment "${assignment.title}" has been posted in ${course.title}.`,
-        link: `/assignments/${assignment._id}`
-      });
-    }
+    // [ĐÃ XÓA LOGIC GỬI THÔNG BÁO TỰ ĐỘNG CHO TẤT CẢ SINH VIÊN]
 
     res.status(201).json({ success: true, assignment });
   } catch (error) {
@@ -139,18 +127,26 @@ exports.createAssignment = async (req, res) => {
 
 // @desc    Update assignment
 // @route   PUT /api/assignments/:id
-// @access  Private/Teacher
+// @access  Private/Teacher/Admin
 exports.updateAssignment = async (req, res) => {
   try {
-    const assignment = await Assignment.findById(req.params.id);
-    if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found' });
+    let assignment = await Assignment.findById(req.params.id);
+    if (!assignment) {
+      return res.status(404).json({ success: false, message: 'Assignment not found' });
+    }
 
-    const updated = await Assignment.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.status(200).json({ success: true, assignment: updated });
+    assignment = await Assignment.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    });
+
+    return res.status(200).json({ success: true, data: assignment });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error updating assignment:', error);
+    return res.status(500).json({ success: false, message: 'Error updating assignment' });
   }
 };
+
 
 // @desc    Delete assignment
 // @route   DELETE /api/assignments/:id
@@ -170,6 +166,7 @@ exports.deleteAssignment = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
 // @desc    Submit assignment
 // @route   POST /api/assignments/:id/submit
 // @access  Private/Student
@@ -281,7 +278,8 @@ exports.getTeacherRecentAssignments = async (req, res) => {
     const assignments = await Assignment.find({ courseId: { $in: courseIds } })
       .populate('courseId', 'title code')
       .sort('-createdAt')
-      .limit(5); // Limit to 5 most recent
+      .limit(5);
+    // Limit to 5 most recent
     
     res.json({
       success: true,
@@ -304,7 +302,6 @@ exports.getTeacherAssignments = async (req, res) => {
     const assignments = await Assignment.find({ role: 'teacher' })
       .populate('courseId')
       .populate('userId', 'name email');
-    
     res.status(200).json({
       success: true,
       assignments: assignments,
@@ -326,7 +323,6 @@ exports.getStudentAssignments = async (req, res) => {
   try {
     // Find courses the student is enrolled in
     const student = await User.findById(req.user.id).select('courses');
-    
     if (!student || !student.courses || student.courses.length === 0) {
       return res.status(200).json({
         success: true,
@@ -338,7 +334,6 @@ exports.getStudentAssignments = async (req, res) => {
     const assignments = await Assignment.find({
       courseId: { $in: student.courses }
     }).populate('courseId', 'title code');
-    
     return res.status(200).json({
       success: true,
       data: assignments

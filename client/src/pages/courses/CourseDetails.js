@@ -195,6 +195,17 @@ const CourseDetails = () => {
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-accent-yellow text-text-dark border border-accent-yellow shadow">{course.language || 'Language'}</span>
           </div>
         </div>
+        {/* NEW: Manage Students Button for Course Teacher */}
+        {isCourseTeacher && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-6">
+            <Link
+              to={`/teacher/courses/${course._id}/manage-students`}
+              className="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-medium text-sm text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 shadow-lg"
+            >
+              <UserIcon className="h-4 w-4 mr-2" /> Quản Lý Sinh Viên
+            </Link>
+          </motion.div>
+        )}
         {/* Info Grid */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-white/80 p-4 rounded-xl border border-primary-50 flex flex-col items-start shadow-card">

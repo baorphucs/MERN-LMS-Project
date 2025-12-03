@@ -1,11 +1,30 @@
 const User = require('../models/user.model');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+// Lưu ý: Nếu bạn có hàm sendTokenResponse riêng, hãy đảm bảo nó được import.
+// Nếu không, tôi sẽ sử dụng logic gửi response trực tiếp.
 
-// Generate JWT Token
+// Hàm tạo JWT Token (Được sử dụng lại trong nhiều hàm)
 const generateToken = (id) => {
+  // Đảm bảo các biến môi trường được thiết lập, nếu không dùng giá trị mặc định
   return jwt.sign({ id }, process.env.JWT_SECRET || 'secret', {
     expiresIn: process.env.JWT_EXPIRE || '30d',
+  });
+};
+
+// Hàm gửi phản hồi với token (Thường được sử dụng trong Login/Register)
+const sendResponseWithToken = (user, statusCode, res, token) => {
+  res.status(statusCode).json({
+    success: true,
+    token,
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+      // Thêm các trường khác cần thiết ở đây, ví dụ: courses: user.courses
+    }
   });
 };
 
@@ -28,29 +47,22 @@ exports.register = async (req, res, next) => {
       return res.status(400).json({ message: 'User with this email already exists' });
     }
 
-    // Create user
+    // TẠO NGƯỜI DÙNG MỚI (FIX TỰ ĐỘNG ĐĂNG KÝ KHÓA HỌC)
+    // Trường courses sẽ mặc định là [] theo User Model Schema
     console.log('Creating user with:', { name, email, role });
     const user = await User.create({
       name,
       email,
       password,
       role: role || 'student'
+      // KHÔNG có logic gán courses: allCourses... ở đây.
     });
 
     // Generate token
     const token = generateToken(user._id);
 
-    res.status(201).json({
-      success: true,
-      token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar
-      }
-    });
+    sendResponseWithToken(user, 201, res, token);
+
   } catch (error) {
     console.error('Registration detailed error:', error);
     // Pass error to global error handler
@@ -76,8 +88,8 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Check if password matches
-    const isMatch = await user.matchPassword(password);
+    // Check if password matches (Giả định user.matchPassword là một method trong User Schema)
+    const isMatch = await user.matchPassword(password); 
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -85,17 +97,8 @@ exports.login = async (req, res) => {
     // Generate token
     const token = generateToken(user._id);
 
-    res.json({
-      success: true,
-      token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar
-      }
-    });
+    sendResponseWithToken(user, 200, res, token);
+
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -107,7 +110,8 @@ exports.login = async (req, res) => {
 // @access  Private
 exports.getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate('courses');
+    // Populate courses để lấy thông tin khóa học mà user đó tham gia
+    const user = await User.findById(req.user.id).populate('courses'); 
     res.json({
       success: true,
       user

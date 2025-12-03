@@ -15,9 +15,6 @@ exports.createQuiz = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
 
-    // ĐÃ XÓA: kiểm tra courseDoc.teacher === req.user.id
-    // Bây giờ teacher nào cũng tạo được quiz ở mọi course
-
     const quiz = await Quiz.create({
       title, description, course, teacher: req.user.id,
       timeLimit: timeLimit || null,
@@ -28,13 +25,7 @@ exports.createQuiz = async (req, res) => {
 
     await Course.findByIdAndUpdate(course, { $push: { quizzes: quiz._id } });
 
-    for (const studentId of courseDoc.students) {
-      await Notification.create({
-        user: studentId,
-        text: `A new quiz "${quiz.title}" has been posted in ${courseDoc.title}.`,
-        link: `/quizzes/${quiz._id}`
-      });
-    }
+    // [ĐÃ XÓA LOGIC GỬI THÔNG BÁO TỰ ĐỘNG CHO TẤT CẢ SINH VIÊN]
 
     res.status(201).json({ success: true, quiz });
   } catch (error) {

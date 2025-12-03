@@ -153,6 +153,7 @@ import EditCourse from './pages/teacher/EditCourse';
 
 // NEW: Quản lý người dùng cho Teacher
 import Users from './pages/teacher/Users';
+import ManageStudents from './pages/teacher/ManageStudents'; // NEW IMPORT
 
 // Assignment Pages
 import Assignments from './pages/assignments/Assignments';
@@ -213,6 +214,9 @@ const App = () => {
             
             {/* MỚI: Quản lý người dùng */}
             <Route path="/teacher/users" element={<Layout><Users /></Layout>} />
+
+            {/* NEW: Quản lý sinh viên trong khóa học */}
+            <Route path="/teacher/courses/:id/manage-students" element={<Layout><ManageStudents /></Layout>} />
 
             {/* Các route tạo nội dung */}
             <Route path="/teacher/assignments/create/:courseId" element={<Layout><CreateAssignment /></Layout>} />
@@ -2672,6 +2676,17 @@ const CourseDetails = () => {
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-accent-yellow text-text-dark border border-accent-yellow shadow">{course.language || 'Language'}</span>
           </div>
         </div>
+        {/* NEW: Manage Students Button for Course Teacher */}
+        {isCourseTeacher && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-6">
+            <Link
+              to={`/teacher/courses/${course._id}/manage-students`}
+              className="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-medium text-sm text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 shadow-lg"
+            >
+              <UserIcon className="h-4 w-4 mr-2" /> Quản Lý Sinh Viên
+            </Link>
+          </motion.div>
+        )}
         {/* Info Grid */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-white/80 p-4 rounded-xl border border-primary-50 flex flex-col items-start shadow-card">
@@ -9670,6 +9685,241 @@ const EditQuiz = () => {
 export default EditQuiz; 
 
 ==================================================
+FILE_PATH: client\src\pages\teacher\ManageStudents.js
+==================================================
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { PlusIcon, UserAddIcon, XIcon } from '@heroicons/react/outline'; // XIcon cho nút đóng
+
+// Component Modal đơn giản để chọn sinh viên
+const StudentSelectModal = ({ isOpen, onClose, allStudents, onStudentAdd }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Lọc danh sách sinh viên dựa trên tìm kiếm
+  const filteredStudents = allStudents.filter(student =>
+    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="flex justify-between items-center pb-3 border-b">
+          <h3 className="text-xl font-bold text-gray-900">Select Student to Add</h3>
+          <button onClick={onClose}>
+            <XIcon className="h-6 w-6 text-gray-500 hover:text-gray-700" />
+          </button>
+        </div>
+        
+        <div className="mt-4">
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        
+        <div className="mt-4 max-h-60 overflow-y-auto divide-y divide-gray-100 border rounded-md">
+          {filteredStudents.length > 0 ? (
+            filteredStudents.map((student) => (
+              <div key={student._id} className="p-3 hover:bg-gray-50 flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{student.name}</p>
+                  <p className="text-xs text-gray-500">{student.email}</p>
+                </div>
+                <button
+                  onClick={() => onStudentAdd(student._id, student.name)}
+                  className="text-primary-600 hover:text-primary-800 text-sm font-semibold"
+                >
+                  <PlusIcon className="h-5 w-5" />
+                </button>
+              </div>
+            ))
+          ) : (
+            <p className="p-3 text-center text-sm text-gray-500">No students found.</p>
+          )}
+        </div>
+        
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+const ManageStudents = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [course, setCourse] = useState(null);
+  const [students, setStudents] = useState([]);
+  const [allStudents, setAllStudents] = useState([]); // NEW: Danh sách tất cả sinh viên
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false); // NEW: State quản lý Modal
+
+  // Hàm fetch data được cập nhật để sử dụng cho cả khởi tạo và làm mới
+  const fetchCourseDetails = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`/api/courses/${id}`);
+      setCourse(res.data.course);
+      // Danh sách sinh viên hiện tại trong khóa học
+      setStudents(res.data.students || []); 
+    } catch (err) {
+      toast.error('Failed to load course details');
+      navigate('/teacher/dashboard');
+    } finally {
+      setLoading(false);
+    }
+  }, [id, navigate]);
+  
+  // NEW: Hàm fetch tất cả sinh viên từ hệ thống
+  const fetchAllStudents = async () => {
+    try {
+      // Gọi API lấy users và lọc theo vai trò student
+      const res = await axios.get(`/api/users?role=student`); 
+      
+      // Lấy ID của các sinh viên ĐÃ có trong khóa học này
+      const enrolledStudentIds = new Set(students.map(s => s._id));
+      
+      // Lọc ra các sinh viên CHƯA được thêm vào khóa học
+      const unenrolledStudents = res.data.users.filter(user => 
+        !enrolledStudentIds.has(user._id)
+      );
+      
+      setAllStudents(unenrolledStudents);
+    } catch (err) {
+      toast.error('Failed to load all students list');
+      console.error('Error fetching all students:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourseDetails();
+  }, [fetchCourseDetails]);
+  
+  // Tải danh sách tất cả sinh viên sau khi có danh sách sinh viên trong khóa học
+  useEffect(() => {
+      if (!loading && course) {
+          fetchAllStudents();
+      }
+  }, [loading, course, students]);
+
+
+  // ==================================================
+  // FIX: Triển khai logic Thêm Sinh viên từ Modal
+  // ==================================================
+  const handleAddStudent = async (studentId, studentName) => {
+      setIsModalOpen(false); // Đóng modal ngay lập tức
+      
+      try {
+        const res = await axios.put(`/api/courses/${id}/add-student`, { 
+          studentId: studentId // Gửi studentId chính xác lên server
+        });
+
+        if (res.data.success) {
+          toast.success(`${studentName || 'Student'} added successfully!`);
+          await fetchCourseDetails(); // Refresh list course students
+        }
+      } catch (err) {
+        console.error('Error adding student:', err.response || err);
+        // Hiển thị thông báo lỗi chi tiết từ server
+        toast.error(err.response?.data?.message || 'Failed to add student. Please ensure a valid Student ID is provided.');
+      }
+  };
+
+  // ==================================================
+  // FIX: Triển khai logic Xóa Sinh viên
+  // ==================================================
+  const handleRemoveStudent = async (studentId, studentName) => {
+    if (!window.confirm(`Are you sure you want to remove student ${studentName || studentId} from this course?`)) {
+      return;
+    }
+
+    try {
+      const res = await axios.put(`/api/courses/${id}/remove-student`, { 
+        studentId: studentId 
+      });
+
+      if (res.data.success) {
+        toast.success(`${studentName || 'Student'} removed successfully!`);
+        await fetchCourseDetails(); // Refresh list
+      }
+    } catch (err) {
+      console.error('Error removing student:', err.response || err);
+      toast.error(err.response?.data?.message || 'Failed to remove student.');
+    }
+  };
+
+  // ==================================================
+  // HIỂN THỊ
+  // ==================================================
+  if (loading) return <div className="text-center py-20 text-xl">Loading...</div>;
+  if (!course) return <div className="text-center py-20 text-xl">Course not found.</div>;
+  
+  return (
+    <div className="max-w-4xl mx-auto py-10 px-4">
+      <h1 className="text-3xl font-bold mb-4">Manage Students for: {course.title} ({course.code})</h1>
+      <p className="mb-6 text-gray-600">Total enrolled students: {students.length}</p>
+
+      {/* Button mở Modal */}
+      <button 
+        onClick={() => setIsModalOpen(true)} 
+        className="mb-6 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 inline-flex items-center gap-2"
+      >
+        <UserAddIcon className="h-5 w-5" />
+        Add Student
+      </button>
+
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        <ul className="divide-y divide-gray-200">
+          {students.map(student => (
+            <li key={student._id} className="p-4 flex justify-between items-center hover:bg-gray-50">
+              <div>
+                <p className="font-semibold text-gray-800">{student.name}</p>
+                <p className="text-sm text-gray-500">{student.email}</p>
+              </div>
+              <button 
+                onClick={() => handleRemoveStudent(student._id, student.name)} 
+                className="text-red-600 hover:text-red-800 text-sm font-medium"
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+        {students.length === 0 && (
+          <p className="p-4 text-gray-500 text-center">No students currently enrolled.</p>
+        )}
+      </div>
+      
+      {/* Modal chọn sinh viên */}
+      <StudentSelectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        // Danh sách sinh viên chưa được thêm vào
+        allStudents={allStudents} 
+        onStudentAdd={handleAddStudent}
+      />
+    </div>
+  );
+};
+
+export default ManageStudents;
+
+==================================================
 FILE_PATH: client\src\pages\teacher\UploadMaterial.js
 ==================================================
 
@@ -10127,11 +10377,9 @@ exports.getAssignments = async (req, res) => {
 exports.getAssignment = async (req, res) => {
   try {
     console.log('Getting assignment details for ID:', req.params.id);
-    
     const assignment = await Assignment.findById(req.params.id)
       .populate('courseId', 'title code teacher')
       .populate('submissions.student', 'name email avatar');
-      
     if (!assignment) {
       return res.status(404).json({
         success: false,
@@ -10169,26 +10417,16 @@ exports.createAssignment = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Course not found' });
     }
 
-    // ĐÃ XÓA kiểm tra teacher → ai là teacher cũng tạo được assignment ở mọi course
-
     const assignment = await Assignment.create({
       title, description, courseId, dueDate,
       totalPoints: totalPoints || 100,
       attachments: attachments || [],
       createdBy: req.user.id
     });
-
     course.assignments.push(assignment._id);
     await course.save();
 
-    // Notify students...
-    for (const studentId of course.students) {
-      await Notification.create({
-        user: studentId,
-        text: `A new assignment "${assignment.title}" has been posted in ${course.title}.`,
-        link: `/assignments/${assignment._id}`
-      });
-    }
+    // [ĐÃ XÓA LOGIC GỬI THÔNG BÁO TỰ ĐỘNG CHO TẤT CẢ SINH VIÊN]
 
     res.status(201).json({ success: true, assignment });
   } catch (error) {
@@ -10199,18 +10437,26 @@ exports.createAssignment = async (req, res) => {
 
 // @desc    Update assignment
 // @route   PUT /api/assignments/:id
-// @access  Private/Teacher
+// @access  Private/Teacher/Admin
 exports.updateAssignment = async (req, res) => {
   try {
-    const assignment = await Assignment.findById(req.params.id);
-    if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found' });
+    let assignment = await Assignment.findById(req.params.id);
+    if (!assignment) {
+      return res.status(404).json({ success: false, message: 'Assignment not found' });
+    }
 
-    const updated = await Assignment.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.status(200).json({ success: true, assignment: updated });
+    assignment = await Assignment.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    });
+
+    return res.status(200).json({ success: true, data: assignment });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error updating assignment:', error);
+    return res.status(500).json({ success: false, message: 'Error updating assignment' });
   }
 };
+
 
 // @desc    Delete assignment
 // @route   DELETE /api/assignments/:id
@@ -10230,6 +10476,7 @@ exports.deleteAssignment = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
 // @desc    Submit assignment
 // @route   POST /api/assignments/:id/submit
 // @access  Private/Student
@@ -10341,7 +10588,8 @@ exports.getTeacherRecentAssignments = async (req, res) => {
     const assignments = await Assignment.find({ courseId: { $in: courseIds } })
       .populate('courseId', 'title code')
       .sort('-createdAt')
-      .limit(5); // Limit to 5 most recent
+      .limit(5);
+    // Limit to 5 most recent
     
     res.json({
       success: true,
@@ -10364,7 +10612,6 @@ exports.getTeacherAssignments = async (req, res) => {
     const assignments = await Assignment.find({ role: 'teacher' })
       .populate('courseId')
       .populate('userId', 'name email');
-    
     res.status(200).json({
       success: true,
       assignments: assignments,
@@ -10386,7 +10633,6 @@ exports.getStudentAssignments = async (req, res) => {
   try {
     // Find courses the student is enrolled in
     const student = await User.findById(req.user.id).select('courses');
-    
     if (!student || !student.courses || student.courses.length === 0) {
       return res.status(200).json({
         success: true,
@@ -10398,7 +10644,6 @@ exports.getStudentAssignments = async (req, res) => {
     const assignments = await Assignment.find({
       courseId: { $in: student.courses }
     }).populate('courseId', 'title code');
-    
     return res.status(200).json({
       success: true,
       data: assignments
@@ -10449,11 +10694,30 @@ FILE_PATH: server\controllers\auth.controller.js
 const User = require('../models/user.model');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+// Lưu ý: Nếu bạn có hàm sendTokenResponse riêng, hãy đảm bảo nó được import.
+// Nếu không, tôi sẽ sử dụng logic gửi response trực tiếp.
 
-// Generate JWT Token
+// Hàm tạo JWT Token (Được sử dụng lại trong nhiều hàm)
 const generateToken = (id) => {
+  // Đảm bảo các biến môi trường được thiết lập, nếu không dùng giá trị mặc định
   return jwt.sign({ id }, process.env.JWT_SECRET || 'secret', {
     expiresIn: process.env.JWT_EXPIRE || '30d',
+  });
+};
+
+// Hàm gửi phản hồi với token (Thường được sử dụng trong Login/Register)
+const sendResponseWithToken = (user, statusCode, res, token) => {
+  res.status(statusCode).json({
+    success: true,
+    token,
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+      // Thêm các trường khác cần thiết ở đây, ví dụ: courses: user.courses
+    }
   });
 };
 
@@ -10476,29 +10740,22 @@ exports.register = async (req, res, next) => {
       return res.status(400).json({ message: 'User with this email already exists' });
     }
 
-    // Create user
+    // TẠO NGƯỜI DÙNG MỚI (FIX TỰ ĐỘNG ĐĂNG KÝ KHÓA HỌC)
+    // Trường courses sẽ mặc định là [] theo User Model Schema
     console.log('Creating user with:', { name, email, role });
     const user = await User.create({
       name,
       email,
       password,
       role: role || 'student'
+      // KHÔNG có logic gán courses: allCourses... ở đây.
     });
 
     // Generate token
     const token = generateToken(user._id);
 
-    res.status(201).json({
-      success: true,
-      token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar
-      }
-    });
+    sendResponseWithToken(user, 201, res, token);
+
   } catch (error) {
     console.error('Registration detailed error:', error);
     // Pass error to global error handler
@@ -10524,8 +10781,8 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Check if password matches
-    const isMatch = await user.matchPassword(password);
+    // Check if password matches (Giả định user.matchPassword là một method trong User Schema)
+    const isMatch = await user.matchPassword(password); 
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -10533,17 +10790,8 @@ exports.login = async (req, res) => {
     // Generate token
     const token = generateToken(user._id);
 
-    res.json({
-      success: true,
-      token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar
-      }
-    });
+    sendResponseWithToken(user, 200, res, token);
+
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -10555,7 +10803,8 @@ exports.login = async (req, res) => {
 // @access  Private
 exports.getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate('courses');
+    // Populate courses để lấy thông tin khóa học mà user đó tham gia
+    const user = await User.findById(req.user.id).populate('courses'); 
     res.json({
       success: true,
       user
@@ -10612,7 +10861,6 @@ exports.resetPassword = async (req, res) => {
   await user.save();
   res.json({ success: true, message: 'Password has been reset successfully.' });
 };
-
 
 ==================================================
 FILE_PATH: server\controllers\base.controller.js
@@ -10698,6 +10946,8 @@ FILE_PATH: server\controllers\course.controller.js
 ==================================================
 const Course = require('../models/course.model');
 const User = require('../models/user.model');
+// BƯỚC FIX QUAN TRỌNG: Import model Notification
+const Notification = require('../models/notification.model');
 
 // @desc    Get all courses
 // @route   GET /api/courses
@@ -10705,15 +10955,11 @@ const User = require('../models/user.model');
 exports.getCourses = async (req, res) => {
   try {
     console.log('Fetching all courses - debug mode');
-    
-    // Simplified query to avoid potential errors
     const courses = await Course.find({})
       .populate('teacher', 'name email')
-      .lean(); // Use lean for better performance
+      .lean();
     
     console.log(`Found ${courses.length} courses`);
-    
-    // Match the response format expected by the client
     return res.status(200).json({
       success: true,
       courses: courses || []
@@ -10736,7 +10982,6 @@ exports.getCourse = async (req, res) => {
     const course = await Course.findById(req.params.id)
       .populate('teacher', 'name email')
       .populate('students', 'name email');
-      
     if (!course) {
       return res.status(404).json({
         success: false,
@@ -10751,7 +10996,6 @@ exports.getCourse = async (req, res) => {
       require('../models/material.model').find({ courseId: course._id }),
       require('../models/notice.model').find({ courseId: course._id })
     ]);
-    
     return res.status(200).json({
       success: true,
       course,
@@ -10776,7 +11020,6 @@ exports.getCourse = async (req, res) => {
 exports.createCourse = async (req, res) => {
   try {
     const { title, description, code, coverImageUrl } = req.body;
-    
     if (!title) {
       return res.status(400).json({
         success: false,
@@ -10791,7 +11034,6 @@ exports.createCourse = async (req, res) => {
       coverImageUrl,
       teacher: req.user.id
     });
-    
     return res.status(201).json({
       success: true,
       data: course
@@ -10819,7 +11061,6 @@ exports.updateCourse = async (req, res) => {
       new: true,
       runValidators: true
     });
-
     return res.status(200).json({ success: true, data: course });
   } catch (error) {
     console.error('Error updating course:', error);
@@ -10853,7 +11094,6 @@ exports.deleteCourse = async (req, res) => {
 exports.enrollCourse = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
-    
     if (!course) {
       return res.status(404).json({
         success: false,
@@ -10879,7 +11119,6 @@ exports.enrollCourse = async (req, res) => {
       { $push: { courses: course._id } },
       { new: true }
     );
-    
     return res.json({
       success: true,
       message: 'Successfully enrolled in course',
@@ -10902,7 +11141,6 @@ exports.getTeacherCourses = async (req, res) => {
     const courses = await Course.find({ teacher: req.user.id })
       .sort({ createdAt: -1 })
       .populate('teacher', 'name email');
-    
     return res.json({
       success: true,
       courses: courses
@@ -10915,7 +11153,70 @@ exports.getTeacherCourses = async (req, res) => {
     });
   }
 };
+// @desc    Add a student to course
+// @route   PUT /api/courses/:id/add-student
+// @access  Private/Teacher
+exports.addStudentToCourse = async (req, res) => {
+  try {
+    const { studentId } = req.body;
+    if (!studentId) return res.status(400).json({ success: false, message: 'Student ID required' }); 
 
+    const course = await Course.findById(req.params.id); 
+    const student = await User.findById(studentId); 
+
+    if (!course || !student) return res.status(404).json({ success: false, message: 'Course or Student not found' }); 
+    if (student.role !== 'student') return res.status(400).json({ success: false, message: 'User is not a student' }); 
+    if (course.students.includes(studentId)) return res.status(400).json({ success: false, message: 'Student already enrolled' }); 
+    
+    // 1. Add student to course
+    course.students.push(studentId);  
+    await course.save();  
+    
+    // 2. Add course to student's courses (Enrollment logic)
+    student.courses.push(course._id); 
+    await student.save(); 
+
+    // 3. Gửi thông báo cho học sinh vừa được thêm
+    await Notification.create({ 
+      user: studentId,
+      text: `You have been added to the course: ${course.title}`,
+      link: `/courses/${course._id}`
+    });
+
+    res.json({ success: true, message: 'Student added successfully' }); 
+  } catch (error) {
+    console.error('Error adding student:', error);
+    res.status(500).json({ success: false, message: 'Server error' }); 
+  }
+};
+
+// @desc    Remove a student from course
+// @route   PUT /api/courses/:id/remove-student
+// @access  Private/Teacher
+exports.removeStudentFromCourse = async (req, res) => {
+  try {
+    const { studentId } = req.body; 
+    if (!studentId) return res.status(400).json({ success: false, message: 'Student ID required' }); 
+
+    const course = await Course.findById(req.params.id); 
+    const student = await User.findById(studentId); 
+
+    if (!course || !student) return res.status(404).json({ success: false, message: 'Course or Student not found' }); 
+    
+    // 1. Remove student from course
+    course.students.pull(studentId);
+    await course.save(); 
+    
+    // 2. Remove course from student's courses
+    student.courses.pull(course._id); 
+    await student.save(); 
+
+    res.json({ success: true, message: 'Student removed successfully' });  
+  } catch (error) {
+    console.error('Error removing student:', error);
+    res.status(500).json({ success: false, message: 'Server error' }); 
+  }
+};
 
 ==================================================
 FILE_PATH: server\controllers\material.controller.js
@@ -11176,7 +11477,7 @@ const ensureDirectoryExists = (directory) => {
 
 // @desc    Create new notice
 // @route   POST /api/notices
-// @access  Private/Teacher (bây giờ teacher nào cũng tạo được)
+// @access  Private/Teacher
 exports.createNotice = async (req, res) => {
   try {
     const { title, content, courseId, priority, pinned, attachments } = req.body;
@@ -11226,14 +11527,7 @@ exports.createNotice = async (req, res) => {
       attachments: files
     });
 
-    // Gửi thông báo cho học sinh
-    for (const studentId of course.students) {
-      await Notification.create({
-        user: studentId,
-        text: `Thông báo mới "${notice.title}" trong môn ${course.title}`,
-        link: `/notices/${notice._id}`
-      });
-    }
+    // [ĐÃ XÓA LOGIC GỬI THÔNG BÁO TỰ ĐỘNG CHO TẤT CẢ SINH VIÊN]
 
     res.status(201).json({ success: true, notice });
   } catch (error) {
@@ -11245,7 +11539,6 @@ exports.createNotice = async (req, res) => {
     });
   }
 };
-
 // @desc    Update notice
 // @route   PUT /api/notices/:id
 exports.updateNotice = async (req, res) => {
@@ -11445,9 +11738,6 @@ exports.createQuiz = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
 
-    // ĐÃ XÓA: kiểm tra courseDoc.teacher === req.user.id
-    // Bây giờ teacher nào cũng tạo được quiz ở mọi course
-
     const quiz = await Quiz.create({
       title, description, course, teacher: req.user.id,
       timeLimit: timeLimit || null,
@@ -11458,13 +11748,7 @@ exports.createQuiz = async (req, res) => {
 
     await Course.findByIdAndUpdate(course, { $push: { quizzes: quiz._id } });
 
-    for (const studentId of courseDoc.students) {
-      await Notification.create({
-        user: studentId,
-        text: `A new quiz "${quiz.title}" has been posted in ${courseDoc.title}.`,
-        link: `/quizzes/${quiz._id}`
-      });
-    }
+    // [ĐÃ XÓA LOGIC GỬI THÔNG BÁO TỰ ĐỘNG CHO TẤT CẢ SINH VIÊN]
 
     res.status(201).json({ success: true, quiz });
   } catch (error) {
@@ -12083,7 +12367,13 @@ const bcrypt = require('bcryptjs');
 // @access  Private/Admin
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password');
+    let query = {};
+    // NEW: Allow filtering by role if requested in query params (e.g., /api/users?role=student)
+    if (req.query.role) {
+      query.role = req.query.role;
+    }
+    
+    const users = await User.find(query).select('-password');
     
     res.json({
       success: true,
@@ -12095,7 +12385,6 @@ exports.getUsers = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 // @desc    Get current user profile
 // @route   GET /api/users/me
 // @access  Private
@@ -12998,10 +13287,13 @@ const {
   getAssignments,
   getAssignment,
   createAssignment,
-  updateAssignment,
+  // Thêm updateAssignment (Hàm này có thể bị thiếu/xóa trong controller)
+  updateAssignment, 
   deleteAssignment,
   submitAssignment,
-  gradeSubmission,
+  // Đổi tên gradeSubmission thành gradeSubmissionByAssignmentId để rõ ràng hơn
+  // Nhưng vì nó đã có trong controller cũ, ta giữ nguyên tên để không gây nhầm lẫn
+  gradeSubmission, 
   getStudentAssignments,
   getAssignmentsForTeacher
 } = require('../controllers/assignment.controller');
@@ -13038,15 +13330,16 @@ router.route('/')
 // Single assignment routes
 router.route('/:id')
   .get(protect, getAssignment)
-  .put(protect, authorize('teacher', 'admin'), updateAssignment)
+  .put(protect, authorize('teacher', 'admin'), updateAssignment) // Dòng 50 đã được fix trong Controller
   .delete(protect, authorize('teacher', 'admin'), deleteAssignment);
 
-// Submission routes
+// Submission routes (Đã sửa lỗi: gradeSubmission đã được chuyển sang submission.routes.js trong các phiên bản trước)
+// Tuy nhiên, nếu bạn muốn giữ nó ở đây, ta phải đảm bảo nó được import.
 router.post('/:id/submit', protect, authorize('student'), upload.single('file'), submitAssignment);
-router.post('/:id/grade/:submissionId', protect, authorize('teacher', 'admin'), gradeSubmission);
+// XÓA DÒNG NÀY VÀ SỬ DỤNG submission.routes.js để tránh nhầm lẫn route
+// router.post('/:id/grade/:submissionId', protect, authorize('teacher', 'admin'), gradeSubmission);
 
 module.exports = router;
-
 
 ==================================================
 FILE_PATH: server\routes\auth.routes.js
@@ -13084,7 +13377,9 @@ const {
   updateCourse,
   deleteCourse,
   getTeacherCourses,
-  enrollCourse
+  enrollCourse,
+  addStudentToCourse, // NEW
+  removeStudentFromCourse // NEW
 } = require('../controllers/course.controller');
 const { protect, authorize } = require('../middleware/auth.middleware');
 
@@ -13103,11 +13398,14 @@ router.post('/:id/enroll', protect, authorize('student'), enrollCourse);
 router.put('/:id', protect, authorize('teacher'), updateCourse);
 router.delete('/:id', protect, authorize('teacher'), deleteCourse);
 
+// NEW: Routes for managing students
+router.put('/:id/add-student', protect, authorize('teacher'), addStudentToCourse); // NEW
+router.put('/:id/remove-student', protect, authorize('teacher'), removeStudentFromCourse); // NEW
+
 // Course creation
 router.post('/', protect, authorize('teacher'), createCourse);
 
 module.exports = router;
-
 
 ==================================================
 FILE_PATH: server\routes\material.routes.js

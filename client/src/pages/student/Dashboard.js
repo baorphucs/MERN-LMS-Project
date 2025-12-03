@@ -1,3 +1,5 @@
+// FILE_PATH: client\src\pages\student\Dashboard.js (SỬA LẠI LOGIC TẢI DỮ LIỆU)
+
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -21,17 +23,20 @@ const StudentDashboard = () => {
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
-        // Fetch courses
-        const coursesRes = await axios.get('/api/courses');
-        setCourses(coursesRes.data.courses);
+        const token = localStorage.getItem('token');
+        
+        // **FIX LOGIC NÀY**: Dùng endpoint dashboard để lấy dữ liệu chính xác
+        const res = await axios.get('/api/users/me/dashboard', {
+           headers: { Authorization: `Bearer ${token}` }
+        });
 
-        // Fetch assignments
-        const assignmentsRes = await axios.get('/api/assignments/student');
-        setAssignments(assignmentsRes.data.assignments);
-
-        // Fetch quizzes
-        const quizzesRes = await axios.get('/api/quizzes/student');
-        setQuizzes(quizzesRes.data.quizzes);
+        if (res.data.success) {
+           setCourses(res.data.courses || []);
+           setAssignments(res.data.assignments || []);
+           setQuizzes(res.data.quizzes || []);
+        } else {
+           console.error('Failed to load dashboard data');
+        }
 
         setLoading(false);
       } catch (error) {
@@ -41,14 +46,14 @@ const StudentDashboard = () => {
     };
 
     fetchStudentData();
-  }, []);
+  }, [user]);
 
   // Defensive: always ensure arrays are defined
   const safeAssignments = Array.isArray(assignments) ? assignments : [];
   const safeCourses = Array.isArray(courses) ? courses : [];
   const safeQuizzes = Array.isArray(quizzes) ? quizzes : [];
 
-  // Calculate upcoming deadlines
+  // Calculate upcoming deadlines (logic giữ nguyên)
   const upcomingAssignments = safeAssignments
     .filter(assignment => {
       const submitted = assignment.submissions?.some(
@@ -63,6 +68,7 @@ const StudentDashboard = () => {
   // Replace the 'Learning Progress' stat with 'Completed Assignments'
   const completedAssignments = safeAssignments.filter(a => a.submissions?.some(sub => sub.student.toString() === user?._id)).length;
   const totalAssignments = safeAssignments.length;
+  
   const stats = [
     {
       title: 'Enrolled Courses',
@@ -132,33 +138,34 @@ const StudentDashboard = () => {
       <div>
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Upcoming Deadlines</h2>
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {upcomingAssignments.length > 0 ? (
-            <div className="divide-y divide-gray-200">
-              {upcomingAssignments.map((assignment) => (
-                <div key={assignment._id} className="p-4 hover:bg-gray-50">
-                  <h3 className="font-medium text-gray-800">{assignment.title}</h3>
-                  <p className="text-sm text-gray-600">
-                    Course: {assignment.course.title}
-                  </p>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-sm text-red-500">
-                      Due: {moment(assignment.deadline).format('MMM D, YYYY')}
-                    </span>
-                    <Link
-                      to={`/assignments/${assignment._id}`}
-                      className="text-primary-600 hover:text-primary-700 text-sm font-medium"
-                    >
-                      View Details
-                    </Link>
+          {upcomingAssignments.length > 0 ?
+            (
+              <div className="divide-y divide-gray-200">
+                {upcomingAssignments.map((assignment) => (
+                  <div key={assignment._id} className="p-4 hover:bg-gray-50">
+                    <h3 className="font-medium text-gray-800">{assignment.title}</h3>
+                    <p className="text-sm text-gray-600">
+                      Course: {assignment.course?.title}
+                    </p>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-sm text-red-500">
+                        Due: {moment(assignment.deadline).format('MMM D, YYYY')}
+                      </span>
+                      <Link
+                        to={`/assignments/${assignment._id}`}
+                        className="text-primary-600 hover:text-primary-700 font-medium text-sm"
+                      >
+                        View Details
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-center py-8">
-              No upcoming deadlines. You're all caught up!
-            </p>
-          )}
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">
+                No upcoming deadlines. You're all caught up!
+              </p>
+            )}
         </div>
       </div>
 
@@ -166,48 +173,49 @@ const StudentDashboard = () => {
       <div>
         <h2 className="text-xl font-semibold text-gray-800 mb-4">My Courses</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {safeCourses.length > 0 ? (
-            safeCourses.map((course, index) => (
-              <motion.div
-                key={course._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="bg-white rounded-lg shadow-md overflow-hidden"
-              >
-                <div 
-                  className="h-32 bg-cover bg-center" 
-                  style={{ 
-                    backgroundImage: `url(${course.coverImage ? `/uploads/${course.coverImage}` : '/img/default-course.jpg'})` 
-                  }}
-                ></div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-800">{course.title}</h3>
-                  <p className="text-gray-600 text-sm mt-1">Instructor: {course.teacher.name}</p>
-                  <div className="mt-4 flex justify-between items-center">
-                    <Link
-                      to={`/courses/${course._id}`}
-                      className="text-primary-600 hover:text-primary-700 font-medium text-sm"
-                    >
-                      View Course
-                    </Link>
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                      {course.code}
-                    </span>
+          {safeCourses.length > 0 ?
+            (
+              safeCourses.map((course, index) => (
+                <motion.div
+                  key={course._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  className="bg-white rounded-lg shadow-md overflow-hidden"
+                >
+                  <div
+                    className="h-32 bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(${course.coverImage ? `/uploads/${course.coverImage}` : '/img/default-course.jpg'})`
+                    }}
+                  ></div>
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-800">{course.title}</h3>
+                    <p className="text-gray-600 text-sm mt-1">Instructor: {course.teacher?.name}</p>
+                    <div className="mt-4 flex justify-between items-center">
+                      <Link
+                        to={`/courses/${course._id}`}
+                        className="text-primary-600 hover:text-primary-700 font-medium text-sm"
+                      >
+                        View Course
+                      </Link>
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                        {course.code}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))
-          ) : (
-            <div className="col-span-full">
-              <p className="text-gray-500 text-center py-8">
-                You're not enrolled in any courses yet. 
-                <Link to="/courses" className="text-primary-600 hover:underline ml-1">
-                  Browse available courses
-                </Link>
-              </p>
-            </div>
-          )}
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full">
+                <p className="text-gray-500 text-center py-8">
+                  You're not enrolled in any courses yet.
+                  <Link to="/courses" className="text-primary-600 hover:underline ml-1">
+                    Browse available courses
+                  </Link>
+                </p>
+              </div>
+            )}
         </div>
       </div>
 
@@ -215,35 +223,36 @@ const StudentDashboard = () => {
       <div>
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Available Quizzes</h2>
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {safeQuizzes.filter(q => !q.submitted).length > 0 ? (
-            <div className="divide-y divide-gray-200">
-              {safeQuizzes
-                .filter(q => !q.submitted)
-                .map((quiz) => (
-                  <div key={quiz._id} className="p-4 hover:bg-gray-50">
-                    <h3 className="font-medium text-gray-800">{quiz.title}</h3>
-                    <p className="text-sm text-gray-600">
-                      Course: {quiz.course.title}
-                    </p>
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-sm text-gray-500">
-                        {quiz.questions?.length || 0} Questions
-                      </span>
-                      <Link
-                        to={`/quizzes/${quiz._id}/take`}
-                        className="text-primary-600 hover:text-primary-700 text-sm font-medium"
-                      >
-                        Take Quiz
-                      </Link>
+          {safeQuizzes.filter(q => !q.submitted).length > 0 ?
+            (
+              <div className="divide-y divide-gray-200">
+                {safeQuizzes
+                  .filter(q => !q.submitted)
+                  .map((quiz) => (
+                    <div key={quiz._id} className="p-4 hover:bg-gray-50">
+                      <h3 className="font-medium text-gray-800">{quiz.title}</h3>
+                      <p className="text-sm text-gray-600">
+                        Course: {quiz.course?.title}
+                      </p>
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="text-sm text-gray-500">
+                          {quiz.questions?.length || 0} Questions
+                        </span>
+                        <Link
+                          to={`/quizzes/${quiz._id}/take`}
+                          className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                        >
+                          Take Quiz
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-center py-8">
-              No quizzes available at the moment.
-            </p>
-          )}
+                  ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">
+                No quizzes available at the moment.
+              </p>
+            )}
         </div>
       </div>
     </div>

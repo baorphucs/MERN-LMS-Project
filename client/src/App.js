@@ -32,6 +32,7 @@ import EditCourse from './pages/teacher/EditCourse';
 
 // NEW: Quản lý người dùng cho Teacher
 import Users from './pages/teacher/Users';
+import ManageStudents from './pages/teacher/ManageStudents'; // NEW IMPORT
 
 // Assignment Pages
 import Assignments from './pages/assignments/Assignments';
@@ -92,6 +93,9 @@ const App = () => {
             
             {/* MỚI: Quản lý người dùng */}
             <Route path="/teacher/users" element={<Layout><Users /></Layout>} />
+
+            {/* NEW: Quản lý sinh viên trong khóa học */}
+            <Route path="/teacher/courses/:id/manage-students" element={<Layout><ManageStudents /></Layout>} />
 
             {/* Các route tạo nội dung */}
             <Route path="/teacher/assignments/create/:courseId" element={<Layout><CreateAssignment /></Layout>} />
