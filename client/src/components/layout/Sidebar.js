@@ -1,3 +1,4 @@
+// FILE_PATH: client/src/components/layout/Sidebar.js (ĐÃ BỔ SUNG MENU CHAT ADMIN)
 import React, { useContext, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,7 +10,8 @@ import {
   BellIcon,
   AcademicCapIcon,
   ChevronDownIcon,
-  UsersIcon,        // THÊM ICON NÀY
+  UsersIcon,
+  ChatIcon, // <=== ĐÃ THÊM IMPORT NÀY
 } from '@heroicons/react/outline';
 import AuthContext from '../../context/AuthContext';
 
@@ -133,6 +135,21 @@ const Sidebar = () => {
               </Link>
             )}
           </div>
+
+          {/* NEW: Quản lý Chat - CHỈ DÀNH CHO TEACHER */}
+          {isTeacher && (
+              <Link
+                  to="/teacher/chat"
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                      isActive('/teacher/chat') 
+                          ? 'bg-primary-600 text-white shadow-lg' 
+                          : 'hover:bg-primary-100 text-text-dark'
+                  }`}
+              >
+                  <ChatIcon className="w-6 h-6" />
+                  <span className="font-medium">Hỗ Trợ Trực Tuyến</span>
+              </Link>
+          )}
 
           {/* 2 MENU MỚI CHỈ DÀNH CHO TEACHER */}
           {isTeacher && (

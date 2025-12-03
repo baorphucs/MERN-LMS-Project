@@ -1,9 +1,15 @@
+// FILE_PATH: server/server.js (CẬP NHẬT HOÀN TOÀN)
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
 require('dotenv').config();
+
+// NEW IMPORTS FOR CHAT
+const http = require('http'); 
+const { Server } = require('socket.io'); 
+const { handleSocketMessage } = require('./controllers/chat.controller'); 
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -14,10 +20,23 @@ const assignmentRoutes = require('./routes/assignment.routes');
 const quizRoutes = require('./routes/quiz.routes');
 const materialRoutes = require('./routes/material.routes');
 const submissionRoutes = require('./routes/submission.routes');
-const activityRoutes = require('./routes/activity.routes'); // Added activities routes
+const activityRoutes = require('./routes/activity.routes'); 
 const notificationRoutes = require('./routes/notification.routes');
+// NEW IMPORT
+const chatRoutes = require('./routes/chat.routes'); 
 
 const app = express();
+// Tạo HTTP server từ app Express
+const server = http.createServer(app); 
+
+// Cấu hình Socket.IO
+const io = new Server(server, {
+  cors: {
+    // Đảm bảo khớp với frontend port
+    origin: process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '*', 
+    methods: ["GET", "POST"]
+  }
+});
 
 // Disable caching for all API responses
 app.use((req, res, next) => {
@@ -66,6 +85,59 @@ app.use(['/api/materials', '/api/assignments', '/api/quizzes', '/api/notices'], 
   next();
 });
 
+// KẾT NỐI SOCKET.IO LOGIC
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+  
+  // 1. User tham gia phòng chat của chính họ (User ID)
+  socket.on('join_room', (userId) => {
+    socket.join(userId); 
+    console.log(`User ${userId} joined room ${userId}`);
+  });
+  
+  // 2. Admin tham gia phòng hỗ trợ chung
+  socket.on('join_admin_room', () => {
+    socket.join('admin_support_room');
+    console.log(`Admin joined admin_support_room`);
+  });
+
+  // 3. Nhận tin nhắn và gửi lại cho người nhận (Real-time)
+  socket.on('send_message', async (data) => {
+    const { senderId, receiverId, message } = data;
+
+    // Lưu tin nhắn vào DB (sử dụng logic từ controller)
+    const savedMessage = await handleSocketMessage({ senderId, receiverId, message }); 
+    
+    if (savedMessage) {
+        // Data để gửi đi, bao gồm cả timestamp từ DB
+        const responseData = { 
+            ...data, 
+            messageId: savedMessage._id,
+            createdAt: savedMessage.createdAt,
+            sender: savedMessage.sender.toString(), // Gửi lại sender ID
+        };
+
+        // Gửi tin nhắn đến người gửi (để hiển thị tin nhắn của chính họ)
+        io.to(senderId).emit('receive_message', responseData);
+        
+        // Gửi tin nhắn đến người nhận/chatRoomId (Student ID)
+        io.to(savedMessage.chatRoomId.toString()).emit('receive_message', responseData);
+
+        // Gửi thông báo đến tất cả Admin đang lắng nghe nếu người gửi là Student
+        if (senderId === savedMessage.chatRoomId.toString()) {
+            io.to('admin_support_room').emit('new_chat_notification', { 
+                chatRoomId: savedMessage.chatRoomId, 
+                message: message 
+            });
+        }
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -75,8 +147,10 @@ app.use('/api/assignments', assignmentRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/materials', materialRoutes);
 app.use('/api/submissions', submissionRoutes);
-app.use('/api/activities', activityRoutes); // Added activities routes
+app.use('/api/activities', activityRoutes); 
 app.use('/api/notifications', notificationRoutes);
+// NEW ROUTE
+app.use('/api/chat', chatRoutes); 
 
 // Global error handler for any uncaught errors in the routes
 app.use('/api/*', (error, req, res, next) => {
@@ -143,6 +217,6 @@ process.on('unhandledRejection', (err) => {
   });
 });
 
-// Start server
+// Start server (Sử dụng server.listen thay vì app.listen)
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

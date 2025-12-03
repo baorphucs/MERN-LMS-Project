@@ -25,7 +25,8 @@ FILE_PATH: client\package.json
     "react-scripts": "5.0.1",
     "react-toastify": "^9.1.3",
     "web-vitals": "^2.1.4",
-    "zxcvbn": "^4.4.2"
+    "zxcvbn": "^4.4.2",
+    "socket.io-client": "^4.7.2"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -119,19 +120,24 @@ FILE_PATH: client\public\manifest.json
 ==================================================
 FILE_PATH: client\src\App.js
 ==================================================
-import React from 'react';
+// FILE_PATH: client/src/App.js (CẬP NHẬT HOÀN TOÀN ĐỂ SỬA LỖI CÚ PHÁP useContext)
+import React, { useContext } from 'react'; // <=== ĐÃ THÊM useContext VÀO ĐÂY 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import 'react-toastify/dist/ReactToastify.css'; 
 
 // Auth Context
-import { AuthProvider } from './context/AuthContext';
+import AuthContext, { AuthProvider } from './context/AuthContext'; // Bổ sung AuthContext
 
 // Layout Components
 import Layout from './components/layout/Layout';
-import PrivateRoute from './components/routing/PrivateRoute';
+import PrivateRoute from './components/routing/PrivateRoute'; 
 import TeacherRoute from './components/routing/TeacherRoute';
 import StudentRoute from './components/routing/StudentRoute';
+
+// NEW IMPORT CHO CHAT
+import ChatWidget from './components/common/ChatWidget';
+import AdminChat from './pages/teacher/AdminChat'; 
 
 // Auth Pages
 import Login from './pages/auth/Login';
@@ -139,7 +145,7 @@ import Register from './pages/auth/Register';
 
 // Public Pages
 import Home from './pages/Home';
-import NotFound from './pages/NotFound';
+import NotFound from './pages/NotFound'; 
 
 // Dashboard Pages
 import TeacherDashboard from './pages/teacher/Dashboard';
@@ -152,98 +158,331 @@ import CreateCourse from './pages/teacher/CreateCourse';
 import EditCourse from './pages/teacher/EditCourse';
 
 // NEW: Quản lý người dùng cho Teacher
-import Users from './pages/teacher/Users';
-import ManageStudents from './pages/teacher/ManageStudents'; // NEW IMPORT
+import Users from './pages/teacher/Users'; 
+import ManageStudents from './pages/teacher/ManageStudents'; 
 
 // Assignment Pages
 import Assignments from './pages/assignments/Assignments';
 import AssignmentDetails from './pages/assignments/AssignmentDetails';
 import CreateAssignment from './pages/teacher/CreateAssignment';
-import SubmitAssignment from './pages/student/SubmitAssignment';
+import SubmitAssignment from './pages/student/SubmitAssignment'; 
 
 // Quiz Pages
 import Quizzes from './pages/quizzes/Quizzes';
 import QuizDetails from './pages/quizzes/QuizDetails';
 import CreateQuiz from './pages/teacher/CreateQuiz';
 import TakeQuiz from './pages/quizzes/TakeQuiz';
-import QuizResult from './pages/quizzes/QuizResult';
+import QuizResult from './pages/quizzes/QuizResult'; 
 import EditQuiz from './pages/teacher/EditQuiz';
 
 // Material
 import Materials from './pages/materials/Materials';
-import CreateMaterial from './pages/teacher/CreateMaterial';
+import CreateMaterial from './pages/teacher/CreateMaterial'; 
 
 // Notice
 import Notices from './pages/notices/Notices';
 import CreateNotice from './pages/teacher/CreateNotice';
 
+const AppContent = () => { // Tách logic ra khỏi App để sử dụng useContext
+    const { isAuthenticated, user, loading } = useContext(AuthContext);
+
+    // Nếu đang tải, trả về null hoặc loading state 
+    if (loading) return null; 
+
+    return (
+        <Router>
+            <ToastContainer position="top-right" autoClose={3000} />
+            <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Layout><Home /></Layout>} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} /> 
+
+                {/* Protected Routes - Cả Teacher & Student */}
+                <Route element={<PrivateRoute />}>
+                    <Route path="/courses" element={<Layout><Courses /></Layout>} />
+                    <Route path="/courses/:id" element={<Layout><CourseDetails /></Layout>} /> 
+                    <Route path="/notices" element={<Layout><Notices /></Layout>} />
+                    <Route path="/materials" element={<Layout><Materials /></Layout>} />
+                    <Route path="/assignments" element={<Layout><Assignments /></Layout>} />
+                    <Route path="/assignments/:id" element={<Layout><AssignmentDetails /></Layout>} /> 
+                    <Route path="/quizzes" element={<Layout><Quizzes /></Layout>} />
+                    <Route path="/quizzes/:id" element={<Layout><QuizDetails /></Layout>} />
+                    <Route path="/quizzes/:id/result" element={<Layout><QuizResult /></Layout>} />
+                </Route>
+
+                {/* Teacher Routes - Bao gồm cả Super Admin */}
+                <Route element={<TeacherRoute />}>
+                    <Route path="/teacher/dashboard" element={<Layout><TeacherDashboard /></Layout>} />
+                    <Route path="/teacher/create-course" element={<Layout><CreateCourse /></Layout>} />
+                    
+                    {/* MỚI: Quản lý tất cả khóa học */} 
+                    <Route path="/teacher/courses" element={<Layout><Courses /></Layout>} />
+                    
+                    {/* MỚI: Sửa khóa học */}
+                    <Route path="/teacher/edit-course/:id" element={<Layout><EditCourse /></Layout>} /> 
+                    
+                    {/* MỚI: Quản lý người dùng */}
+                    <Route path="/teacher/users" element={<Layout><Users /></Layout>} />
+
+                    {/* NEW: Quản lý sinh viên trong khóa học */} 
+                    <Route path="/teacher/courses/:id/manage-students" element={<Layout><ManageStudents /></Layout>} />
+
+                    {/* NEW: Chat Admin Route */}
+                    <Route path="/teacher/chat" element={<Layout><AdminChat /></Layout>} />
+
+                    {/* Các route tạo nội dung */} 
+                    <Route path="/teacher/assignments/create/:courseId" element={<Layout><CreateAssignment /></Layout>} />
+                    <Route path="/teacher/quizzes/create/:courseId" element={<Layout><CreateQuiz /></Layout>} />
+                    <Route path="/teacher/materials/create/:courseId" element={<Layout><CreateMaterial /></Layout>} />
+                    <Route path="/teacher/notices/create/:courseId" element={<Layout><CreateNotice /></Layout>} /> 
+                    
+                    {/* Edit Quiz */}
+                    <Route path="/quizzes/:id/edit" element={<Layout><EditQuiz /></Layout>} />
+                </Route>
+
+                {/* Student Routes */}
+                <Route element={<StudentRoute />}>
+                    <Route path="/student/dashboard" element={<Layout><StudentDashboard /></Layout>} />
+                    <Route path="/assignments/:id/submit" element={<Layout><SubmitAssignment /></Layout>} />
+                    <Route path="/quizzes/:id/take" element={<Layout><TakeQuiz /></Layout>} />
+                </Route>
+
+                {/* 404 */}
+                <Route path="*" element={<NotFound />} />
+            </Routes>
+            
+            {/* NEW: Ẩn/Hiện Chat Widget tùy thuộc vào trạng thái đăng nhập */} 
+            {isAuthenticated && <ChatWidget />}
+            
+        </Router>
+    ); 
+}
+
+
 const App = () => {
-  return (
-    <AuthProvider>
-      <Router>
-        <ToastContainer position="top-right" autoClose={3000} />
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Layout><Home /></Layout>} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-
-          {/* Protected Routes - Cả Teacher & Student */}
-          <Route element={<PrivateRoute />}>
-            <Route path="/courses" element={<Layout><Courses /></Layout>} />
-            <Route path="/courses/:id" element={<Layout><CourseDetails /></Layout>} />
-            <Route path="/notices" element={<Layout><Notices /></Layout>} />
-            <Route path="/materials" element={<Layout><Materials /></Layout>} />
-            <Route path="/assignments" element={<Layout><Assignments /></Layout>} />
-            <Route path="/assignments/:id" element={<Layout><AssignmentDetails /></Layout>} />
-            <Route path="/quizzes" element={<Layout><Quizzes /></Layout>} />
-            <Route path="/quizzes/:id" element={<Layout><QuizDetails /></Layout>} />
-            <Route path="/quizzes/:id/result" element={<Layout><QuizResult /></Layout>} />
-          </Route>
-
-          {/* Teacher Routes - Bao gồm cả Super Admin */}
-          <Route element={<TeacherRoute />}>
-            <Route path="/teacher/dashboard" element={<Layout><TeacherDashboard /></Layout>} />
-            <Route path="/teacher/create-course" element={<Layout><CreateCourse /></Layout>} />
-            
-            {/* MỚI: Quản lý tất cả khóa học */}
-            <Route path="/teacher/courses" element={<Layout><Courses /></Layout>} />
-            
-            {/* MỚI: Sửa khóa học */}
-            <Route path="/teacher/edit-course/:id" element={<Layout><EditCourse /></Layout>} />
-            
-            {/* MỚI: Quản lý người dùng */}
-            <Route path="/teacher/users" element={<Layout><Users /></Layout>} />
-
-            {/* NEW: Quản lý sinh viên trong khóa học */}
-            <Route path="/teacher/courses/:id/manage-students" element={<Layout><ManageStudents /></Layout>} />
-
-            {/* Các route tạo nội dung */}
-            <Route path="/teacher/assignments/create/:courseId" element={<Layout><CreateAssignment /></Layout>} />
-            <Route path="/teacher/quizzes/create/:courseId" element={<Layout><CreateQuiz /></Layout>} />
-            <Route path="/teacher/materials/create/:courseId" element={<Layout><CreateMaterial /></Layout>} />
-            <Route path="/teacher/notices/create/:courseId" element={<Layout><CreateNotice /></Layout>} />
-            
-            {/* Edit Quiz */}
-            <Route path="/quizzes/:id/edit" element={<Layout><EditQuiz /></Layout>} />
-          </Route>
-
-          {/* Student Routes */}
-          <Route element={<StudentRoute />}>
-            <Route path="/student/dashboard" element={<Layout><StudentDashboard /></Layout>} />
-            <Route path="/assignments/:id/submit" element={<Layout><SubmitAssignment /></Layout>} />
-            <Route path="/quizzes/:id/take" element={<Layout><TakeQuiz /></Layout>} />
-          </Route>
-
-          {/* 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
-  );
+    return (
+        <AuthProvider>
+            <AppContent />
+        </AuthProvider>
+    ); 
 };
 
 export default App;
+
+==================================================
+FILE_PATH: client\src\components\common\ChatWidget.js
+==================================================
+// FILE_PATH: client/src/components/common/ChatWidget.js (ĐÃ SỬA LỖI CÚ PHÁP)
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChatIcon, XIcon, PaperAirplaneIcon, RefreshIcon } from '@heroicons/react/outline';
+import io from 'socket.io-client';
+import AuthContext from '../../context/AuthContext';
+import axios from 'axios';
+import moment from 'moment';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+const socket = io(BACKEND_URL); 
+
+const ChatWidget = () => {
+  const { user, isAuthenticated } = useContext(AuthContext);
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  // ID phòng chat của người dùng này (dùng user._id làm room ID)
+  const chatRoomId = user?._id; 
+  const isStudent = user?.role === 'student';
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  
+  const fetchMessages = async () => {
+    if (!chatRoomId) return;
+    setLoading(true);
+    try {
+      // Đảm bảo API trả về object với sender.name và sender._id
+      const res = await axios.get(`/api/chat/history/${chatRoomId}`); 
+      setMessages(res.data.messages);
+    } catch (err) {
+      console.error('Error fetching chat history:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 1. Thiết lập Socket và Join Room
+  useEffect(() => { // <=== ĐÃ SỬA LỖI Ở ĐÂY
+    if (!isAuthenticated || !user) return;
+
+    // Join room của user hiện tại
+    socket.emit('join_room', chatRoomId);
+    
+    // Admin (Teacher) cũng join phòng chung để nhận thông báo từ Student
+    if (user.role === 'teacher') {
+        socket.emit('join_admin_room');
+    }
+
+    // 2. Lắng nghe tin nhắn
+    const handleReceiveMessage = (data) => {
+        // Chỉ thêm tin nhắn nếu nó thuộc phòng chat hiện tại (của chính mình)
+        if (data.senderId === chatRoomId || data.receiverId === chatRoomId) {
+            
+            setMessages(prev => {
+                // *** FIX LỖI: Tránh thêm tin nhắn nếu nó đã có (tránh trùng lặp từ socket) ***
+                if (data.messageId && prev.some(m => m.messageId === data.messageId)) {
+                    return prev; 
+                }
+                
+                // Nếu tin nhắn đến từ chính người dùng (senderId == chatRoomId), 
+                // thì nó phải được thêm vào messages list.
+                // Nếu tin nhắn đến từ người khác (Admin), thì cũng thêm vào.
+                return [...prev, data];
+            });
+        }
+    };
+    
+    socket.on('receive_message', handleReceiveMessage);
+
+    // Dọn dẹp
+    return () => {
+      socket.off('receive_message', handleReceiveMessage);
+    };
+  }, [isAuthenticated, user, chatRoomId]);
+  
+  // Auto scroll khi có tin nhắn mới hoặc mở chat
+  useEffect(() => {
+      scrollToBottom();
+  }, [messages, isOpen]);
+  
+  // Tải lịch sử khi mở chat lần đầu
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      fetchMessages();
+    }
+  }, [isOpen]);
+  
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!inputMessage.trim() || !chatRoomId) return;
+
+    const messageData = {
+      senderId: chatRoomId,
+      // Gửi đến Admin chung, Backend sẽ xử lý
+      receiverId: 'admin_support_room', 
+      message: inputMessage.trim(),
+    };
+    
+    // Gửi qua Socket.IO
+    socket.emit('send_message', messageData);
+
+    setInputMessage('');
+  };
+  
+  const chatButton = (
+    <motion.button
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      onClick={() => setIsOpen(!isOpen)}
+      className="fixed bottom-6 right-6 bg-primary-600 text-white p-4 rounded-full shadow-lg z-50 hover:bg-primary-700 transition-colors"
+    >
+      {isOpen ? <XIcon className="h-6 w-6" /> : <ChatIcon className="h-6 w-6" />}
+    </motion.button>
+  );
+
+  if (user?.role === 'teacher') {
+    // Teacher nên dùng trang AdminChat để quản lý nhiều cuộc hội thoại
+    return chatButton;
+  }
+  
+  // Chỉ Student mới thấy ChatWidget hỗ trợ
+  if (!isStudent) return null;
+
+  return (
+    <>
+      {chatButton}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-24 right-6 w-80 h-96 bg-white rounded-xl shadow-2xl flex flex-col z-50 border border-primary-100"
+          >
+            {/* Chat Header */}
+            <div className="flex justify-between items-center p-4 bg-primary-600 text-white rounded-t-xl">
+              <h3 className="font-bold text-lg">Hỗ trợ Trực tuyến</h3>
+              <button onClick={fetchMessages} disabled={loading} className="p-1 rounded-full hover:bg-primary-700">
+                  <RefreshIcon className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+
+            {/* Message Body */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-neutral-50/80">
+              {loading ? (
+                <p className="text-center text-gray-500 mt-5">Đang tải lịch sử...</p>
+              ) : messages.length === 0 ? (
+                <div className="text-center text-gray-500 mt-5">
+                    <p>Chào mừng! Chúng tôi sẵn sàng hỗ trợ bạn.</p>
+                </div>
+              ) : (
+                messages.map((msg, index) => {
+                    // CHECK: Dùng logic kiểm tra sender ID thống nhất
+                    const senderId = msg.sender?._id || msg.sender;
+                    const isMe = senderId === chatRoomId; // chatRoomId là user._id
+
+                    return (
+                        <div 
+                            key={msg.messageId || index}
+                            className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+                        >
+                            <div className={`max-w-[80%] p-2 rounded-lg text-sm shadow-md ${
+                                isMe
+                                    ? 'bg-primary-400 text-white rounded-br-none'
+                                    : 'bg-white text-gray-800 rounded-tl-none border'
+                            }`}>
+                                <p>{msg.message}</p>
+                                <span className={`block text-xs mt-1 ${isMe ? 'text-primary-100' : 'text-gray-500'}`}>
+                                    {moment(msg.createdAt).format('HH:mm')}
+                                </span>
+                            </div>
+                        </div>
+                    );
+                })
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            <form onSubmit={handleSendMessage} className="p-3 border-t flex bg-white">
+              <input
+                type="text"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                placeholder="Nhập tin nhắn..."
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              />
+              <button
+                type="submit"
+                className="bg-primary-600 text-white p-2 rounded-r-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+                disabled={!inputMessage.trim()}
+              >
+                <PaperAirplaneIcon className="h-5 w-5 transform rotate-45" />
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
+export default ChatWidget;
 
 ==================================================
 FILE_PATH: client\src\components\course\CourseNotices.jsx
@@ -617,6 +856,7 @@ export default Navbar;
 ==================================================
 FILE_PATH: client\src\components\layout\Sidebar.js
 ==================================================
+// FILE_PATH: client/src/components/layout/Sidebar.js (ĐÃ BỔ SUNG MENU CHAT ADMIN)
 import React, { useContext, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -628,7 +868,8 @@ import {
   BellIcon,
   AcademicCapIcon,
   ChevronDownIcon,
-  UsersIcon,        // THÊM ICON NÀY
+  UsersIcon,
+  ChatIcon, // <=== ĐÃ THÊM IMPORT NÀY
 } from '@heroicons/react/outline';
 import AuthContext from '../../context/AuthContext';
 
@@ -752,6 +993,21 @@ const Sidebar = () => {
               </Link>
             )}
           </div>
+
+          {/* NEW: Quản lý Chat - CHỈ DÀNH CHO TEACHER */}
+          {isTeacher && (
+              <Link
+                  to="/teacher/chat"
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                      isActive('/teacher/chat') 
+                          ? 'bg-primary-600 text-white shadow-lg' 
+                          : 'hover:bg-primary-100 text-text-dark'
+                  }`}
+              >
+                  <ChatIcon className="w-6 h-6" />
+                  <span className="font-medium">Hỗ Trợ Trực Tuyến</span>
+              </Link>
+          )}
 
           {/* 2 MENU MỚI CHỈ DÀNH CHO TEACHER */}
           {isTeacher && (
@@ -3121,6 +3377,8 @@ export default CourseDetails;
 ==================================================
 FILE_PATH: client\src\pages\courses\Courses.js
 ==================================================
+// FILE_PATH: client\src\pages\courses\Courses.js
+
 // src/pages/courses/Courses.js (THAY THẾ HOÀN TOÀN FILE CŨ)
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -3138,15 +3396,36 @@ const Courses = () => {
 
   useEffect(() => {
     fetchAllCourses();
-  }, []);
+  }, [user]); // Thêm user vào dependency array
 
   const fetchAllCourses = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('/api/courses', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setCourses(res.data.courses || []);
+      let res;
+      
+      // Teacher: Xem TẤT CẢ khóa học để quản lý (hoặc có thể đổi thành chỉ khóa học của họ)
+      // Hiện tại giữ nguyên logic cũ là fetch ALL courses cho teacher để quản lý
+      if (user?.role === 'teacher') {
+        // Teacher có thể thấy tất cả courses để quản lý chung (giả định)
+        res = await axios.get('/api/courses', { 
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCourses(res.data.courses || []);
+      } 
+      // Student: Chỉ xem các khóa học đã ghi danh
+      else if (user?.role === 'student') {
+        // Dùng endpoint /api/users/me/courses (course controller không có route này, user controller có [cite: 2395])
+        res = await axios.get('/api/users/me/courses', { 
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCourses(res.data.courses || []);
+      }
+      else {
+          // Public view hoặc Role khác: Dùng endpoint chung
+          res = await axios.get('/api/courses');
+          setCourses(res.data.courses || []);
+      }
+      
     } catch (err) {
       toast.error('Không tải được danh sách khóa học');
       console.error(err);
@@ -3175,7 +3454,7 @@ const Courses = () => {
     <div className="max-w-7xl mx-auto py-10 px-4">
       <div className="flex justify-between items-center mb-10">
         <h1 className="text-4xl font-bold text-gray-900">
-          {user?.role === 'teacher' ? 'Quản Lý Tất Cả Khóa Học' : 'Danh Sách Khóa Học'}
+          {user?.role === 'teacher' ? 'Quản Lý Tất Cả Khóa Học' : 'Danh Sách Khóa Học Đã Ghi Danh'}
         </h1>
         {user?.role === 'teacher' && (
           <Link
@@ -3190,7 +3469,14 @@ const Courses = () => {
 
       {courses.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-2xl shadow">
-          <p className="text-2xl text-gray-500">Chưa có khóa học nào</p>
+          <p className="text-2xl text-gray-500">
+            {user?.role === 'teacher' ? 'Chưa có khóa học nào được tạo.' : 'Bạn chưa ghi danh vào khóa học nào.'}
+          </p>
+          {user?.role === 'student' && (
+            <p className="mt-4 text-gray-600">
+              Vui lòng liên hệ giáo viên để được thêm vào khóa học.
+            </p>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -3203,6 +3489,7 @@ const Courses = () => {
               <div
                 className="h-48 bg-cover bg-center"
                 style={{
+                  // Sử dụng coverImageUrl nếu có, nếu không dùng ảnh mặc định
                   backgroundImage: `url(${course.coverImageUrl || '/img/default-course.jpg'})`
                 }}
               />
@@ -6286,6 +6573,8 @@ export default Register;
 ==================================================
 FILE_PATH: client\src\pages\student\Dashboard.js
 ==================================================
+// FILE_PATH: client\src\pages\student\Dashboard.js (SỬA LẠI LOGIC TẢI DỮ LIỆU)
+
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -6309,17 +6598,20 @@ const StudentDashboard = () => {
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
-        // Fetch courses
-        const coursesRes = await axios.get('/api/courses');
-        setCourses(coursesRes.data.courses);
+        const token = localStorage.getItem('token');
+        
+        // **FIX LOGIC NÀY**: Dùng endpoint dashboard để lấy dữ liệu chính xác
+        const res = await axios.get('/api/users/me/dashboard', {
+           headers: { Authorization: `Bearer ${token}` }
+        });
 
-        // Fetch assignments
-        const assignmentsRes = await axios.get('/api/assignments/student');
-        setAssignments(assignmentsRes.data.assignments);
-
-        // Fetch quizzes
-        const quizzesRes = await axios.get('/api/quizzes/student');
-        setQuizzes(quizzesRes.data.quizzes);
+        if (res.data.success) {
+           setCourses(res.data.courses || []);
+           setAssignments(res.data.assignments || []);
+           setQuizzes(res.data.quizzes || []);
+        } else {
+           console.error('Failed to load dashboard data');
+        }
 
         setLoading(false);
       } catch (error) {
@@ -6329,14 +6621,14 @@ const StudentDashboard = () => {
     };
 
     fetchStudentData();
-  }, []);
+  }, [user]);
 
   // Defensive: always ensure arrays are defined
   const safeAssignments = Array.isArray(assignments) ? assignments : [];
   const safeCourses = Array.isArray(courses) ? courses : [];
   const safeQuizzes = Array.isArray(quizzes) ? quizzes : [];
 
-  // Calculate upcoming deadlines
+  // Calculate upcoming deadlines (logic giữ nguyên)
   const upcomingAssignments = safeAssignments
     .filter(assignment => {
       const submitted = assignment.submissions?.some(
@@ -6351,6 +6643,7 @@ const StudentDashboard = () => {
   // Replace the 'Learning Progress' stat with 'Completed Assignments'
   const completedAssignments = safeAssignments.filter(a => a.submissions?.some(sub => sub.student.toString() === user?._id)).length;
   const totalAssignments = safeAssignments.length;
+  
   const stats = [
     {
       title: 'Enrolled Courses',
@@ -6420,33 +6713,34 @@ const StudentDashboard = () => {
       <div>
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Upcoming Deadlines</h2>
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {upcomingAssignments.length > 0 ? (
-            <div className="divide-y divide-gray-200">
-              {upcomingAssignments.map((assignment) => (
-                <div key={assignment._id} className="p-4 hover:bg-gray-50">
-                  <h3 className="font-medium text-gray-800">{assignment.title}</h3>
-                  <p className="text-sm text-gray-600">
-                    Course: {assignment.course.title}
-                  </p>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-sm text-red-500">
-                      Due: {moment(assignment.deadline).format('MMM D, YYYY')}
-                    </span>
-                    <Link
-                      to={`/assignments/${assignment._id}`}
-                      className="text-primary-600 hover:text-primary-700 text-sm font-medium"
-                    >
-                      View Details
-                    </Link>
+          {upcomingAssignments.length > 0 ?
+            (
+              <div className="divide-y divide-gray-200">
+                {upcomingAssignments.map((assignment) => (
+                  <div key={assignment._id} className="p-4 hover:bg-gray-50">
+                    <h3 className="font-medium text-gray-800">{assignment.title}</h3>
+                    <p className="text-sm text-gray-600">
+                      Course: {assignment.course?.title}
+                    </p>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-sm text-red-500">
+                        Due: {moment(assignment.deadline).format('MMM D, YYYY')}
+                      </span>
+                      <Link
+                        to={`/assignments/${assignment._id}`}
+                        className="text-primary-600 hover:text-primary-700 font-medium text-sm"
+                      >
+                        View Details
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-center py-8">
-              No upcoming deadlines. You're all caught up!
-            </p>
-          )}
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">
+                No upcoming deadlines. You're all caught up!
+              </p>
+            )}
         </div>
       </div>
 
@@ -6454,48 +6748,49 @@ const StudentDashboard = () => {
       <div>
         <h2 className="text-xl font-semibold text-gray-800 mb-4">My Courses</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {safeCourses.length > 0 ? (
-            safeCourses.map((course, index) => (
-              <motion.div
-                key={course._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="bg-white rounded-lg shadow-md overflow-hidden"
-              >
-                <div 
-                  className="h-32 bg-cover bg-center" 
-                  style={{ 
-                    backgroundImage: `url(${course.coverImage ? `/uploads/${course.coverImage}` : '/img/default-course.jpg'})` 
-                  }}
-                ></div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-800">{course.title}</h3>
-                  <p className="text-gray-600 text-sm mt-1">Instructor: {course.teacher.name}</p>
-                  <div className="mt-4 flex justify-between items-center">
-                    <Link
-                      to={`/courses/${course._id}`}
-                      className="text-primary-600 hover:text-primary-700 font-medium text-sm"
-                    >
-                      View Course
-                    </Link>
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                      {course.code}
-                    </span>
+          {safeCourses.length > 0 ?
+            (
+              safeCourses.map((course, index) => (
+                <motion.div
+                  key={course._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  className="bg-white rounded-lg shadow-md overflow-hidden"
+                >
+                  <div
+                    className="h-32 bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(${course.coverImage ? `/uploads/${course.coverImage}` : '/img/default-course.jpg'})`
+                    }}
+                  ></div>
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-800">{course.title}</h3>
+                    <p className="text-gray-600 text-sm mt-1">Instructor: {course.teacher?.name}</p>
+                    <div className="mt-4 flex justify-between items-center">
+                      <Link
+                        to={`/courses/${course._id}`}
+                        className="text-primary-600 hover:text-primary-700 font-medium text-sm"
+                      >
+                        View Course
+                      </Link>
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                        {course.code}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))
-          ) : (
-            <div className="col-span-full">
-              <p className="text-gray-500 text-center py-8">
-                You're not enrolled in any courses yet. 
-                <Link to="/courses" className="text-primary-600 hover:underline ml-1">
-                  Browse available courses
-                </Link>
-              </p>
-            </div>
-          )}
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full">
+                <p className="text-gray-500 text-center py-8">
+                  You're not enrolled in any courses yet.
+                  <Link to="/courses" className="text-primary-600 hover:underline ml-1">
+                    Browse available courses
+                  </Link>
+                </p>
+              </div>
+            )}
         </div>
       </div>
 
@@ -6503,35 +6798,36 @@ const StudentDashboard = () => {
       <div>
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Available Quizzes</h2>
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {safeQuizzes.filter(q => !q.submitted).length > 0 ? (
-            <div className="divide-y divide-gray-200">
-              {safeQuizzes
-                .filter(q => !q.submitted)
-                .map((quiz) => (
-                  <div key={quiz._id} className="p-4 hover:bg-gray-50">
-                    <h3 className="font-medium text-gray-800">{quiz.title}</h3>
-                    <p className="text-sm text-gray-600">
-                      Course: {quiz.course.title}
-                    </p>
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-sm text-gray-500">
-                        {quiz.questions?.length || 0} Questions
-                      </span>
-                      <Link
-                        to={`/quizzes/${quiz._id}/take`}
-                        className="text-primary-600 hover:text-primary-700 text-sm font-medium"
-                      >
-                        Take Quiz
-                      </Link>
+          {safeQuizzes.filter(q => !q.submitted).length > 0 ?
+            (
+              <div className="divide-y divide-gray-200">
+                {safeQuizzes
+                  .filter(q => !q.submitted)
+                  .map((quiz) => (
+                    <div key={quiz._id} className="p-4 hover:bg-gray-50">
+                      <h3 className="font-medium text-gray-800">{quiz.title}</h3>
+                      <p className="text-sm text-gray-600">
+                        Course: {quiz.course?.title}
+                      </p>
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="text-sm text-gray-500">
+                          {quiz.questions?.length || 0} Questions
+                        </span>
+                        <Link
+                          to={`/quizzes/${quiz._id}/take`}
+                          className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                        >
+                          Take Quiz
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-center py-8">
-              No quizzes available at the moment.
-            </p>
-          )}
+                  ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-8">
+                No quizzes available at the moment.
+              </p>
+            )}
         </div>
       </div>
     </div>
@@ -6539,7 +6835,6 @@ const StudentDashboard = () => {
 };
 
 export default StudentDashboard;
-
 
 ==================================================
 FILE_PATH: client\src\pages\student\SubmitAssignment.js
@@ -7259,6 +7554,300 @@ const TakeQuiz = () => {
 
 export default TakeQuiz;
 
+
+==================================================
+FILE_PATH: client\src\pages\teacher\AdminChat.js
+==================================================
+// FILE_PATH: client/src/pages/teacher/AdminChat.js (ĐÃ SỬA LỖI REAL-TIME CỦA ADMIN)
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { RefreshIcon, PaperAirplaneIcon, ChatIcon, ChevronLeftIcon } from '@heroicons/react/outline';
+import io from 'socket.io-client';
+import AuthContext from '../../context/AuthContext';
+import axios from 'axios';
+import moment from 'moment';
+import { toast } from 'react-toastify';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+const socket = io(BACKEND_URL); 
+
+const AdminChat = () => {
+    const { user } = useContext(AuthContext);
+    const [conversations, setConversations] = useState([]);
+    const [messages, setMessages] = useState([]);
+    const [selectedRoom, setSelectedRoom] = useState(null); // chatRoomId của Student
+    const [inputMessage, setInputMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const messagesEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    // 1. Fetch Danh sách Hội thoại (Conversations)
+    const fetchConversations = async () => {
+        setLoading(true);
+        try {
+            const res = await axios.get('/api/chat/admin/conversations');
+            setConversations(res.data.conversations);
+            toast.success("Danh sách hội thoại đã được cập nhật.");
+        } catch (err) {
+            console.error('Error fetching conversations:', err);
+            toast.error("Không tải được danh sách hội thoại.");
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    // 2. Fetch Lịch sử tin nhắn cho phòng đã chọn
+    const fetchMessages = async (chatRoomId) => {
+        setLoading(true);
+        try {
+            const res = await axios.get(`/api/chat/history/${chatRoomId}`);
+            setMessages(res.data.messages);
+        } catch (err) {
+            console.error('Error fetching messages:', err);
+            setMessages([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    // 3. Xử lý khi chọn một phòng chat
+    const handleSelectRoom = (room) => {
+        // Rời khỏi phòng cũ (nếu có)
+        if (selectedRoom) {
+            socket.emit('leave_room', selectedRoom.chatRoomId);
+        }
+        
+        setSelectedRoom(room);
+        setMessages([]); // Xóa tin nhắn cũ
+        fetchMessages(room.chatRoomId);
+        
+        // Join phòng mới
+        // Admin join phòng của Student để nghe tin nhắn đến từ Student
+        socket.emit('join_room', room.chatRoomId); 
+    };
+
+    // 4. Thiết lập Socket.IO và lắng nghe
+    useEffect(() => {
+        if (!user) return;
+        
+        // Admin join phòng Admin để nhận thông báo
+        socket.emit('join_admin_room');
+        // Admin cũng join phòng của chính họ (user._id) để nhận self-update tin nhắn
+        socket.emit('join_room', user._id); 
+
+        // Lắng nghe thông báo tin nhắn mới (khi Admin đang ở trang khác)
+        const handleNewNotification = (data) => {
+            toast.info(`Tin nhắn mới từ ${data.chatRoomId}. Cập nhật danh sách.`);
+            fetchConversations();
+        };
+
+        // Lắng nghe tin nhắn Real-time
+        const handleReceiveMessage = (data) => {
+            
+            // Lắng nghe cho 2 trường hợp:
+            // 1. Tin nhắn là self-update của chính Admin (senderId == user._id)
+            // 2. Tin nhắn thuộc về phòng chat Admin đang mở (receiverId == selectedRoom.chatRoomId)
+            if (selectedRoom && (data.senderId === selectedRoom.chatRoomId || 
+                                data.receiverId === selectedRoom.chatRoomId ||
+                                data.senderId === user._id) 
+            ) {
+                setMessages(prev => {
+                    // Tránh duplicate nếu tin nhắn đã được gửi từ chính Admin này
+                    if (data.messageId && prev.some(m => m.messageId === data.messageId)) return prev;
+                    return [...prev, data];
+                });
+            }
+            // Nếu không phải phòng đang mở, chỉ cập nhật danh sách hội thoại
+            else {
+                fetchConversations();
+            }
+        };
+
+        socket.on('new_chat_notification', handleNewNotification);
+        socket.on('receive_message', handleReceiveMessage);
+        
+        // Tải danh sách hội thoại khi vào trang
+        fetchConversations();
+
+        return () => {
+            socket.off('new_chat_notification', handleNewNotification);
+            socket.off('receive_message', handleReceiveMessage);
+            if (selectedRoom) {
+                socket.emit('leave_room', selectedRoom.chatRoomId);
+            }
+        };
+    }, [user, selectedRoom]);
+
+    // Auto scroll
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    const handleSendMessage = (e) => {
+        e.preventDefault();
+        if (!inputMessage.trim() || !selectedRoom) return;
+
+        const messageData = {
+            senderId: user._id, // Teacher ID
+            receiverId: selectedRoom.chatRoomId, // Student ID
+            message: inputMessage.trim(),
+        };
+        
+        // Gửi qua Socket.IO
+        socket.emit('send_message', messageData);
+
+        setInputMessage('');
+    };
+
+    return (
+        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <h1 className="text-2xl font-extrabold font-heading text-primary-600 mb-6">
+                Quản Lý Hỗ Trợ Trực Tuyến (Admin Chat)
+            </h1>
+            
+            <div className="flex h-[70vh] bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden">
+                {/* Conversations List (Left Panel) */}
+                <motion.div 
+                    initial={{ width: '100%' }}
+                    animate={{ width: selectedRoom ? '30%' : '100%', minWidth: selectedRoom ? '300px' : '100%' }}
+                    className="flex-shrink-0 border-r overflow-y-auto transition-all duration-300"
+                >
+                    <div className="p-4 bg-gray-50 border-b flex justify-between items-center sticky top-0 z-10">
+                        <h2 className="text-lg font-bold text-gray-800">Hội thoại ({conversations.length})</h2>
+                        <button onClick={fetchConversations} disabled={loading} className="p-2 rounded-full hover:bg-gray-200">
+                            <RefreshIcon className={`h-5 w-5 text-primary-600 ${loading ? 'animate-spin' : ''}`} />
+                        </button>
+                    </div>
+                    <ul className="divide-y divide-gray-100">
+                        {conversations.map((conv) => (
+                            <li 
+                                key={conv.chatRoomId} 
+                                onClick={() => handleSelectRoom(conv)}
+                                className={`p-4 cursor-pointer hover:bg-primary-50 transition-colors ${selectedRoom?.chatRoomId === conv.chatRoomId ? 'bg-primary-100/70 border-l-4 border-primary-600' : ''}`}
+                            >
+                                <div className="flex justify-between items-start">
+                                    <div className="truncate">
+                                        <p className="font-semibold text-gray-900 truncate">
+                                            {conv.student.name}
+                                        </p>
+                                        <p className={`text-sm mt-1 truncate ${conv.unreadCount > 0 ? 'font-bold text-gray-700' : 'text-gray-500'}`}>
+                                            {conv.lastSender}: {conv.lastMessage}
+                                        </p>
+                                    </div>
+                                    <div className="flex flex-col items-end flex-shrink-0 ml-2">
+                                        <span className="text-xs text-gray-500 whitespace-nowrap">
+                                            {moment(conv.lastTime).fromNow(true)}
+                                        </span>
+                                        {conv.unreadCount > 0 && (
+                                            <span className="mt-1 px-2 py-0.5 text-xs font-bold text-white bg-red-500 rounded-full">
+                                                {conv.unreadCount}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                    {conversations.length === 0 && (
+                        <p className="text-center text-gray-500 p-5">Không có hội thoại nào.</p>
+                    )}
+                </motion.div>
+                
+                {/* Chat Panel (Right Panel) */}
+                <div className="flex-1 flex flex-col">
+                    {selectedRoom ? (
+                        <>
+                            {/* Chat Panel Header */}
+                            <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
+                                <h2 className="text-lg font-bold text-primary-600">
+                                    <button 
+                                        onClick={() => setSelectedRoom(null)} 
+                                        className="mr-3 p-1 rounded-full hover:bg-gray-200"
+                                        title="Back to conversations"
+                                    >
+                                        <ChevronLeftIcon className="h-5 w-5" />
+                                    </button>
+                                    {selectedRoom.student.name}
+                                    <span className="text-sm text-gray-500 ml-2">({selectedRoom.student.email})</span>
+                                </h2>
+                            </div>
+                            
+                            {/* Message Body */}
+                            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-neutral-50/80">
+                                {loading ? (
+                                    <p className="text-center text-gray-500 mt-5">Đang tải lịch sử...</p>
+                                ) : messages.length === 0 ? (
+                                    <div className="text-center text-gray-500 mt-5">
+                                        <p>Bắt đầu cuộc trò chuyện với {selectedRoom.student.name}.</p>
+                                    </div>
+                                ) : (
+                                    messages.map((msg, index) => {
+                                        // CHECK: Dùng logic kiểm tra sender ID thống nhất
+                                        const senderId = msg.sender?._id || msg.sender;
+                                        const isMe = senderId === user._id;
+
+                                        // Lấy tên người gửi
+                                        const senderName = isMe 
+                                            ? 'Admin' 
+                                            : (msg.sender?.name || selectedRoom.student.name);
+
+                                        return (
+                                            <div 
+                                                key={msg.messageId || index}
+                                                className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+                                            >
+                                                <div className={`max-w-[80%] p-3 rounded-lg text-sm shadow-md ${
+                                                    isMe 
+                                                        ? 'bg-primary-400 text-white rounded-br-none' 
+                                                        : 'bg-white text-gray-800 rounded-tl-none border'
+                                                }`}>
+                                                    <p className="font-medium">{senderName}:</p>
+                                                    <p className="mt-1">{msg.message}</p>
+                                                    <span className={`block text-xs mt-1 ${isMe ? 'text-primary-100' : 'text-gray-500'}`}>
+                                                        {moment(msg.createdAt).format('HH:mm - MMM D')}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                                <div ref={messagesEndRef} />
+                            </div>
+                            
+                            {/* Input Footer */}
+                            <form onSubmit={handleSendMessage} className="p-4 border-t flex bg-white">
+                                <input
+                                    type="text"
+                                    value={inputMessage}
+                                    onChange={(e) => setInputMessage(e.target.value)}
+                                    placeholder="Nhập tin nhắn phản hồi..."
+                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                                />
+                                <button
+                                    type="submit"
+                                    className="bg-primary-600 text-white p-2 rounded-r-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+                                    disabled={!inputMessage.trim()}
+                                >
+                                    <PaperAirplaneIcon className="h-5 w-5 transform rotate-45" />
+                                </button>
+                            </form>
+                        </>
+                    ) : (
+                        <div className="flex-1 flex flex-col items-center justify-center text-gray-500">
+                            <ChatIcon className="h-16 w-16 mb-4" />
+                            <p className="text-lg">Chọn một hội thoại để bắt đầu hỗ trợ.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default AdminChat;
 
 ==================================================
 FILE_PATH: client\src\pages\teacher\CreateAssignment.js
@@ -10942,6 +11531,192 @@ exports.getById = (Model) => async (req, res) => {
 
 
 ==================================================
+FILE_PATH: server\controllers\chat.controller.js
+==================================================
+// FILE_PATH: server/controllers/chat.controller.js (CẬP NHẬT)
+const Message = require('../models/message.model');
+const User = require('../models/user.model');
+const mongoose = require('mongoose');
+
+// Hàm lưu tin nhắn vào DB
+exports.saveMessage = async (data) => {
+  try {
+    const { senderId, receiverId, message } = data;
+    
+    // 1. Tìm thông tin người gửi (sender)
+    const sender = await User.findById(senderId).select('role');
+    if (!sender) {
+        console.error('Lỗi: Không tìm thấy người gửi (sender)');
+        return null;
+    }
+    
+    let chatRoomId = new mongoose.Types.ObjectId(senderId);
+
+    // 2. Xử lý logic chatRoomId
+    // Nếu người gửi là Student, chatRoomId là ID của chính Student đó.
+    if (sender.role === 'student') {
+        chatRoomId = new mongoose.Types.ObjectId(senderId);
+    } 
+    // Nếu người gửi là Teacher (Admin), chatRoomId phải là ID của Student mà họ đang chat cùng (receiverId)
+    else if (sender.role === 'teacher' && mongoose.Types.ObjectId.isValid(receiverId)) {
+        // Kiểm tra xem receiverId có phải là ID User hợp lệ không
+        const receiver = await User.findById(receiverId).select('role');
+        if (receiver && receiver.role === 'student') {
+            chatRoomId = new mongoose.Types.ObjectId(receiverId);
+        } else {
+            console.error('Lỗi: Teacher đang gửi tin nhắn không hợp lệ đến non-student ID.');
+            return null;
+        }
+    } else {
+        // Nếu Teacher/Admin tự gửi tin cho mình, hoặc gửi đến ID không phải User.
+        // Ta cần phải có receiverId hợp lệ (ID của Student) để xác định chatRoomId.
+        // Nếu không có receiverId hợp lệ, ta sẽ dừng lại.
+        // Đây là trường hợp Student dùng ChatWidget, gửi tin mà chưa rõ Admin nào nhận.
+        if (receiverId === 'admin_support_room') {
+             // Trường hợp Student gửi tin đến Admin chung (backend sẽ lưu với chatRoomId là ID của Student)
+             chatRoomId = new mongoose.Types.ObjectId(senderId);
+        } else {
+             console.error('Lỗi: Không thể xác định chatRoomId hợp lệ.');
+             return null;
+        }
+    }
+
+    const newMessage = await Message.create({
+      chatRoomId,
+      sender: senderId,
+      message,
+    });
+    
+    // Populate sender info để trả về (cần thiết cho socket logic)
+    await newMessage.populate('sender', 'name role');
+    return newMessage;
+  } catch (error) {
+    console.error('Error saving message:', error);
+    return null;
+  }
+};
+
+// @desc    Get chat history for a room (User ID)
+// @route   GET /api/chat/history/:chatRoomId
+// @access  Private
+exports.getMessages = async (req, res) => {
+  try {
+    const { chatRoomId } = req.params;
+    const userId = req.user.id;
+    
+    // Chỉ cho phép lấy lịch sử nếu user là chủ phòng chat hoặc là Teacher/Admin
+    if (chatRoomId !== userId && req.user.role !== 'teacher' && req.user.role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Not authorized to view this chat history' });
+    }
+
+    // Đã sửa: dùng lean() để chuyển thành object thường và tránh lỗi khi gán
+    const messages = await Message.find({ chatRoomId })
+      .populate('sender', 'name role')
+      .sort('createdAt')
+      .lean(); // Dùng .lean()
+      
+    // Đánh dấu tin nhắn là đã đọc (nếu user không phải sender của tin nhắn)
+    if (messages.length > 0) {
+      await Message.updateMany(
+        { chatRoomId, sender: { $ne: userId }, isRead: false },
+        { isRead: true }
+      );
+    }
+
+    res.json({ success: true, messages });
+  } catch (error) {
+    console.error('Error getting messages:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Get recent conversations for Admin (Teacher)
+// @route   GET /api/chat/admin/conversations
+// @access  Private/Teacher
+exports.getConversations = async (req, res) => {
+  try {
+    // 1. Nhóm theo chatRoomId và lấy tin nhắn cuối cùng
+    const conversations = await Message.aggregate([
+      // Lọc các tin nhắn mà Teacher (req.user.id) không phải là người gửi
+      // Ta không cần lọc này vì ta coi Teacher chỉ là Admin. Tất cả tin nhắn
+      // có chatRoomId là Student ID đều là cuộc hội thoại cần hỗ trợ.
+      
+      // Nhóm theo chatRoomId (ID của Student)
+      {
+        $group: {
+          _id: '$chatRoomId',
+          lastMessage: { $last: '$message' },
+          lastSender: { $last: '$sender' },
+          lastTime: { $last: '$createdAt' },
+          unreadCount: { 
+            $sum: { 
+              $cond: [
+                { $and: [ 
+                  { $eq: ['$isRead', false] }, 
+                  { $ne: ['$sender', new mongoose.Types.ObjectId(req.user.id)] } 
+                ]}, 
+                1, 
+                0
+              ] 
+            } 
+          }
+        }
+      },
+      // Sắp xếp theo thời gian gửi cuối cùng
+      { $sort: { lastTime: -1 } },
+      // Populate thông tin người dùng (Student)
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'student'
+        }
+      },
+      // Bỏ các cuộc hội thoại không phải Student hoặc không tìm thấy
+      { $match: { 'student.role': 'student' } },
+      // Unwrap thông tin student
+      { $unwind: '$student' },
+      // Lấy thông tin người gửi cuối cùng
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'lastSender',
+          foreignField: '_id',
+          as: 'lastSenderInfo'
+        }
+      },
+      { $unwind: '$lastSenderInfo' },
+      // Project ra kết quả cuối cùng
+      {
+        $project: {
+          _id: 0,
+          chatRoomId: '$_id',
+          student: {
+            _id: '$student._id',
+            name: '$student.name',
+            email: '$student.email',
+          },
+          lastMessage: 1,
+          lastTime: 1,
+          lastSender: '$lastSenderInfo.name',
+          unreadCount: 1,
+        }
+      }
+    ]);
+
+    res.json({ success: true, conversations });
+  } catch (error) {
+    console.error('Error getting conversations:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Hàm được sử dụng bởi Socket.IO để lưu tin nhắn (không phải API)
+exports.handleSocketMessage = exports.saveMessage; 
+delete exports.saveMessage;
+
+==================================================
 FILE_PATH: server\controllers\course.controller.js
 ==================================================
 const Course = require('../models/course.model');
@@ -12927,6 +13702,38 @@ module.exports = mongoose.model('Material', materialSchema);
 
 
 ==================================================
+FILE_PATH: server\models\message.model.js
+==================================================
+// FILE_PATH: server/models/message.model.js
+const mongoose = require('mongoose');
+
+const messageSchema = new mongoose.Schema({
+  // chatRoomId: ID của người dùng (Student/Teacher) mà Admin sẽ chat với
+  chatRoomId: { 
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', 
+    required: true,
+    index: true
+  },
+  sender: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  message: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  isRead: { // Có thể dùng cho Admin để đánh dấu tin nhắn chưa đọc
+    type: Boolean,
+    default: false,
+  },
+}, { timestamps: true });
+
+module.exports = mongoose.model('Message', messageSchema);
+
+==================================================
 FILE_PATH: server\models\notice.model.js
 ==================================================
 const mongoose = require('mongoose');
@@ -13253,7 +14060,8 @@ FILE_PATH: server\package.json
     "jsonwebtoken": "^9.0.1",
     "mongoose": "^7.4.3",
     "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
@@ -13364,6 +14172,28 @@ router.post('/reset-password', resetPassword);
 
 module.exports = router;
 
+
+==================================================
+FILE_PATH: server\routes\chat.routes.js
+==================================================
+// FILE_PATH: server/routes/chat.routes.js
+const express = require('express');
+const router = express.Router();
+const { getMessages, getConversations } = require('../controllers/chat.controller');
+const { protect, authorize } = require('../middleware/auth.middleware');
+
+// Route lấy lịch sử chat cho cả 2 bên (User ID là chatRoomId)
+router.get('/history/:chatRoomId', protect, getMessages);
+
+// Route lấy danh sách hội thoại cho Admin (Teacher)
+router.get('/admin/conversations', protect, authorize('teacher'), getConversations);
+
+// API dự phòng để gửi tin nhắn (có thể bị bỏ qua nếu chỉ dùng socket)
+// router.post('/', protect, async (req, res) => {
+//     // ... logic gọi saveMessage ...
+// }); 
+
+module.exports = router;
 
 ==================================================
 FILE_PATH: server\routes\course.routes.js
@@ -13846,12 +14676,18 @@ resetDatabase();
 ==================================================
 FILE_PATH: server\server.js
 ==================================================
+// FILE_PATH: server/server.js (CẬP NHẬT HOÀN TOÀN)
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
 require('dotenv').config();
+
+// NEW IMPORTS FOR CHAT
+const http = require('http'); 
+const { Server } = require('socket.io'); 
+const { handleSocketMessage } = require('./controllers/chat.controller'); 
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -13862,10 +14698,23 @@ const assignmentRoutes = require('./routes/assignment.routes');
 const quizRoutes = require('./routes/quiz.routes');
 const materialRoutes = require('./routes/material.routes');
 const submissionRoutes = require('./routes/submission.routes');
-const activityRoutes = require('./routes/activity.routes'); // Added activities routes
+const activityRoutes = require('./routes/activity.routes'); 
 const notificationRoutes = require('./routes/notification.routes');
+// NEW IMPORT
+const chatRoutes = require('./routes/chat.routes'); 
 
 const app = express();
+// Tạo HTTP server từ app Express
+const server = http.createServer(app); 
+
+// Cấu hình Socket.IO
+const io = new Server(server, {
+  cors: {
+    // Đảm bảo khớp với frontend port
+    origin: process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '*', 
+    methods: ["GET", "POST"]
+  }
+});
 
 // Disable caching for all API responses
 app.use((req, res, next) => {
@@ -13914,6 +14763,59 @@ app.use(['/api/materials', '/api/assignments', '/api/quizzes', '/api/notices'], 
   next();
 });
 
+// KẾT NỐI SOCKET.IO LOGIC
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+  
+  // 1. User tham gia phòng chat của chính họ (User ID)
+  socket.on('join_room', (userId) => {
+    socket.join(userId); 
+    console.log(`User ${userId} joined room ${userId}`);
+  });
+  
+  // 2. Admin tham gia phòng hỗ trợ chung
+  socket.on('join_admin_room', () => {
+    socket.join('admin_support_room');
+    console.log(`Admin joined admin_support_room`);
+  });
+
+  // 3. Nhận tin nhắn và gửi lại cho người nhận (Real-time)
+  socket.on('send_message', async (data) => {
+    const { senderId, receiverId, message } = data;
+
+    // Lưu tin nhắn vào DB (sử dụng logic từ controller)
+    const savedMessage = await handleSocketMessage({ senderId, receiverId, message }); 
+    
+    if (savedMessage) {
+        // Data để gửi đi, bao gồm cả timestamp từ DB
+        const responseData = { 
+            ...data, 
+            messageId: savedMessage._id,
+            createdAt: savedMessage.createdAt,
+            sender: savedMessage.sender.toString(), // Gửi lại sender ID
+        };
+
+        // Gửi tin nhắn đến người gửi (để hiển thị tin nhắn của chính họ)
+        io.to(senderId).emit('receive_message', responseData);
+        
+        // Gửi tin nhắn đến người nhận/chatRoomId (Student ID)
+        io.to(savedMessage.chatRoomId.toString()).emit('receive_message', responseData);
+
+        // Gửi thông báo đến tất cả Admin đang lắng nghe nếu người gửi là Student
+        if (senderId === savedMessage.chatRoomId.toString()) {
+            io.to('admin_support_room').emit('new_chat_notification', { 
+                chatRoomId: savedMessage.chatRoomId, 
+                message: message 
+            });
+        }
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -13923,8 +14825,10 @@ app.use('/api/assignments', assignmentRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/materials', materialRoutes);
 app.use('/api/submissions', submissionRoutes);
-app.use('/api/activities', activityRoutes); // Added activities routes
+app.use('/api/activities', activityRoutes); 
 app.use('/api/notifications', notificationRoutes);
+// NEW ROUTE
+app.use('/api/chat', chatRoutes); 
 
 // Global error handler for any uncaught errors in the routes
 app.use('/api/*', (error, req, res, next) => {
@@ -13991,10 +14895,9 @@ process.on('unhandledRejection', (err) => {
   });
 });
 
-// Start server
+// Start server (Sử dụng server.listen thay vì app.listen)
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 ==================================================
 FILE_PATH: server.js
