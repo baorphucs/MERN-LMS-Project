@@ -156,6 +156,10 @@ import RoadmapIelts from './pages/RoadmapIelts';
 import FAQ from './pages/FAQ'; 
 // NEW: Contact Page
 import Contact from './pages/Contact'; 
+// NEW: About Page
+import About from './pages/About'; 
+// NEW: Commitment Page
+import Commitment from './pages/Commitment'; 
 
 // Dashboard Pages
 import TeacherDashboard from './pages/teacher/Dashboard';
@@ -203,6 +207,12 @@ return (
          
                 {/* NEW: Contact Public Route */}
                 <Route path="/contact" element={<Layout><Contact /></Layout>} /> 
+
+                {/* NEW: About Public Route */}
+                <Route path="/about" element={<Layout><About /></Layout>} /> 
+
+                {/* NEW: Commitment Public Route */}
+                <Route path="/commitment" element={<Layout><Commitment /></Layout>} />
 
                 {/* NEW: Roadmap Public Routes */}
                 <Route path="/roadmap/toeic" element={<Layout><RoadmapToeic /></Layout>} />
@@ -690,12 +700,14 @@ const Navbar = () => {
   const location = useLocation();
   const { notifications, markAsRead } = useNotifications();
   
-  // CẬP NHẬT: Thêm link FAQ và Contact vào mảng navLinks
+  // CẬP NHẬT: Thêm link Commitment và sửa tên tiếng Việt
   const navLinks = [
-    { name: 'Trang chủ', to: '/', public: true },
+    { name: 'Trang chủ', to: '/', public: true }, // Đã đổi tên
+    { name: 'Giới thiệu', to: '/about', public: true }, 
+    { name: 'Cam Kết Đầu Ra', to: '/commitment', public: true }, // NEW: Link Cam Kết
     { name: 'Courses', to: '/courses', public: false },
-    { name: 'FAQ', to: '/faq', public: true }, // Link FAQ đã thêm
-    { name: 'Liên hệ', to: '/contact', public: true }, // NEW: Link Contact
+    { name: 'FAQ', to: '/faq', public: true },
+    { name: 'Liên hệ', to: '/contact', public: true }, // Đã đổi tên
   ];
 
   function isActive(path) {
@@ -715,8 +727,7 @@ const Navbar = () => {
       {({ open }) => (
         <>
           <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-            <div className="relative flex h-16 items-center 
-justify-between">
+            <div className="relative flex h-16 items-center justify-between">
               <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
 
                 {/* Mobile menu button*/}
@@ -881,8 +892,7 @@ bg-white/70 shadow border border-primary-100 text-sm focus:outline-none transiti
                           enter="transition ease-out duration-100"
                           enterFrom="transform opacity-0 scale-95"
                           enterTo="transform opacity-100 scale-100"
-                          leave="transition ease-in 
-duration-75"
+                          leave="transition ease-in duration-75"
                           leaveFrom="transform opacity-100 scale-100"
                           leaveTo="transform opacity-0 scale-95"
                         >
@@ -924,8 +934,7 @@ right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white/90 shadow-lg ring-1 
                       </Link>
                       <Link
                         to="/register"
-                        className="bg-primary-600 text-white hover:bg-primary-700 px-3 
-py-2 rounded-md text-sm font-medium"
+                        className="bg-primary-600 text-white hover:bg-primary-700 px-3 py-2 rounded-md text-sm font-medium"
                       >
                         Register
                       </Link>
@@ -948,7 +957,7 @@ py-2 rounded-md text-sm font-medium"
                       isActive(item.to)
                         ? 'bg-primary-100 text-primary-700 shadow'
                         : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700',
-                      'block rounded-md px-3 py-2 text-base font-semibold' 
+                      'block rounded-md px-3 py-2 text-base font-semibold'
                     )}
                   >
                     {item.name}
@@ -1549,6 +1558,240 @@ root.render(
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
 
+
+==================================================
+FILE_PATH: client\src\pages\About.js
+==================================================
+// FILE_PATH: client\src\pages\About.js (TẠO MỚI FILE NÀY)
+
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { AcademicCapIcon } from '@heroicons/react/solid';
+import { LocationMarkerIcon, MailIcon, PhoneIcon, ArrowRightIcon } from '@heroicons/react/outline';
+import Footer from '../components/layout/Footer';
+
+// ==============================================================
+// 1. DỮ LIỆU CỐ ĐỊNH CHO TRANG INTRO
+// ==============================================================
+const INTRO_DATA = {
+    // Phần giới thiệu chung (dùng mẫu từ ảnh 575e01.jpg)
+    main: {
+        title: "Giới thiệu chung về NTTU HUB",
+        description: [
+            "Được thành lập vào năm 2024, NTTU HUB hướng đến trở thành Tổ chức Giáo dục hàng đầu trong nước và khu vực về Khảo thí, giải pháp giáo dục và hệ sinh thái giáo dục số.",
+            "Tại Việt Nam, với mạng lưới chi nhánh trải dài cả 3 miền đất nước, NTTU HUB ngày càng khẳng định uy tín trong các lĩnh vực hoạt động như: Tổ chức các bài thi tiếng Anh quốc tế (như TOEIC, IELTS), các bài thi Tin học quốc tế (MOS, IC3), và các bài thi khác như SAT, GRE, CFA. Chúng tôi cũng cung cấp giải pháp tiếng Anh, Tin học quốc tế cho các doanh nghiệp, các trường học, cơ quan quản lý giáo dục."
+        ],
+        // Dùng ảnh văn phòng mô phỏng
+        image: "https://images.unsplash.com/photo-1542838132332-ce05b9b660c1?auto=format&fit=crop&w=800&q=80", 
+    },
+    // 3 cột chính
+    cores: [
+        {
+            title: "Tầm Nhìn",
+            icon: "🚩", 
+            quote: "Trở thành Tổ chức Giáo dục hàng đầu trong nước và khu vực về giáo dục số.",
+            description: "NTTU HUB đặt mục tiêu định hướng trở thành Tổ chức Giáo dục hàng đầu trong nước và khu vực về Khảo thí, giải pháp giáo dục và hệ sinh thái giáo dục số. Chúng tôi cam kết không ngừng đổi mới để mang lại giá trị cao nhất cho học viên và cộng đồng.",
+            image: "https://images.unsplash.com/photo-1534790566855-4cb788d389ec?auto=format&fit=crop&w=600&q=80" // Tầm nhìn (View)
+        },
+        {
+            title: "Sứ Mệnh",
+            icon: "💡",
+            quote: "Cung cấp giải pháp giáo dục toàn diện, nâng cao năng lực cạnh tranh cho người học.",
+            description: "Sứ mệnh của chúng tôi là cung cấp các giải pháp giáo dục, công cụ luyện thi toàn diện, giúp nâng cao năng lực ngoại ngữ và tin học, từ đó nâng cao năng lực cạnh tranh trong thị trường lao động toàn cầu cho người học.",
+            image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=600&q=80" // Sứ mệnh (Mission)
+        },
+        {
+            title: "Giá Trị Cốt Lõi",
+            icon: "💎",
+            quote: "Chất lượng, Đổi mới, Tận tâm, và Hợp tác.",
+            description: "Chất lượng là ưu tiên hàng đầu, Đổi mới trong công nghệ và phương pháp, Tận tâm phục vụ học viên, và Hợp tác cùng các đối tác để tạo ra hệ sinh thái giáo dục hoàn chỉnh.",
+            image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=600&q=80" // Giá trị cốt lõi (Core Value)
+        }
+    ]
+};
+
+// ==============================================================
+// 2. Component AboutCard (Với Hiệu ứng Hover)
+// ==============================================================
+const AboutCard = ({ data }) => {
+    const [isHovered, setIsHovered] = useState(false);
+
+    // Variants cho lớp phủ (overlay)
+    const overlayVariants = {
+        initial: { opacity: 0, y: 50 },
+        hover: { opacity: 1, y: 0, transition: { duration: 0.4, type: "spring", stiffness: 100 } }
+    };
+
+    return (
+        <motion.div
+            className="relative h-96 rounded-2xl overflow-hidden shadow-xl cursor-pointer group"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6 }}
+        >
+            {/* Background Image */}
+            <img 
+                src={data.image} 
+                alt={data.title} 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+            
+            {/* Lớp phủ mặc định (Dark Overlay) */}
+            <div className="absolute inset-0 bg-black/50 transition-colors duration-300 group-hover:bg-primary-900/90"></div>
+
+            {/* Content hiển thị cố định */}
+            <motion.div 
+                className="absolute inset-0 flex flex-col justify-end p-6 text-white z-10 transition-opacity duration-300"
+                initial={false}
+                animate={{ opacity: isHovered ? 0 : 1 }}
+            >
+                <h3 className="text-3xl font-extrabold mb-1 drop-shadow-md">
+                    {data.title} <span className="text-4xl ml-2">{data.icon}</span>
+                </h3>
+                <p className="text-lg font-medium italic drop-shadow-md">{data.quote}</p>
+            </motion.div>
+            
+            {/* Content hiển thị khi hover (Hidden Overlay) */}
+            <AnimatePresence>
+                {isHovered && (
+                    <motion.div
+                        variants={overlayVariants}
+                        initial="initial"
+                        animate="hover"
+                        exit="initial"
+                        className="absolute inset-0 bg-primary-800/90 backdrop-blur-sm flex items-center justify-center p-8 text-white z-20"
+                    >
+                        <p className="text-center text-lg font-light leading-relaxed">
+                            {data.description}
+                        </p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </motion.div>
+    );
+};
+
+// ==============================================================
+// 3. Component ContactInfo (Tái sử dụng từ Contact.js)
+// ==============================================================
+const CONTACT_INFO = [
+    { 
+        icon: LocationMarkerIcon, 
+        title: 'Address', 
+        value: 'Phòng 213, Tòa nhà F, Số 300A Nguyễn Tất Thành, P.13, Q.4, TP.HCM',
+        link: 'https://maps.app.goo.gl/r6R5m7xYh1P2qjLNA'
+    },
+    { 
+        icon: MailIcon, 
+        title: 'Email', 
+        value: 'nttuhub@nttu.edu.vn',
+        link: 'mailto:nttuhub@nttu.edu.vn' 
+    },
+    { 
+        icon: PhoneIcon, 
+        title: 'Phone', 
+        value: '028 7300 2424',
+        link: 'tel:02873002424' 
+    },
+];
+
+// ==============================================================
+// 4. Component About Chính
+// ==============================================================
+const About = () => {
+    return (
+        <div className="bg-gray-50 min-h-screen">
+            <div className="max-w-7xl mx-auto py-12 md:py-20 px-4 sm:px-6 lg:px-8">
+                
+                {/* Header */}
+                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-center mb-12">
+                    <AcademicCapIcon className="h-10 w-10 text-primary-600 mx-auto mb-2" />
+                    <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
+                        Giới Thiệu Về NTTU HUB
+                    </h1>
+                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                        Tầm nhìn, Sứ mệnh và Giá trị cốt lõi của chúng tôi.
+                    </p>
+                </motion.div>
+                
+                {/* 1. Giới thiệu chung và Hình ảnh */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20 items-center">
+                    <motion.div 
+                        initial={{ opacity: 0, x: -50 }} 
+                        whileInView={{ opacity: 1, x: 0 }} 
+                        viewport={{ once: true, amount: 0.3 }} 
+                        transition={{ duration: 0.8 }}
+                    >
+                        <h2 className="text-3xl font-bold text-gray-900 mb-6">{INTRO_DATA.main.title}</h2>
+                        <div className="space-y-4 text-gray-700 leading-relaxed">
+                            {INTRO_DATA.main.description.map((p, i) => (
+                                <p key={i}>{p}</p>
+                            ))}
+                        </div>
+                        <a href="/contact" className="mt-6 inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors shadow-md">
+                            Liên hệ ngay <ArrowRightIcon className="h-5 w-5 ml-2" />
+                        </a>
+                    </motion.div>
+                    <motion.div 
+                        initial={{ opacity: 0, x: 50 }} 
+                        whileInView={{ opacity: 1, x: 0 }} 
+                        viewport={{ once: true, amount: 0.3 }} 
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                        className="rounded-3xl overflow-hidden shadow-2xl h-96"
+                    >
+                        <img 
+                            src={INTRO_DATA.main.image} 
+                            alt="NTTU HUB Office" 
+                            className="w-full h-full object-cover"
+                        />
+                    </motion.div>
+                </div>
+
+                {/* 2. Tầm nhìn, Sứ mệnh, Giá trị cốt lõi (3 Cards) */}
+                <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-12">
+                    Nền tảng Phát triển của Chúng tôi
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {INTRO_DATA.cores.map((core, index) => (
+                        <AboutCard key={index} data={core} />
+                    ))}
+                </div>
+
+                {/* 3. Liên hệ (Contact Info Block) */}
+                <div className="mt-20 bg-primary-700 rounded-2xl p-8 md:p-12 shadow-2xl">
+                    <h2 className="text-3xl font-bold text-white mb-8 text-center">Thông Tin Liên Hệ</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {CONTACT_INFO.map((item, index) => (
+                            <motion.div 
+                                key={index} 
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: index * 0.15 }}
+                                className="bg-white p-6 rounded-xl text-center shadow-lg border border-primary-100"
+                            >
+                                <div className="mx-auto h-12 w-12 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 mb-4">
+                                    <item.icon className="h-6 w-6" />
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-900">{item.title}</h3>
+                                <a href={item.link} className="text-base font-medium text-primary-600 hover:text-primary-700 transition-colors block">
+                                    {item.value}
+                                </a>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+
+            </div>
+            <Footer />
+        </div>
+    );
+};
+
+export default About;
 
 ==================================================
 FILE_PATH: client\src\pages\assignments\AssignmentDetails.js
@@ -2856,6 +3099,241 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword; 
+
+==================================================
+FILE_PATH: client\src\pages\Commitment.js
+==================================================
+// FILE_PATH: client\src\pages\Commitment.js (TẠO MỚI FILE NÀY)
+
+import React from 'react';
+import { motion } from 'framer-motion';
+import { AcademicCapIcon, CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/outline';
+import Footer from '../components/layout/Footer';
+
+// Hàm helper để tạo cấu trúc CSS
+function classNames(...classes) {
+    return classes.filter(Boolean).join(' ');
+}
+
+// ==============================================================
+// 1. DỮ LIỆU CỐ ĐỊNH CHO TRANG CAM KẾT ĐẦU RA (Dựa trên hình ảnh 56f869.jpg)
+// ==============================================================
+const COMMITMENT_DATA = {
+    header: "CAM KẾT ĐẦU RA LỘ TRÌNH HỌC",
+    subHeader: "Cam kết đầu ra là sự đảm bảo về kết quả học tập cho học viên đăng ký các khóa học cam kết tại  (NTTU HUB).",
+    sections: [
+        {
+            title: "I. Điều Kiện Áp Dụng Cam Kết",
+            icon: "✅",
+            content: [
+                { type: 'paragraph', text: 'Học viên cần đáp ứng đầy đủ các điều kiện sau:' },
+                { 
+                    type: 'list', 
+                    items: [
+                        'Đã đăng ký và thanh toán khóa học cam kết.',
+                        'Hoàn thành các bài kiểm tra đầu vào và đạt chuẩn về điểm số (hoặc được PREP duyệt).',
+                        'Tuân thủ nghiêm ngặt lộ trình học tập, hoàn thành tối thiểu 90% bài tập về nhà và bài luyện tập bắt buộc do PREP giao.',
+                        'Đạt kết quả tối thiểu 80% trong các bài kiểm tra giữa khóa và cuối khóa.'
+                    ] 
+                },
+                { type: 'paragraph', text: 'Trong thời gian học, học viên không được vi phạm bất kỳ quy định nào của PREP (ví dụ: chia sẻ tài khoản, vi phạm bản quyền) dẫn đến bị đình chỉ học.' }
+            ]
+        },
+        {
+            title: "II. Nghĩa Vụ Của Học Viên",
+            icon: "📚",
+            content: [
+                { type: 'paragraph', text: 'Trong thời gian tham gia khóa học, học viên có trách nhiệm:' },
+                { 
+                    type: 'list', 
+                    items: [
+                        'Tham gia đầy đủ các buổi học trực tuyến (live session) và các buổi chữa bài tập (feedback session) theo lịch trình đã định.',
+                        'Dành đủ thời gian tự học theo Study Plan cá nhân (tối thiểu 4-6 giờ/tuần).',
+                        'Báo cáo tiến độ học tập và kết quả bài kiểm tra định kỳ cho đội ngũ giáo viên/tư vấn học tập của PREP.',
+                        'Thông báo ngay lập tức cho PREP nếu có bất kỳ vấn đề nào ảnh hưởng đến việc học tập của mình (ví dụ: sự cố kỹ thuật, vấn đề sức khỏe,...).'
+                    ] 
+                }
+            ]
+        },
+        {
+            title: "III. Cam Kết Của Prep",
+            icon: "🎯",
+            content: [
+                { type: 'paragraph', text: 'PREP cam kết cung cấp các dịch vụ sau:' },
+                { 
+                    type: 'list', 
+                    items: [
+                        'Lộ trình học tập được thiết kế riêng biệt, phù hợp với trình độ đầu vào và mục tiêu đầu ra của từng học viên.',
+                        'Đội ngũ giáo viên và tư vấn viên có chuyên môn cao, nhiệt tình hỗ trợ học viên trong suốt quá trình học.',
+                        'Cung cấp đầy đủ các công cụ học tập và luyện thi ảo (PREP AI) với chất lượng tốt nhất.',
+                        'Trong trường hợp học viên đã đáp ứng đầy đủ tất cả các điều kiện cam kết nhưng không đạt được mục tiêu đầu ra đã đăng ký, PREP sẽ áp dụng chính sách hoàn tiền hoặc học lại miễn phí.'
+                    ] 
+                }
+            ]
+        },
+        {
+            title: "IV. Quy Trình Hoàn Tiền",
+            icon: "💰",
+            content: [
+                { type: 'paragraph', text: 'Quy trình hoàn tiền được thực hiện theo các bước sau:' },
+                { 
+                    type: 'list', 
+                    items: [
+                        'Học viên gửi yêu cầu chính thức (bằng văn bản/email) lên PREP trong vòng 7 ngày kể từ ngày công bố kết quả thi cuối khóa/thi thật.',
+                        'PREP tiến hành kiểm tra và xác nhận học viên đã đáp ứng đầy đủ các điều kiện áp dụng cam kết.',
+                        'Nếu yêu cầu hợp lệ, PREP sẽ thông báo về phương án hoàn tiền hoặc học lại miễn phí. Thời gian xử lý hoàn tiền là 30 ngày làm việc.'
+                    ] 
+                }
+            ]
+        }
+    ],
+    // Dữ liệu bảng (Table Data) - Dựa trên phụ lục hình ảnh
+    table: {
+        headers: ["Phạm vi cam kết", "IELTS", "TOEIC L/R", "TOEIC S/W", "Tin học (MOS, IC3)"],
+        rows: [
+            ["Mục tiêu", "Band Score Overall 6.5+", "Điểm 700+", "Điểm 300+", "Pass các Module đã đăng ký"],
+            ["Điều kiện hoàn thành", "Hoàn thành 90% bài tập, thi thử đạt 80%", "Hoàn thành 90% bài tập, thi thử đạt 80%", "Hoàn thành 90% bài tập, thi thử đạt 80%", "Hoàn thành 90% bài tập, thi thử đạt 80%"],
+            ["Hình thức bồi hoàn", "Hoàn tiền 100% hoặc học lại miễn phí", "Hoàn tiền 100% hoặc học lại miễn phí", "Hoàn tiền 100% hoặc học lại miễn phí", "Hoàn tiền 100% hoặc học lại miễn phí"],
+        ]
+    }
+};
+
+// ==============================================================
+// 2. Component Trình bày nội dung (Content Renderer)
+// ==============================================================
+const ContentRenderer = ({ content }) => (
+    <div className="space-y-4 text-gray-700">
+        {content.map((block, index) => {
+            if (block.type === 'paragraph') {
+                return <p key={index} className="leading-relaxed">{block.text}</p>;
+            } else if (block.type === 'list') {
+                return (
+                    // Dùng div thay cho ul và flex để kiểm soát layout tốt hơn
+                    <div key={index} className="space-y-2 pl-4">
+                        {block.items.map((item, itemIndex) => (
+                            <div key={itemIndex} className="flex items-start">
+                                <CheckCircleIcon className="h-5 w-5 text-primary-600 mr-2 flex-shrink-0 mt-0.5" />
+                                <span className="flex-1">{item}</span>
+                            </div>
+                        ))}
+                    </div>
+                );
+            }
+            return null;
+        })}
+    </div>
+);
+
+// ==============================================================
+// 3. Component Commitment Chính
+// ==============================================================
+const Commitment = () => {
+    return (
+        <div className="bg-gray-50 min-h-screen">
+            <div className="max-w-4xl mx-auto py-12 md:py-20 px-4 sm:px-6 lg:px-8">
+                
+                {/* Header */}
+                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-center mb-12 bg-white p-8 rounded-xl shadow-lg border border-primary-100">
+                    <AcademicCapIcon className="h-10 w-10 text-primary-600 mx-auto mb-2" />
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-primary-700 mb-4">
+                        {COMMITMENT_DATA.header}
+                    </h1>
+                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                        {COMMITMENT_DATA.subHeader}
+                    </p>
+                </motion.div>
+                
+                {/* Nội dung chi tiết */}
+                <div className="space-y-12">
+                    {COMMITMENT_DATA.sections.map((section, index) => (
+                        <motion.div 
+                            key={index} 
+                            initial={{ opacity: 0, y: 30 }} 
+                            whileInView={{ opacity: 1, y: 0 }} 
+                            viewport={{ once: true, amount: 0.1 }}
+                            transition={{ duration: 0.6 }}
+                            className="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-200"
+                        >
+                            <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center space-x-3">
+                                <span className="text-3xl text-primary-600">{section.icon}</span>
+                                <span>{section.title}</span>
+                            </h2>
+                            <ContentRenderer content={section.content} />
+                        </motion.div>
+                    ))}
+                </div>
+
+                {/* Bảng Cam Kết Chi Tiết */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 30 }} 
+                    whileInView={{ opacity: 1, y: 0 }} 
+                    viewport={{ once: true, amount: 0.1 }}
+                    transition={{ duration: 0.6 }}
+                    className="mt-12 bg-white rounded-xl shadow-lg border border-gray-200 overflow-x-auto"
+                >
+                    <h2 className="text-2xl font-bold text-gray-900 p-6 border-b">
+                        Phụ lục: Bảng Nghĩa vụ Hoàn thành
+                    </h2>
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-primary-600 text-white">
+                            <tr>
+                                {COMMITMENT_DATA.table.headers.map((header, index) => (
+                                    <th 
+                                        key={index} 
+                                        scope="col" 
+                                        className={classNames("px-6 py-3 text-left text-sm font-semibold uppercase tracking-wider", {
+                                            "w-1/6": index === 0, // Cột đầu tiên rộng hơn
+                                        })}
+                                    >
+                                        {header}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {COMMITMENT_DATA.table.rows.map((row, rowIndex) => (
+                                <tr key={rowIndex} className="hover:bg-gray-50 transition-colors">
+                                    {row.map((cell, cellIndex) => (
+                                        <td 
+                                            key={cellIndex} 
+                                            className="px-6 py-4 whitespace-normal text-sm font-medium text-gray-800"
+                                        >
+                                            {cellIndex === 0 ? (
+                                                <span className="font-bold text-primary-700">{cell}</span>
+                                            ) : (
+                                                cell
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </motion.div>
+                
+                {/* CTA cuối trang */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }} 
+                    whileInView={{ opacity: 1, y: 0 }} 
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="mt-12 text-center"
+                >
+                    <a 
+                        href="/contact" 
+                        className="inline-flex items-center px-8 py-4 bg-primary-600 text-white rounded-full font-extrabold text-lg hover:bg-primary-700 transition-colors shadow-xl"
+                    >
+                        Đăng ký nhận tư vấn <ArrowRightIcon className="ml-2 h-6 w-6" />
+                    </a>
+                </motion.div>
+
+            </div>
+            <Footer />
+        </div>
+    );
+};
+
+export default Commitment;
 
 ==================================================
 FILE_PATH: client\src\pages\Contact.js
@@ -4789,7 +5267,7 @@ export default FAQ;
 ==================================================
 FILE_PATH: client\src\pages\Home.js
 ==================================================
-// FILE_PATH: client\src\pages\Home.js (ĐÃ SẮP XẾP LẠI THỨ TỰ ĐÚNG VÀ KHÔI PHỤC HOÀN TOÀN PHẦN BENEFITS)
+// FILE_PATH: client\src\pages\Home.js (CẬP NHẬT HOÀN CHỈNH - THAY THẾ CTA BẰNG FORM ĐĂNG KÝ EMAIL/PHONE)
 import React, { useContext, useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -4802,13 +5280,20 @@ import {
   ArrowRightIcon,
   XIcon,
   StarIcon,
-  ThumbUpIcon
+  ThumbUpIcon,
+  MailIcon, // NEW: Dùng cho form
+  PhoneIcon // NEW: Dùng cho form
 } from '@heroicons/react/outline';
 import Footer from '../components/layout/Footer';
 import { Tab } from '@headlessui/react';
+// NEW: Imports cho form
+import { useForm } from 'react-hook-form'; 
+import emailjs from '@emailjs/browser'; 
+import { toast } from 'react-toastify';
+
 
 // ==============================================================
-// DỮ LIỆU CỐ ĐỊNH CHO CÁC PHẦN (Modal/Marquee)
+// DỮ LIỆU CỐ ĐỊNH CHO CÁC PHẦN
 // ==============================================================
 const ALL_STUDENTS_DATA = [
   // Dữ liệu mô phỏng từ ảnh 83ea95.jpg và 83ea59.jpg
@@ -5039,7 +5524,7 @@ const ThreeStepSlider = () => {
                                     {currentStep.description}
                                 </p>
                             </motion.div>
-                         </AnimatePresence>
+                        </AnimatePresence>
                     </div>
 
                     {/* Cột 2: Image and Motion Container */}
@@ -5058,7 +5543,7 @@ const ThreeStepSlider = () => {
                                 }}
                                 className="absolute inset-0 p-6 flex items-center justify-center"
                             >
-                                <div className="text-center">
+                                <div className="text-center w-full h-full">
                                     <p className="text-sm font-semibold text-white/70 mb-2">{currentStep.substep}</p>
                                     {/* Placeholder Image for the step */}
                                     <div className="w-64 h-64 mx-auto bg-gray-200 rounded-lg flex items-center justify-center border-4 border-blue-400">
@@ -5072,7 +5557,7 @@ const ThreeStepSlider = () => {
                 </div>
 
                  {/* Pagination/Step Indicator */}
-                 <div className="text-center mt-12 flex justify-center space-x-3">
+                <div className="text-center mt-12 flex justify-center space-x-3">
                     {STEP_DATA.map((s, index) => (
                         <button
                             key={s.step}
@@ -5091,7 +5576,154 @@ const ThreeStepSlider = () => {
 
 
 // ==============================================================
-// Component chính Home (Tiếp tục)
+// Component MỚI: Form Đăng ký nhận tư vấn (CTA mới)
+// ==============================================================
+const SubscriptionCTA = ({ isAuthenticated }) => {
+    // Sử dụng EmailJS keys đã cung cấp trong Contact.js
+    const serviceID = 'service_odo7xzm'; 
+    const templateID = 'template_iy35o7f'; 
+    const publicKey = 'BM-yrfjfz0EoLCCPV'; 
+    
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset,
+    } = useForm();
+    
+    const [submitting, setSubmitting] = useState(false);
+    
+    const onSubmit = (data) => {
+        setSubmitting(true);
+        
+        const templateParams = {
+            // Đặt tên trường rõ ràng để Admin biết đây là form đăng ký tư vấn
+            name: data.email, // Dùng email làm tên nếu không có trường tên
+            email: data.email,
+            subject: "YÊU CẦU TƯ VẤN - TỪ HOMEPAGE",
+            message: `Yêu cầu tư vấn từ khách hàng:\n- Email: ${data.email}\n- Số điện thoại: ${data.phone}\n- Nhu cầu: Đăng ký học/Tư vấn lộ trình.`,
+            time: new Date().toLocaleString(),
+        };
+
+        // Gửi qua emailjs
+        emailjs
+            .send(serviceID, templateID, templateParams, publicKey)
+            .then((response) => {
+                toast.success('Yêu cầu của bạn đã được gửi! Chúng tôi sẽ liên hệ lại sớm.');
+                reset(); // clear form
+            })
+            .catch((err) => {
+                console.error('FAILED...', err);
+                toast.error('Gửi yêu cầu thất bại. Vui lòng thử lại.');
+            })
+            .finally(() => {
+                setSubmitting(false);
+            });
+    };
+    
+    const inputClasses = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-accent-yellow focus:border-accent-yellow placeholder-gray-500 text-gray-800 transition-shadow";
+    const errorClasses = "absolute -bottom-5 left-0 text-xs text-red-300 font-medium";
+
+    if (isAuthenticated) {
+        return (
+            <motion.section
+                className="bg-primary-700 py-16 md:py-20 text-white"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+            >
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-3">Sẵn sàng học tập?</h2>
+                    <p className="text-lg text-primary-100 mb-8 max-w-2xl mx-auto">
+                        Tiếp tục hành trình học tập và chinh phục Band Score mục tiêu ngay!
+                    </p>
+                    <Link
+                        to="/dashboard"
+                        className="inline-flex items-center px-8 py-4 bg-white text-primary-700 rounded-full font-extrabold text-lg hover:bg-gray-100 transition-colors shadow-lg"
+                    >
+                        Go to Dashboard <ArrowRightIcon className="ml-2 h-6 w-6" />
+                    </Link>
+                </div>
+            </motion.section>
+        );
+    }
+    
+    // Form Đăng ký nếu chưa đăng nhập
+    return (
+        <motion.section
+            className="bg-primary-700 py-16 md:py-20 text-white"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+        >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 className="text-3xl md:text-4xl font-bold mb-3">Sẵn sàng nhận lộ trình học cá nhân hóa?</h2>
+                <p className="text-lg text-primary-100 mb-8 max-w-3xl mx-auto">
+                    Để lại thông tin liên hệ, chuyên viên tư vấn sẽ gọi lại cho bạn **trong vòng 30 phút** để thiết kế lộ trình miễn phí.
+                </p>
+                
+                <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl mx-auto space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Email Field */}
+                        <div className="relative">
+                            <input
+                                {...register("email", {
+                                    required: "Email không được trống",
+                                    pattern: {
+                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                        message: "Email không hợp lệ"
+                                    }
+                                })}
+                                type="email"
+                                placeholder="Email của bạn"
+                                className={inputClasses}
+                                disabled={submitting}
+                            />
+                            <MailIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                            {errors.email && (<span className={errorClasses}>{errors.email?.message}</span>)}
+                        </div>
+                        
+                        {/* Phone Field */}
+                        <div className="relative">
+                            <input
+                                {...register("phone", {
+                                    required: "SĐT không được trống",
+                                    pattern: {
+                                        value: /^\d{10,11}$/, // Kiểm tra 10 hoặc 11 chữ số
+                                        message: "Số điện thoại không hợp lệ"
+                                    }
+                                })}
+                                type="tel"
+                                placeholder="Số điện thoại"
+                                className={inputClasses}
+                                disabled={submitting}
+                            />
+                            <PhoneIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                            {errors.phone && (<span className={errorClasses}>{errors.phone?.message}</span>)}
+                        </div>
+                    </div>
+                    
+                    {/* Submit Button */}
+                    <motion.button
+                        type="submit"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        disabled={submitting}
+                        className="w-full inline-flex items-center justify-center px-8 py-3 bg-accent-yellow text-primary-700 rounded-xl font-extrabold text-lg shadow-xl hover:bg-yellow-300 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                        {submitting ? 'Đang gửi yêu cầu...' : 'GỬI YÊU CẦU TƯ VẤN MIỄN PHÍ'}
+                    </motion.button>
+                </form>
+            </div>
+        </motion.section>
+    );
+};
+
+
+// ==============================================================
+// Component chính Home 
 // ==============================================================
 const Home = () => {
   const { isAuthenticated, user } = useContext(AuthContext);
@@ -5122,8 +5754,7 @@ const Home = () => {
         setParallaxY2(Math.max(0, -rect.top * 0.15));
       }
       if (benefitsRef.current) {
-        const 
- rect = benefitsRef.current.getBoundingClientRect();
+        const rect = benefitsRef.current.getBoundingClientRect();
         setParallaxY3(Math.max(0, -rect.top * 0.1));
       }
     };
@@ -5255,16 +5886,14 @@ const Home = () => {
       >
         <motion.div
           className="absolute -top-32 left-1/2 w-96 h-96 bg-gradient-to-br from-primary-200 to-accent-yellow rounded-full blur-3xl opacity-30 z-0"
-     
-      style={{ y: parallaxY2 * 0.5 }}
+          style={{ y: parallaxY2 * 0.5 }}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div className="text-center mb-16" variants={itemVariants}>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Thiết kế cho việc học hiện đại</h2>
             <p className="max-w-2xl mx-auto text-lg text-gray-600">
-              Nền 
- tảng của chúng tôi cung cấp tất cả các công cụ bạn cần để giảng dạy hiệu quả và tạo ra những trải nghiệm học tập hấp dẫn.
- </p>
+              Nền tảng của chúng tôi cung cấp tất cả các công cụ bạn cần để giảng dạy hiệu quả và tạo ra những trải nghiệm học tập hấp dẫn.
+            </p>
           </motion.div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -5272,30 +5901,25 @@ const Home = () => {
               <motion.div
                 key={index}
                 variants={itemVariants}
-     
-            whileHover={{ scale: 1.04, boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.2)' }}
+                whileHover={{ scale: 1.04, boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.2)' }}
                 className="bg-white/80 backdrop-blur-lg rounded-xl p-8 border border-primary-50 shadow-card hover:shadow-xl transition-all duration-300 flex flex-col md:flex-row items-center gap-6"
                 style={{ y: parallaxY2 * (0.1 + index * 0.05) }}
               >
-        
-         <motion.img
+                <motion.img
                   src={featureImages[index]}
                   alt={feature.title}
                   className="w-28 h-28 object-cover rounded-2xl shadow-lg mb-4 md:mb-0 md:mr-6"
                   style={{ y: parallaxY2 * 0.15 }}
-        
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 + index * 0.1, duration: 0.7, type: 'spring' }}
                 />
                 <div>
- 
                   <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600 mb-5">
                     {feature.icon}
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-              
-     <p className="text-gray-600">{feature.description}</p>
+                  <p className="text-gray-600">{feature.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -5311,26 +5935,23 @@ const Home = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Lợi Ích Dành Cho Tất Cả Mọi Người</h2>
             <p className="max-w-2xl mx-auto text-lg text-gray-600">
               Dù bạn là giáo viên hay học viên, nền tảng của chúng tôi đều nâng cao trải nghiệm học tập.
- </p>
+            </p>
           </motion.div>
           
           <div className="md:flex md:items-center md:justify-between">
             <motion.div className="md:w-1/2 mb-10 md:mb-0" variants={itemVariants}>
               <h3 className="text-2xl font-semibold text-gray-900 mb-6">Lợi Ích Dành Cho Giáo Viên</h3>
               <ul className="space-y-4">
-             
-    {['Tạo và quản lý khóa học dễ dàng.','Chia sẻ tài liệu dưới nhiều định dạng khác nhau.','Thiết kế các bài đánh giá và bài kiểm tra/đố vui.','Theo dõi tiến độ và mức độ tham gia của học viên.','Giao tiếp hiệu quả với học viên.'].map((item, i) => (
+                {['Tạo và quản lý khóa học dễ dàng.','Chia sẻ tài liệu dưới nhiều định dạng khác nhau.','Thiết kế các bài đánh giá và bài kiểm tra/đố vui.','Theo dõi tiến độ và mức độ tham gia của học viên.','Giao tiếp hiệu quả với học viên.'].map((item, i) => (
                   <li key={i} className="flex items-start">
                     <CheckCircleIcon className="h-6 w-6 text-green-500 mr-2 flex-shrink-0" />
-    
-                 <span className="text-gray-700">{item}</span>
+                    <span className="text-gray-700">{item}</span>
                   </li>
                 ))}
               </ul>
             </motion.div>
             
-           
-  <motion.div className="md:w-1/2" variants={itemVariants}>
+            <motion.div className="md:w-1/2" variants={itemVariants}>
               <h3 className="text-2xl font-semibold text-gray-900 mb-6">Lợi Ích Dành Cho Học Viên</h3>
               <ul className="space-y-4">
                 {['Truy cập tất cả tài liệu khóa học tại một nơi duy nhất.','Nộp bài tập dưới dạng kỹ thuật số.','Làm bài kiểm tra và nhận phản hồi tức thì.','Theo dõi điểm số và tiến độ học tập của bạn.','Luôn cập nhật các thông báo mới nhất của khóa học.'].map((item, i) => (
@@ -5338,8 +5959,7 @@ const Home = () => {
                     <CheckCircleIcon className="h-6 w-6 text-green-500 mr-2 flex-shrink-0" />
                     <span className="text-gray-700">{item}</span>
                   </li>
-      
-           ))}
+                ))}
               </ul>
             </motion.div>
           </div>
@@ -5356,13 +5976,11 @@ const Home = () => {
         className="py-16 md:py-24 bg-white relative overflow-hidden"
         variants={containerVariants}
         initial="hidden"
-      
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
       >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.h2
-  
             className="text-3xl md:text-4xl font-extrabold text-center mb-12 text-primary-700"
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -5371,7 +5989,6 @@ const Home = () => {
             Chất lượng được minh chứng bởi 
             <br />
             <span className="text-primary-400">Hàng nghìn gương mặt xuất sắc</span>
-         
           </motion.h2>
 
           <Tab.Group>
@@ -5567,6 +6184,7 @@ const Home = () => {
             <h2 className="text-3xl md:text-4xl font-extrabold mb-4 drop-shadow-lg">
               Được đánh giá cao bởi hàng trăm nghìn học viên đã và đang theo học
             </h2>
+            
             <p className="text-lg text-primary-100 mb-6 font-light">
               Đây chính là sự ghi nhận lớn nhất với Prep (NTTU HUB), nhờ có động lực cải tiến không ngừng nghỉ và đem đến trải nghiệm học tập tuyệt vời nhất cho bạn.
             </p>
@@ -5574,7 +6192,7 @@ const Home = () => {
 
           {/* Cột 2: Marquee dọc */}
           <div className="md:w-2/3 h-[500px] overflow-hidden relative rounded-2xl shadow-2xl bg-white/10 p-4">
-            
+          
             {/* Masking gradients */}
             <div className="absolute inset-0 z-10 [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)]"></div>
             
@@ -5666,38 +6284,14 @@ const Home = () => {
       </section>
       {/* ==================== END PARTNERS MARQUEE ==================== */}
 
-      {/* ==================== READY TO TRANSFORM (CTA SECTION) ==================== */}
-      <motion.section
-        className="bg-primary-700 py-16 md:py-20 text-white"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-      >
-     
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to transform your learning experience?</h2>
-          <p className="text-lg text-primary-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of teachers and students who are already using our platform to enhance their educational journey.
- </p>
-          <Link
-            to={isAuthenticated ?
- (user?.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard') : '/register'}
-            className="inline-flex items-center px-6 py-3 bg-white text-primary-700 rounded-md font-medium hover:bg-gray-100 transition-colors shadow-lg"
-          >
-            {isAuthenticated ?
- 'Go to Dashboard' : 'Get Started For Free'}
-            <ArrowRightIcon className="ml-2 h-5 w-5" />
-          </Link>
-        </div>
-      </motion.section>
-      {/* ==================== END READY TO TRANSFORM (CTA SECTION) ==================== */}
+      {/* ==================== NEW CTA SECTION (FORM ĐĂNG KÝ) ==================== */}
+      <SubscriptionCTA isAuthenticated={isAuthenticated} />
+      {/* ==================== END NEW CTA SECTION (FORM ĐĂNG KÝ) ==================== */}
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 0.2, scale: 1 }}
-     
           transition={{ duration: 1.2, delay: 0.2 }}
           className="absolute left-1/4 top-0 w-96 h-96 bg-gradient-to-br from-accent-yellow to-primary-400 rounded-full blur-3xl opacity-60 animate-pulse"
         />

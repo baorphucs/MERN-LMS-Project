@@ -32,6 +32,10 @@ import RoadmapIelts from './pages/RoadmapIelts';
 import FAQ from './pages/FAQ'; 
 // NEW: Contact Page
 import Contact from './pages/Contact'; 
+// NEW: About Page
+import About from './pages/About'; 
+// NEW: Commitment Page
+import Commitment from './pages/Commitment'; 
 
 // Dashboard Pages
 import TeacherDashboard from './pages/teacher/Dashboard';
@@ -79,6 +83,12 @@ return (
          
                 {/* NEW: Contact Public Route */}
                 <Route path="/contact" element={<Layout><Contact /></Layout>} /> 
+
+                {/* NEW: About Public Route */}
+                <Route path="/about" element={<Layout><About /></Layout>} /> 
+
+                {/* NEW: Commitment Public Route */}
+                <Route path="/commitment" element={<Layout><Commitment /></Layout>} />
 
                 {/* NEW: Roadmap Public Routes */}
                 <Route path="/roadmap/toeic" element={<Layout><RoadmapToeic /></Layout>} />

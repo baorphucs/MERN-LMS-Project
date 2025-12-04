@@ -18,12 +18,14 @@ const Navbar = () => {
   const location = useLocation();
   const { notifications, markAsRead } = useNotifications();
   
-  // CẬP NHẬT: Thêm link FAQ và Contact vào mảng navLinks
+  // CẬP NHẬT: Thêm link Commitment và sửa tên tiếng Việt
   const navLinks = [
-    { name: 'Trang chủ', to: '/', public: true },
+    { name: 'Trang chủ', to: '/', public: true }, // Đã đổi tên
+    { name: 'Giới thiệu', to: '/about', public: true }, 
+    { name: 'Cam Kết Đầu Ra', to: '/commitment', public: true }, // NEW: Link Cam Kết
     { name: 'Courses', to: '/courses', public: false },
-    { name: 'FAQ', to: '/faq', public: true }, // Link FAQ đã thêm
-    { name: 'Liên hệ', to: '/contact', public: true }, // NEW: Link Contact
+    { name: 'FAQ', to: '/faq', public: true },
+    { name: 'Liên hệ', to: '/contact', public: true }, // Đã đổi tên
   ];
 
   function isActive(path) {
@@ -43,8 +45,7 @@ const Navbar = () => {
       {({ open }) => (
         <>
           <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-            <div className="relative flex h-16 items-center 
-justify-between">
+            <div className="relative flex h-16 items-center justify-between">
               <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
 
                 {/* Mobile menu button*/}
@@ -209,8 +210,7 @@ bg-white/70 shadow border border-primary-100 text-sm focus:outline-none transiti
                           enter="transition ease-out duration-100"
                           enterFrom="transform opacity-0 scale-95"
                           enterTo="transform opacity-100 scale-100"
-                          leave="transition ease-in 
-duration-75"
+                          leave="transition ease-in duration-75"
                           leaveFrom="transform opacity-100 scale-100"
                           leaveTo="transform opacity-0 scale-95"
                         >
@@ -252,8 +252,7 @@ right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white/90 shadow-lg ring-1 
                       </Link>
                       <Link
                         to="/register"
-                        className="bg-primary-600 text-white hover:bg-primary-700 px-3 
-py-2 rounded-md text-sm font-medium"
+                        className="bg-primary-600 text-white hover:bg-primary-700 px-3 py-2 rounded-md text-sm font-medium"
                       >
                         Register
                       </Link>
@@ -276,7 +275,7 @@ py-2 rounded-md text-sm font-medium"
                       isActive(item.to)
                         ? 'bg-primary-100 text-primary-700 shadow'
                         : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700',
-                      'block rounded-md px-3 py-2 text-base font-semibold' 
+                      'block rounded-md px-3 py-2 text-base font-semibold'
                     )}
                   >
                     {item.name}

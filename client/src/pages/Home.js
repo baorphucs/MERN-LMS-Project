@@ -575,7 +575,7 @@ const Home = () => {
   >
     {/* GIẢM CỠ CHỮ TẠI ĐÂY */}
     <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 drop-shadow-2xl">
-      Chào các bạn!, <span className="text-yellow-400">Chúng tôi là NTTU HUB</span>
+      Chào bạn!, <span className="text-yellow-400">Chúng tôi là NTTU HUB</span>
     </h1>
 
     <p className="text-lg md:text-xl text-white/90 mb-10 max-w-3xl mx-auto font-light leading-relaxed drop-shadow-lg">
