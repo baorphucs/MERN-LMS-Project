@@ -120,14 +120,17 @@ FILE_PATH: client\public\manifest.json
 ==================================================
 FILE_PATH: client\src\App.js
 ==================================================
-// FILE_PATH: client/src/App.js (CẬP NHẬT HOÀN TOÀN ĐỂ SỬA LỖI CÚ PHÁP useContext)
-import React, { useContext } from 'react'; // <=== ĐÃ THÊM useContext VÀO ĐÂY 
+// FILE_PATH: client\src\App.js (CẬP NHẬT HOÀN TOÀN)
+
+import React, 
+{ useContext } from 'react'; // <=== ĐÃ THÊM useContext VÀO ĐÂY 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 
 // Auth Context
-import AuthContext, { AuthProvider } from './context/AuthContext'; // Bổ sung AuthContext
+import AuthContext, { AuthProvider } from './context/AuthContext';
+// Bổ sung AuthContext
 
 // Layout Components
 import Layout from './components/layout/Layout';
@@ -137,16 +140,17 @@ import StudentRoute from './components/routing/StudentRoute';
 
 // NEW IMPORT CHO CHAT
 import ChatWidget from './components/common/ChatWidget';
-import AdminChat from './pages/teacher/AdminChat'; 
-
+import AdminChat from './pages/teacher/AdminChat';
 // Auth Pages
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 
 // Public Pages
 import Home from './pages/Home';
-import NotFound from './pages/NotFound'; 
-
+import NotFound from './pages/NotFound';
+// NEW: Roadmap Pages
+import RoadmapToeic from './pages/RoadmapToeic'; // <=== ĐÃ THÊM IMPORT NÀY
+import RoadmapIelts from './pages/RoadmapIelts'; // <=== ĐÃ THÊM IMPORT NÀY
 // Dashboard Pages
 import TeacherDashboard from './pages/teacher/Dashboard';
 import StudentDashboard from './pages/student/Dashboard';
@@ -158,7 +162,7 @@ import CreateCourse from './pages/teacher/CreateCourse';
 import EditCourse from './pages/teacher/EditCourse';
 
 // NEW: Quản lý người dùng cho Teacher
-import Users from './pages/teacher/Users'; 
+import Users from './pages/teacher/Users';
 import ManageStudents from './pages/teacher/ManageStudents'; 
 
 // Assignment Pages
@@ -182,81 +186,95 @@ import CreateMaterial from './pages/teacher/CreateMaterial';
 // Notice
 import Notices from './pages/notices/Notices';
 import CreateNotice from './pages/teacher/CreateNotice';
-
 const AppContent = () => { // Tách logic ra khỏi App để sử dụng useContext
     const { isAuthenticated, user, loading } = useContext(AuthContext);
-
-    // Nếu đang tải, trả về null hoặc loading state 
-    if (loading) return null; 
-
-    return (
+// Nếu đang tải, trả về null hoặc loading state 
+    if (loading) return null;
+return (
         <Router>
             <ToastContainer position="top-right" autoClose={3000} />
             <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Layout><Home /></Layout>} />
+                
+                {/* NEW: Roadmap Public Routes */}
+                <Route path="/roadmap/toeic" element={<Layout><RoadmapToeic /></Layout>} />
+                <Route path="/roadmap/ielts" element={<Layout><RoadmapIelts /></Layout>} />
+                
                 <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} /> 
+     
+           <Route path="/register" element={<Register />} /> 
 
                 {/* Protected Routes - Cả Teacher & Student */}
                 <Route element={<PrivateRoute />}>
                     <Route path="/courses" element={<Layout><Courses /></Layout>} />
-                    <Route path="/courses/:id" element={<Layout><CourseDetails /></Layout>} /> 
+                  
+  <Route path="/courses/:id" element={<Layout><CourseDetails /></Layout>} /> 
                     <Route path="/notices" element={<Layout><Notices /></Layout>} />
                     <Route path="/materials" element={<Layout><Materials /></Layout>} />
                     <Route path="/assignments" element={<Layout><Assignments /></Layout>} />
-                    <Route path="/assignments/:id" element={<Layout><AssignmentDetails /></Layout>} /> 
+                    <Route 
+path="/assignments/:id" element={<Layout><AssignmentDetails /></Layout>} /> 
                     <Route path="/quizzes" element={<Layout><Quizzes /></Layout>} />
                     <Route path="/quizzes/:id" element={<Layout><QuizDetails /></Layout>} />
                     <Route path="/quizzes/:id/result" element={<Layout><QuizResult /></Layout>} />
                 </Route>
 
-                {/* Teacher Routes - Bao gồm cả Super Admin */}
+        
+        {/* Teacher Routes - Bao gồm cả Super Admin */}
                 <Route element={<TeacherRoute />}>
                     <Route path="/teacher/dashboard" element={<Layout><TeacherDashboard /></Layout>} />
                     <Route path="/teacher/create-course" element={<Layout><CreateCourse /></Layout>} />
-                    
+                 
+   
                     {/* MỚI: Quản lý tất cả khóa học */} 
                     <Route path="/teacher/courses" element={<Layout><Courses /></Layout>} />
                     
-                    {/* MỚI: Sửa khóa học */}
+                    {/* MỚI: Sửa khóa 
+học */}
                     <Route path="/teacher/edit-course/:id" element={<Layout><EditCourse /></Layout>} /> 
                     
                     {/* MỚI: Quản lý người dùng */}
                     <Route path="/teacher/users" element={<Layout><Users /></Layout>} />
 
-                    {/* NEW: Quản lý sinh viên trong khóa học */} 
+    
+                {/* NEW: Quản lý sinh viên trong khóa học */} 
                     <Route path="/teacher/courses/:id/manage-students" element={<Layout><ManageStudents /></Layout>} />
 
                     {/* NEW: Chat Admin Route */}
                     <Route path="/teacher/chat" element={<Layout><AdminChat /></Layout>} />
 
-                    {/* Các route tạo nội dung */} 
+ 
+                   {/* Các route tạo nội dung */} 
                     <Route path="/teacher/assignments/create/:courseId" element={<Layout><CreateAssignment /></Layout>} />
                     <Route path="/teacher/quizzes/create/:courseId" element={<Layout><CreateQuiz /></Layout>} />
                     <Route path="/teacher/materials/create/:courseId" element={<Layout><CreateMaterial /></Layout>} />
-                    <Route path="/teacher/notices/create/:courseId" element={<Layout><CreateNotice /></Layout>} /> 
+  
+                  <Route path="/teacher/notices/create/:courseId" element={<Layout><CreateNotice /></Layout>} /> 
                     
                     {/* Edit Quiz */}
                     <Route path="/quizzes/:id/edit" element={<Layout><EditQuiz /></Layout>} />
-                </Route>
+          
+      </Route>
 
                 {/* Student Routes */}
                 <Route element={<StudentRoute />}>
                     <Route path="/student/dashboard" element={<Layout><StudentDashboard /></Layout>} />
                     <Route path="/assignments/:id/submit" element={<Layout><SubmitAssignment /></Layout>} />
-                    <Route path="/quizzes/:id/take" element={<Layout><TakeQuiz /></Layout>} />
+         
+           <Route path="/quizzes/:id/take" element={<Layout><TakeQuiz /></Layout>} />
                 </Route>
 
                 {/* 404 */}
                 <Route path="*" element={<NotFound />} />
             </Routes>
             
-            {/* NEW: Ẩn/Hiện Chat Widget tùy thuộc vào trạng thái đăng nhập */} 
+       
+     {/* NEW: Ẩn/Hiện Chat Widget tùy thuộc vào trạng thái đăng nhập */} 
             {isAuthenticated && <ChatWidget />}
             
         </Router>
-    ); 
+    );
 }
 
 
@@ -265,7 +283,7 @@ const App = () => {
         <AuthProvider>
             <AppContent />
         </AuthProvider>
-    ); 
+    );
 };
 
 export default App;
@@ -633,6 +651,8 @@ export default Layout;
 ==================================================
 FILE_PATH: client\src\components\layout\Navbar.js
 ==================================================
+// FILE_PATH: client\src\components\layout\Navbar.js (FIXED & UPDATED)
+
 import React, { useContext, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -641,7 +661,7 @@ import {
   BellIcon,
   UserCircleIcon,
   MenuIcon,
-  XIcon
+  XIcon // XIcon (v1)
 } from '@heroicons/react/outline';
 import AuthContext from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
@@ -650,19 +670,21 @@ const Navbar = () => {
   const { user, isAuthenticated, logout } = useContext(AuthContext);
   const location = useLocation();
   const { notifications, markAsRead } = useNotifications();
-
   const navLinks = [
     { name: 'Home', to: '/', public: true },
     { name: 'Courses', to: '/courses', public: false },
   ];
-
   function isActive(path) {
+    // Thêm kiểm tra cho lộ trình
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   }
 
   function classNames(...classes) {
     return classes.filter(Boolean).join(' ');
   }
+
+  // Check if current path is any of the roadmap paths
+  const isRoadmapActive = location.pathname.startsWith('/roadmap');
 
   return (
     <Disclosure as="nav" className="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-neutral-50">
@@ -671,63 +693,75 @@ const Navbar = () => {
           <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
             <div className="relative flex h-16 items-center justify-between">
               <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+
                 {/* Mobile menu button*/}
                 <Disclosure.Button className="inline-flex items-center justify-center rounded-md p-2 text-gray-700 hover:bg-primary-100 focus:outline-none">
                   <span className="sr-only">Open main menu</span>
                   {open ? (
                     <XIcon className="block h-6 w-6" aria-hidden="true" />
+
                   ) : (
                     <MenuIcon className="block h-6 w-6" aria-hidden="true" />
                   )}
                 </Disclosure.Button>
               </div>
+
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex flex-shrink-0 items-center">
                   <Link to="/">
                     <motion.div
                       whileHover={{ scale: 1.05 }}
+
                       className="text-2xl font-extrabold font-heading text-primary-400 drop-shadow-lg tracking-tight bg-gradient-to-r from-primary-400 to-secondary-500 bg-clip-text text-transparent"
                     >
                       NTTU HUB
                     </motion.div>
+
                   </Link>
                 </div>
+
+                {/* Desktop Navigation Links */}
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-2">
+
+                    {/* 1. HIỂN THỊ CÁC LINK CỐ ĐỊNH (HOME, COURSES) */}
                     {navLinks.map((item) => (
+
                       (item.public || isAuthenticated) && (
                         <Link
                           key={item.name}
                           to={item.to}
+
                           className={classNames(
                             isActive(item.to)
                               ? 'bg-primary-100 text-primary-700 shadow-lg'
+
                               : 'text-text-dark hover:bg-primary-50 hover:text-primary-500',
                             'rounded-xl px-4 py-2 text-base font-semibold transition-all duration-200 ease-in-out backdrop-blur-md'
                           )}
                         >
+
                           {item.name}
                         </Link>
                       )
                     ))}
-                  </div>
-                </div>
-              </div>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                {isAuthenticated ? (
-                  <>
-                    {/* Notification dropdown */}
-                    <Menu as="div" className="relative ml-3">
-                      <div>
-                        <Menu.Button className="relative flex rounded-full bg-white/70 shadow border border-primary-100 text-sm focus:outline-none transition-all duration-200">
-                          <span className="sr-only">View notifications</span>
-                          <BellIcon className="h-6 w-6 text-gray-700" />
-                          {notifications.filter(n => !n.read).length > 0 && (
-                            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400"></span>
-                          )}
-                        </Menu.Button>
-                      </div>
+
+                    {/* 2. MENU THẢ XUỐNG: LỘ TRÌNH (NEW) */}
+                    <Menu as="div" className="relative self-center">
+                      <Menu.Button
+                        className={classNames(
+                          isRoadmapActive
+                            ? 'bg-primary-100 text-primary-700 shadow-lg'
+                            : 'text-text-dark hover:bg-primary-50 hover:text-primary-500',
+                          'rounded-xl px-4 py-2 text-base font-semibold transition-all duration-200 ease-in-out backdrop-blur-md inline-flex items-center'
+                        )}
+                      >
+                        Lộ Trình
+                        {/* Biểu tượng mũi tên xuống */}
+                        <svg className="ml-2 -mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.959l3.71-3.73a.75.75 0 011.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0l-4.25-4.25a.75.75 0 01.02-1.06z" clipRule="evenodd" /></svg>
+                      </Menu.Button>
                       <Transition
+                        as={React.Fragment}
                         enter="transition ease-out duration-100"
                         enterFrom="transform opacity-0 scale-95"
                         enterTo="transform opacity-100 scale-100"
@@ -735,112 +769,211 @@ const Navbar = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <Menu.Items className="absolute right-0 z-10 mt-2 w-72 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                          <div className="px-4 py-2 font-semibold text-gray-700 border-b">
-                            Notifications
-                          </div>
-                          {notifications.length > 0 ? (
-                            notifications.map(notification => (
-                              <Menu.Item key={notification._id}>
-                                <div
-                                  className={`block px-4 py-2 text-sm cursor-pointer ${notification.read ? 'text-gray-500' : 'text-gray-700 font-medium bg-blue-50'}`}
-                                  onClick={() => markAsRead(notification._id)}
-                                >
-                                  {notification.text}
-                                </div>
-                              </Menu.Item>
-                            ))
-                          ) : (
-                            <Menu.Item>
-                              <div className="block px-4 py-2 text-sm text-gray-500">
-                                No new notifications
-                              </div>
-                            </Menu.Item>
-                          )}
-                        </Menu.Items>
-                      </Transition>
-                    </Menu>
-                    {/* Profile dropdown */}
-                    <Menu as="div" className="relative ml-3">
-                      <div>
-                        <Menu.Button className="flex rounded-full bg-white/70 shadow border border-primary-100 text-sm focus:outline-none transition-all duration-200">
-                          <span className="sr-only">Open user menu</span>
-                          <div className="h-8 w-8 rounded-full flex items-center justify-center bg-primary-100 text-primary-700 font-bold border-2 border-primary-400 shadow">
-                            {user?.name?.charAt(0).toUpperCase()}
-                          </div>
-                        </Menu.Button>
-                      </div>
-                      <Transition
-                        enter="transition ease-out duration-100"
-                        enterFrom="transform opacity-0 scale-95"
-                        enterTo="transform opacity-100 scale-100"
-                        leave="transition ease-in duration-75"
-                        leaveFrom="transform opacity-100 scale-100"
-                        leaveTo="transform opacity-0 scale-95"
-                      >
-                        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white/90 shadow-lg ring-1 ring-primary-100 focus:outline-none backdrop-blur-md">
+                        <Menu.Items className="absolute left-0 z-20 mt-2 w-48 origin-top-left rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                           <Menu.Item>
                             {({ active }) => (
                               <Link
-                                to={user?.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard'}
+                                to="/roadmap/toeic"
                                 className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
                               >
-                                Dashboard
+                                Luyện Thi TOEIC
                               </Link>
                             )}
                           </Menu.Item>
                           <Menu.Item>
                             {({ active }) => (
-                              <button
-                                onClick={logout}
-                                className={classNames(active ? 'bg-gray-100' : '', 'block w-full text-left px-4 py-2 text-sm text-gray-700')}
+                              <Link
+                                to="/roadmap/ielts"
+                                className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
                               >
-                                Sign out
-                              </button>
+                                Luyện Thi IELTS
+                              </Link>
                             )}
                           </Menu.Item>
                         </Menu.Items>
                       </Transition>
                     </Menu>
-                  </>
-                ) : (
-                  <div className="flex space-x-4">
-                    <Link
-                      to="/login"
-                      className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      to="/register"
-                      className="bg-primary-600 text-white hover:bg-primary-700 px-3 py-2 rounded-md text-sm font-medium"
-                    >
-                      Register
-                    </Link>
+                    {/* 2. END MENU THẢ XUỐNG: LỘ TRÌNH */}
+
                   </div>
-                )}
+
+                </div>
+              </div>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                {isAuthenticated ?
+                  (
+                    <>
+                      {/* Notification dropdown */}
+                      <Menu as="div" className="relative ml-3">
+                        <div>
+
+                          <Menu.Button className="relative flex rounded-full bg-white/70 shadow border border-primary-100 text-sm focus:outline-none transition-all duration-200">
+                            <span className="sr-only">View notifications</span>
+                            <BellIcon className="h-6 w-6 text-gray-700" />
+
+                            {notifications.filter(n => !n.read).length > 0 && (
+                              <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400"></span>
+                            )}
+                          </Menu.Button>
+
+                        </div>
+                        <Transition
+                          enter="transition ease-out duration-100"
+                          enterFrom="transform opacity-0 scale-95"
+
+                          enterTo="transform opacity-100 scale-100"
+                          leave="transition ease-in duration-75"
+                          leaveFrom="transform opacity-100 scale-100"
+                          leaveTo="transform opacity-0 scale-95"
+
+                        >
+                          <Menu.Items className="absolute right-0 z-10 mt-2 w-72 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                            <div className="px-4 py-2 font-semibold text-gray-700 border-b">
+
+                              Notifications
+                            </div>
+                            {notifications.length > 0 ?
+                              (
+                                notifications.map(notification => (
+                                  <Menu.Item key={notification._id}>
+                                    <div
+
+                                      className={`block px-4 py-2 text-sm cursor-pointer ${notification.read ? 'text-gray-500' : 'text-gray-700 font-medium bg-blue-50'}`}
+                                      onClick={() => markAsRead(notification._id)}
+
+                                    >
+                                      {notification.text}
+                                    </div>
+
+                                  </Menu.Item>
+                                ))
+                              ) : (
+                                <Menu.Item>
+
+                                  <div className="block px-4 py-2 text-sm text-gray-500">
+                                    No new notifications
+                                  </div>
+
+                                </Menu.Item>
+                              )}
+                          </Menu.Items>
+                        </Transition>
+
+                      </Menu>
+                      {/* Profile dropdown */}
+                      <Menu as="div" className="relative ml-3">
+                        <div>
+                          <Menu.Button className="flex rounded-full 
+bg-white/70 shadow border border-primary-100 text-sm focus:outline-none transition-all duration-200">
+                            <span className="sr-only">Open user menu</span>
+                            <div className="h-8 w-8 rounded-full flex items-center justify-center bg-primary-100 text-primary-700 font-bold border-2 border-primary-400 shadow">
+
+                              {user?.name?.charAt(0).toUpperCase()}
+                            </div>
+                          </Menu.Button>
+                        </div>
+                        <Transition
+
+                          enter="transition ease-out duration-100"
+                          enterFrom="transform opacity-0 scale-95"
+                          enterTo="transform opacity-100 scale-100"
+                          leave="transition ease-in 
+duration-75"
+                          leaveFrom="transform opacity-100 scale-100"
+                          leaveTo="transform opacity-0 scale-95"
+                        >
+                          <Menu.Items className="absolute 
+right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white/90 shadow-lg ring-1 ring-primary-100 focus:outline-none backdrop-blur-md">
+                            <Menu.Item>
+                              {({ active }) => (
+                                <Link
+
+                                  to={user?.role === 'teacher' ?
+                                    '/teacher/dashboard' : '/student/dashboard'}
+                                  className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
+                                >
+
+                                  Dashboard
+                                </Link>
+                              )}
+                            </Menu.Item>
+
+                            <Menu.Item>
+                              {({ active }) => (
+                                <button
+
+                                  onClick={logout}
+                                  className={classNames(active ? 'bg-gray-100' : '', 'block w-full text-left px-4 py-2 text-sm text-gray-700')}
+                                >
+
+                                  Sign out
+                                </button>
+                              )}
+                            </Menu.Item>
+
+                          </Menu.Items>
+                        </Transition>
+                      </Menu>
+                    </>
+                  )
+                  : (
+                    <div className="flex space-x-4">
+                      <Link
+                        to="/login"
+                        className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
+
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        to="/register"
+
+                        className="bg-primary-600 text-white hover:bg-primary-700 px-3 py-2 rounded-md text-sm font-medium"
+                      >
+                        Register
+                      </Link>
+
+                    </div>
+                  )}
               </div>
             </div>
           </div>
           <Disclosure.Panel className="sm:hidden">
             <div className="space-y-1 px-2 pb-3 pt-2">
               {navLinks.map((item) => (
-                (item.public || isAuthenticated) && (
+
+                (item.public ||
+                  isAuthenticated) && (
                   <Disclosure.Button
                     key={item.name}
                     as={Link}
                     to={item.to}
+
                     className={classNames(
                       isActive(item.to)
                         ? 'bg-primary-100 text-primary-700 shadow'
                         : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700',
-                      'block rounded-md px-3 py-2 text-base font-semibold'
+                      'block rounded-md px-3 py-2 text-base font-semibold' // Dòng này đã được fix lỗi cú pháp
                     )}
                   >
                     {item.name}
                   </Disclosure.Button>
                 )
+
               ))}
+              {/* BỔ SUNG: Mobile Link cho Roadmap */}
+              <Disclosure.Button
+                as={Link}
+                to="/roadmap/toeic"
+                className={classNames(
+                  location.pathname.startsWith('/roadmap')
+                    ? 'bg-primary-100 text-primary-700 shadow'
+                    : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700',
+                  'block rounded-md px-3 py-2 text-base font-semibold'
+                )}
+              >
+                Lộ Trình
+              </Disclosure.Button>
             </div>
           </Disclosure.Panel>
         </>
@@ -850,7 +983,6 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
 
 ==================================================
 FILE_PATH: client\src\components\layout\Sidebar.js
@@ -4031,29 +4163,327 @@ export default TeacherDashboard;
 ==================================================
 FILE_PATH: client\src\pages\Home.js
 ==================================================
+// FILE_PATH: client\src\pages\Home.js (ĐÃ SẮP XẾP LẠI THỨ TỰ ĐÚNG VÀ KHÔI PHỤC HOÀN TOÀN PHẦN BENEFITS)
 import React, { useContext, useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import AuthContext from '../context/AuthContext';
 import { 
   AcademicCapIcon, 
   BookOpenIcon, 
   UserGroupIcon, 
   CheckCircleIcon,
-  ArrowRightIcon 
+  ArrowRightIcon,
+  XIcon,
+  StarIcon,
+  ThumbUpIcon
 } from '@heroicons/react/outline';
 import Footer from '../components/layout/Footer';
+import { Tab } from '@headlessui/react';
 
+// ==============================================================
+// DỮ LIỆU CỐ ĐỊNH CHO CÁC PHẦN (Modal/Marquee)
+// ==============================================================
+const ALL_STUDENTS_DATA = [
+  // Dữ liệu mô phỏng từ ảnh 83ea95.jpg và 83ea59.jpg
+  { id: 1, name: "Hằng Thị Giang Thu", score: "6.5", type: "IELTS", imgSrc: "https://i.ibb.co/3WqP49g/s1.jpg" },
+  { id: 2, name: "Nguyễn Hữu Minh Duy", score: "6.5", type: "IELTS", imgSrc: "https://i.ibb.co/9vB220P/s2.jpg" },
+  { id: 3, name: "Nông Thị Trang Nhung", score: "7.0", type: "IELTS", imgSrc: "https://i.ibb.co/VTHq9H1/s3.jpg" },
+  { id: 4, name: "Bùi Phương Thảo", score: "6.5", type: "IELTS", imgSrc: "https://i.ibb.co/6yqTj5Y/s4.jpg" },
+  { id: 5, name: "Trường Hoàng Dũng", score: "710", type: "TOEIC", imgSrc: "https://i.ibb.co/wJvB0zR/s5.jpg" },
+  { id: 6, name: "Nguyễn Quốc Thắng", score: "7.0", type: "IELTS", imgSrc: "https://i.ibb.co/1Kk2W0W/s6.jpg" },
+  { id: 7, name: "Phạm Thị Nhật Ngân", score: "7.0", type: "IELTS", imgSrc: "https://i.ibb.co/YjVq0W2/s7.jpg" },
+  { id: 8, name: "Phạm Thùy Dương", score: "6.5", type: "IELTS", imgSrc: "https://i.ibb.co/F83Q8Jm/s8.jpg" },
+  { id: 9, name: "Lê Ánh Thư", score: "7.0", type: "IELTS", imgSrc: "https://i.ibb.co/tZ5W25w/s9.jpg" },
+  { id: 10, name: "Nguyễn Khánh Vân", score: "7.5", type: "IELTS", imgSrc: "https://i.ibb.co/f2P617B/s10.jpg" },
+];
+
+const REVIEWS_DATA = [
+    { id: 1, author: "Phạm Tra My", quote: "Em thấy Prep siêu tiện luôn ạ! Bình thường viết bài xong trong 2 ngày là Prep đã gửi feedback cho rùi nên siêu siêu có ích! PREP giảng giải chi tiết nên giúp em hiểu được vấn đề sâu và học ngoại ngữ hiệu quả hơn.", likes: 188, avatar: "" },
+    { id: 2, author: "Hằng Lê", quote: "Em học HSK của PREP từ tháng 6, theo Study Plan. Mới 1/3 khóa HSK 1 nhưng phát âm ổn hơn, biết giới thiệu bản thân. Nhờ AI chấm bài, em nhận ra lỗi sai và cải thiện khả năng học tiếng Trung hiệu quả hơn.", likes: 122, avatar: "" },
+    { id: 3, author: "Phương Uyên", quote: "Đã từng đi học tiếng Anh ở các trung tâm nhưng hướng nói nên mình chưa bao giờ nói nhiều đến vậy. Prep cho mình tự tin hơn nhiều!", likes: 154, avatar: "" },
+    { id: 4, author: "Hoàng Nguyễn", quote: "Học IELTS tại PREP, em tự tin hơn, biết áp dụng kiến thức vào bài và tiến bộ rõ rệt. Em sẽ chăm chỉ, duy trì thái độ học tiếng Anh nghiêm túc cùng PREP, hy vọng đạt band 7.5+.", likes: 122, avatar: "" },
+    { id: 5, author: "Hương Giang", quote: "Thật sự tuyệt vời. Tôi đã thử nhiều khóa học online khác nhưng đây là nơi tôi cảm thấy được hỗ trợ tốt nhất.", likes: 98, avatar: "" },
+    { id: 6, author: "Tuấn Anh", quote: "Giao diện đẹp, dễ sử dụng, tôi có thể học bất cứ khi nào rảnh. Rất phù hợp với người đi làm bận rộn như tôi.", likes: 210, avatar: "" },
+];
+// Lặp lại dữ liệu để tạo hiệu ứng cuộn vô tận cho Reviews
+const INFINITE_REVIEWS = [...REVIEWS_DATA, ...REVIEWS_DATA, ...REVIEWS_DATA];
+
+const PARTNERS_DATA = [
+    { name: "IDP", logo: "/img/partner-idp.png" },
+    { name: "British Council", logo: "/img/partner-bc.png" },
+    { name: "IELTS", logo: "/img/partner-ielts.png" },
+];
+// Lặp lại dữ liệu để tạo hiệu ứng cuộn vô tận cho Partners
+const INFINITE_PARTNERS = [...PARTNERS_DATA, ...PARTNERS_DATA, ...PARTNERS_DATA, ...PARTNERS_DATA];
+
+// Dữ liệu cho Three-Step Slider
+const STEP_DATA = [
+    {
+        step: 1,
+        title: "Thiết kế lộ trình học cá nhân hóa",
+        description: "Prep sẽ luôn đồng hành cùng bạn xuyên suốt hành trình khổ luyện cho đến ngày 'hái quả ngọt'.",
+        substep: "Bước 1: Thiết kế lộ trình học cá nhân hóa",
+        imgSrc: "/img/step1.jpg", // Placeholder
+    },
+    {
+        step: 2,
+        title: "Học và theo dõi tiến bộ",
+        description: "Học tập, thực hành, chấm chữa toàn diện và phản tích, theo dõi sự tiến bộ qua từng ngày.",
+        substep: "Bước 2: Học và theo dõi tiến bộ",
+        imgSrc: "/img/step2.jpg", // Placeholder
+    },
+    {
+        step: 3,
+        title: "Hỗ trợ đăng ký thi, báo điểm, nhận quà vinh danh siêu xịn",
+        description: "Prep sẵn sàng hỗ trợ học viên đăng ký thi với ưu đãi tốt nhất. Bạn còn nhận được những phần quà siêu xịn khi đủ điều kiện là học viên điểm cao và được Vinh danh trên cộng đồng Preppies.",
+        substep: "Bước 3: Hỗ trợ đăng ký thi, báo điểm, nhận quà vinh danh siêu xịn",
+        imgSrc: "/img/step3.jpg", // Placeholder
+    },
+];
+
+
+// ==============================================================
+// Component Modal Dành Cho Danh Sách Học Viên
+// ==============================================================
+const StudentListModal = ({ isOpen, onClose }) => {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100]"
+        >
+          <motion.div
+            initial={{ scale: 0.9, y: 50 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 50 }}
+            className="bg-white rounded-2xl p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto shadow-2xl relative"
+          >
+            <div className="flex justify-between items-center border-b pb-4 mb-4 sticky top-0 bg-white z-10">
+              <h2 className="text-2xl font-bold text-gray-900">Danh sách các học viên</h2>
+              <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                <XIcon className="h-6 w-6 text-gray-500" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {ALL_STUDENTS_DATA.map(student => (
+                <div key={student.id} className="relative rounded-lg overflow-hidden shadow-md">
+                  {/* Image Placeholder */}
+                  <div className="aspect-w-1 aspect-h-1">
+                    {/* Sử dụng ảnh mô phỏng */}
+                    <img src={student.imgSrc} alt={student.name} className="w-full h-full object-cover" />
+                  </div>
+                  {/* Info Overlay */}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-8 text-white">
+                    <p className="font-semibold">{student.name}</p>
+                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold mt-1 ${student.type === 'IELTS' ? 'bg-blue-600' : 'bg-orange-600'}`}>
+                      {student.score} {student.type}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+
+// Helper function
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ');
+}
+
+// ==============================================================
+// Component Three-Step Slider (Sử dụng Scroll Wheel)
+// ==============================================================
+const ThreeStepSlider = () => {
+    const [step, setStep] = useState(0); 
+    const sliderRef = useRef(null);
+    const debounceTimeout = useRef(null);
+    
+    const handleWheel = (e) => {
+        // Chỉ xử lý nếu đang không trong thời gian chờ (debounce)
+        if (debounceTimeout.current) return;
+
+        const direction = e.deltaY > 0 ? 1 : -1; // 1 là cuộn xuống, -1 là cuộn lên
+
+        setStep((prevStep) => {
+            let nextStep = prevStep + direction;
+            if (nextStep < 0) nextStep = 0; // Giới hạn ở bước 0
+            if (nextStep >= STEP_DATA.length) nextStep = STEP_DATA.length - 1; // Giới hạn ở bước cuối
+
+            if (nextStep !== prevStep) {
+                // Kích hoạt debounce
+                debounceTimeout.current = setTimeout(() => {
+                    debounceTimeout.current = null;
+                }, 700); // Chờ 700ms giữa các lần chuyển
+
+                // Ngăn chặn cuộn trang chính khi đang chuyển bước
+                e.preventDefault(); 
+            }
+            return nextStep;
+        });
+    };
+
+    useEffect(() => {
+        const sliderElement = sliderRef.current;
+        if (sliderElement) {
+            sliderElement.addEventListener('wheel', handleWheel, { passive: false });
+        }
+
+        return () => {
+            if (sliderElement) {
+                sliderElement.removeEventListener('wheel', handleWheel);
+            }
+            clearTimeout(debounceTimeout.current);
+        };
+    }, []); // Chỉ chạy một lần khi mount
+
+    const currentStep = STEP_DATA[step];
+
+    // Define motion variants for vertical sliding
+    const slideVariants = {
+        // Custom direction for smooth transition between steps (positive: slide up, negative: slide down)
+        enter: (direction) => ({
+            y: direction > 0 ? 500 : -500, // Slide up from bottom or down from top
+            opacity: 0
+        }),
+        center: {
+            y: 0,
+            opacity: 1
+        },
+        exit: (direction) => ({
+            y: direction < 0 ? 500 : -500, // Slide out to top or bottom
+            opacity: 0
+        })
+    };
+
+    return (
+        <section 
+            ref={sliderRef}
+            className="py-16 md:py-24 bg-blue-900 text-white relative overflow-hidden h-[800px] flex items-center"
+        >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                
+                {/* Global Header */}
+                <motion.div 
+                    className="text-center mb-16"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    viewport={{ once: true }}
+                >
+                    <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
+                        Tối ưu hành trình Học & Luyện Thi với 3 bước dễ dàng
+                    </h2>
+                    <p className="text-lg text-blue-200">
+                        Prep sẽ luôn đồng hành cùng bạn xuyên suốt hành trình khổ luyện cho đến ngày "hái quả ngọt".
+                    </p>
+                </motion.div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    
+                    {/* Cột 1: Text Content */}
+                    <div className="space-y-6 flex flex-col justify-center min-h-[400px] relative">
+                         <AnimatePresence initial={false} mode="wait">
+                            <motion.div 
+                                key={currentStep.step + "text"} // Key để kích hoạt animation
+                                variants={slideVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                custom={1} // custom value for initial/exit variants
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                className="absolute inset-0 p-4"
+                            >
+                                <p className="text-6xl md:text-7xl font-extrabold text-blue-500/50 leading-none">
+                                    Bước {currentStep.step}
+                                </p>
+                                <h3 className="text-3xl font-bold text-white mt-4">
+                                    {currentStep.title}
+                                </h3>
+                                <p className="text-lg text-blue-100 mt-4">
+                                    {currentStep.description}
+                                </p>
+                            </motion.div>
+                         </AnimatePresence>
+                    </div>
+
+                    {/* Cột 2: Image and Motion Container */}
+                    <div className="relative h-96 w-full rounded-3xl overflow-hidden shadow-2xl bg-blue-800">
+                        <AnimatePresence initial={false} mode="wait"> 
+                            <motion.div
+                                key={currentStep.step + "image"} // Key để kích hoạt animation
+                                custom={1} 
+                                variants={slideVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{
+                                    y: { type: "spring", stiffness: 300, damping: 30 },
+                                    opacity: { duration: 0.3 }
+                                }}
+                                className="absolute inset-0 p-6 flex items-center justify-center"
+                            >
+                                <div className="text-center">
+                                    <p className="text-sm font-semibold text-white/70 mb-2">{currentStep.substep}</p>
+                                    {/* Placeholder Image for the step */}
+                                    <div className="w-64 h-64 mx-auto bg-gray-200 rounded-lg flex items-center justify-center border-4 border-blue-400">
+                                        [Image for Step {currentStep.step}]
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+
+                </div>
+
+                 {/* Pagination/Step Indicator */}
+                 <div className="text-center mt-12 flex justify-center space-x-3">
+                    {STEP_DATA.map((s, index) => (
+                        <button
+                            key={s.step}
+                            onClick={() => setStep(index)}
+                            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                                index === step ? 'bg-white scale-125' : 'bg-blue-300/50 hover:bg-blue-300'
+                            }`}
+                            aria-label={`Go to step ${s.step}`}
+                        />
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+
+// ==============================================================
+// Component chính Home (Tiếp tục)
+// ==============================================================
 const Home = () => {
   const { isAuthenticated, user } = useContext(AuthContext);
-
-  // Parallax state (giữ nguyên như cũ)
   const [parallaxY, setParallaxY] = useState(0);
   const [parallaxY2, setParallaxY2] = useState(0);
   const [parallaxY3, setParallaxY3] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State cho Modal
+
   const heroRef = useRef(null);
   const featuresRef = useRef(null);
   const benefitsRef = useRef(null);
+  
+  // Dữ liệu học viên cho phần chuyển động ngang (dùng subset của ALL_STUDENTS_DATA)
+  // Row 1: chạy từ phải sang trái (index chẵn)
+  const achieversRow1 = [ALL_STUDENTS_DATA[0], ALL_STUDENTS_DATA[2], ALL_STUDENTS_DATA[4], ALL_STUDENTS_DATA[6], ALL_STUDENTS_DATA[8]];
+  // Row 2: chạy từ trái sang phải (index lẻ)
+  const achieversRow2 = [ALL_STUDENTS_DATA[1], ALL_STUDENTS_DATA[3], ALL_STUDENTS_DATA[5], ALL_STUDENTS_DATA[7], ALL_STUDENTS_DATA[9]];
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -4066,7 +4496,8 @@ const Home = () => {
         setParallaxY2(Math.max(0, -rect.top * 0.15));
       }
       if (benefitsRef.current) {
-        const rect = benefitsRef.current.getBoundingClientRect();
+        const 
+ rect = benefitsRef.current.getBoundingClientRect();
         setParallaxY3(Math.max(0, -rect.top * 0.1));
       }
     };
@@ -4074,36 +4505,56 @@ const Home = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Animation variants (giữ nguyên)
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.2 } }
   };
-  
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 }
   };
-
   const features = [
-    { icon: <BookOpenIcon className="h-6 w-6" />, title: 'Tài liệu Khóa học Số', description: 'Truy cập tất cả tài nguyên học tập ở cùng một nơi, trên mọi thiết bị, tại bất cứ đâu.' },
-    { icon: <UserGroupIcon className="h-6 w-6" />, title: 'Học Tập Cộng Tác', description: 'Luôn kết nối với bạn học và giảng viên thông qua các thông báo và cập nhật.' },
-    { icon: <AcademicCapIcon className="h-6 w-6" />, title: 'Bài Kiểm tra/Đố Vui Trực tiếp', description: 'Kiểm tra kiến thức của bạn bằng các bài đố vui/kiểm tra tương tác và nhận kết quả tức thì.' },
-    { icon: <UserGroupIcon className="h-6 w-6" />, title: 'Học Tập Cộng Tác', description: 'Luôn kết nối với bạn học và giảng viên thông qua các thông báo và cập nhật.' },
+    { icon: <BookOpenIcon className="h-6 w-6" />, title: 'Tài liệu Khóa học Số', description: 'Truy cập tất cả tài nguyên học tập ở cùng một nơi, trên mọi thiết bị, tại bất cứ đâu.'
+},
+    { icon: <UserGroupIcon className="h-6 w-6" />, title: 'Học Tập Cộng Tác', description: 'Luôn kết nối với bạn học và giảng viên thông qua các thông báo và cập nhật.'
+},
+    { icon: <AcademicCapIcon className="h-6 w-6" />, title: 'Bài Kiểm tra/Đố Vui Trực tiếp', description: 'Kiểm tra kiến thức của bạn bằng các bài đố vui/kiểm tra tương tác và nhận kết quả tức thì.'
+},
+    { icon: <UserGroupIcon className="h-6 w-6" />, title: 'Học Tập Cộng Tác', description: 'Luôn kết nối với bạn học và giảng viên thông qua các thông báo và cập nhật.'
+},
   ];
 
-  const testimonials = [
-    { quote: "This LMS platform has completely transformed how I manage my courses. It's intuitive and saves me so much time!", author: "Dr. Sarah Johnson", role: "Professor of Computer Science" },
-    { quote: "As a student, I love how easy it is to access all my course materials and submit assignments in one place.", author: "Michael Chen", role: "Engineering Student" }
-  ];
-
+  const testimonialTabs = {
+    TOEIC: [
+      { 
+        name: "Bảo Trân", 
+        age: "28 tuổi", 
+        date: "05.08.2024", 
+        quote: "Các đề trong Phòng Luyện ảo mình thấy sát với đề thực tế. Mình rất ưng phần chấm chữa chi tiết, phần này rất thích cho mình có những lỗi sai lẫn cần sửa, từ đó mình cải thiện dần cả 2 kỹ năng Listening và Reading.",
+        score: "990", 
+        type: "TOEIC L&R", 
+        subscores: { Listening: "495", Reading: "495" } 
+      }
+    ],
+    IELTS: [
+      { 
+        name: "Nguyễn Trần Ngân Giang", 
+        age: "", 
+        date: "", 
+        quote: "Em thấy Prep thiết kế bối giảng súc tích, nội dung bài giảng dễ ghi nhớ, em nghĩ sẽ phù hợp với các bạn mới bắt đầu học IELTS. Em có thể học bất cứ lúc nào, nhiều lúc em chỉ mang điện thoại đi cũng có thể học được. Và em đặc biệt rất thích phòng luyện thi ảo PREP AI.",
+        score: "8.0", 
+        type: "IELTS Overall", 
+        subscores: { Listening: "8.5", Reading: "8.0", Speaking: "7.5", Writing: "7.0" } 
+      }
+    ]
+  };
+  
   const featureImages = [
     'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=600&q=80',
     'https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80',
     'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80',
     'https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80',
   ];
-
   return (
     <div className="bg-white">
 
@@ -4127,7 +4578,8 @@ const Home = () => {
   <div className="absolute inset-0 bg-[#1f1f1f]/60 z-10"></div>
 
   <motion.div
-    className="relative z-20 text-center px-6 max-w-4xl mx-auto"
+    className="relative z-20 text-center px-6 
+ max-w-4xl mx-auto"
     style={{ y: parallaxY * 0.2 }}
     initial={{ opacity: 0, y: 60 }}
     animate={{ opacity: 1, y: 0 }}
@@ -4139,14 +4591,17 @@ const Home = () => {
     </h1>
 
     <p className="text-lg md:text-xl text-white/90 mb-10 max-w-3xl mx-auto font-light leading-relaxed drop-shadow-lg">
-      Kết nối bạn với đội ngũ giảng viên hàng đầu, nội dung tương tác và cộng đồng hỗ trợ để cùng bạn chinh phục mục tiêu cá nhân và sự nghiệp.
-    </p>
+      Kết nối bạn với đội ngũ 
+ giảng viên hàng đầu, nội dung tương tác và cộng đồng hỗ trợ để cùng bạn chinh phục mục tiêu cá nhân và sự nghiệp.
+ </p>
 
     <a
-      href={isAuthenticated ? "/dashboard" : "/login"}
+      href={isAuthenticated ?
+ "/dashboard" : "/login"}
       className="inline-block px-8 py-4 text-lg font-semibold bg-white text-primary-700 rounded-full shadow-2xl hover:bg-gray-100 transform hover:scale-105 transition-all duration-300"
     >
-      {isAuthenticated ? "Go to Dashboard" : "Get Started"}
+      {isAuthenticated ?
+ "Go to Dashboard" : "Get Started"}
     </a>
   </motion.div>
 
@@ -4163,8 +4618,7 @@ const Home = () => {
 
 {/* ==================== END HERO ==================== */}
 
-
-      {/* ==================== TỪ ĐÂY TRỞ XUỐNG GIỮ NGUYÊN 100% CỦA BẠN ==================== */}
+      {/* ==================== THIẾT KẾ CHO VIỆC HỌC HIỆN ĐẠI (FEATURES) ==================== */}
       <motion.section
         ref={featuresRef}
         className="py-16 md:py-24 relative"
@@ -4175,14 +4629,16 @@ const Home = () => {
       >
         <motion.div
           className="absolute -top-32 left-1/2 w-96 h-96 bg-gradient-to-br from-primary-200 to-accent-yellow rounded-full blur-3xl opacity-30 z-0"
-          style={{ y: parallaxY2 * 0.5 }}
+     
+      style={{ y: parallaxY2 * 0.5 }}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div className="text-center mb-16" variants={itemVariants}>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Thiết kế cho việc học hiện đại</h2>
             <p className="max-w-2xl mx-auto text-lg text-gray-600">
-              Nền tảng của chúng tôi cung cấp tất cả các công cụ bạn cần để giảng dạy hiệu quả và tạo ra những trải nghiệm học tập hấp dẫn.
-            </p>
+              Nền 
+ tảng của chúng tôi cung cấp tất cả các công cụ bạn cần để giảng dạy hiệu quả và tạo ra những trải nghiệm học tập hấp dẫn.
+ </p>
           </motion.div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -4190,25 +4646,30 @@ const Home = () => {
               <motion.div
                 key={index}
                 variants={itemVariants}
-                whileHover={{ scale: 1.04, boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.2)' }}
+     
+            whileHover={{ scale: 1.04, boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.2)' }}
                 className="bg-white/80 backdrop-blur-lg rounded-xl p-8 border border-primary-50 shadow-card hover:shadow-xl transition-all duration-300 flex flex-col md:flex-row items-center gap-6"
                 style={{ y: parallaxY2 * (0.1 + index * 0.05) }}
               >
-                <motion.img
+        
+         <motion.img
                   src={featureImages[index]}
                   alt={feature.title}
                   className="w-28 h-28 object-cover rounded-2xl shadow-lg mb-4 md:mb-0 md:mr-6"
                   style={{ y: parallaxY2 * 0.15 }}
+        
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 + index * 0.1, duration: 0.7, type: 'spring' }}
                 />
                 <div>
+ 
                   <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600 mb-5">
                     {feature.icon}
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
+              
+     <p className="text-gray-600">{feature.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -4216,29 +4677,34 @@ const Home = () => {
         </div>
       </motion.section>
 
+      {/* ==================== LỢI ÍCH DÀNH CHO TẤT CẢ MỌI NGƯỜI (BENEFITS) ==================== */}
       <motion.section className="bg-gray-50 py-16 md:py-24" variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto 
+ px-4 sm:px-6 lg:px-8">
           <motion.div className="text-center mb-16" variants={itemVariants}>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Lợi Ích Dành Cho Tất Cả Mọi Người</h2>
             <p className="max-w-2xl mx-auto text-lg text-gray-600">
               Dù bạn là giáo viên hay học viên, nền tảng của chúng tôi đều nâng cao trải nghiệm học tập.
-            </p>
+ </p>
           </motion.div>
           
           <div className="md:flex md:items-center md:justify-between">
             <motion.div className="md:w-1/2 mb-10 md:mb-0" variants={itemVariants}>
               <h3 className="text-2xl font-semibold text-gray-900 mb-6">Lợi Ích Dành Cho Giáo Viên</h3>
               <ul className="space-y-4">
-                {['Tạo và quản lý khóa học dễ dàng.','Chia sẻ tài liệu dưới nhiều định dạng khác nhau.','Thiết kế các bài đánh giá và bài kiểm tra/đố vui.','Theo dõi tiến độ và mức độ tham gia của học viên.','Giao tiếp hiệu quả với học viên.'].map((item, i) => (
+             
+    {['Tạo và quản lý khóa học dễ dàng.','Chia sẻ tài liệu dưới nhiều định dạng khác nhau.','Thiết kế các bài đánh giá và bài kiểm tra/đố vui.','Theo dõi tiến độ và mức độ tham gia của học viên.','Giao tiếp hiệu quả với học viên.'].map((item, i) => (
                   <li key={i} className="flex items-start">
                     <CheckCircleIcon className="h-6 w-6 text-green-500 mr-2 flex-shrink-0" />
-                    <span className="text-gray-700">{item}</span>
+    
+                 <span className="text-gray-700">{item}</span>
                   </li>
                 ))}
               </ul>
             </motion.div>
             
-            <motion.div className="md:w-1/2" variants={itemVariants}>
+           
+  <motion.div className="md:w-1/2" variants={itemVariants}>
               <h3 className="text-2xl font-semibold text-gray-900 mb-6">Lợi Ích Dành Cho Học Viên</h3>
               <ul className="space-y-4">
                 {['Truy cập tất cả tài liệu khóa học tại một nơi duy nhất.','Nộp bài tập dưới dạng kỹ thuật số.','Làm bài kiểm tra và nhận phản hồi tức thì.','Theo dõi điểm số và tiến độ học tập của bạn.','Luôn cập nhật các thông báo mới nhất của khóa học.'].map((item, i) => (
@@ -4246,53 +4712,335 @@ const Home = () => {
                     <CheckCircleIcon className="h-6 w-6 text-green-500 mr-2 flex-shrink-0" />
                     <span className="text-gray-700">{item}</span>
                   </li>
-                ))}
+      
+           ))}
               </ul>
             </motion.div>
           </div>
         </div>
       </motion.section>
 
+      {/* ==================== TỐI ƯU HÀNH TRÌNH HỌC & LUYỆN THI (3-STEP SLIDER) ==================== */}
+      <ThreeStepSlider />
+      {/* ==================== END TỐI ƯU HÀNH TRÌNH HỌC & LUYỆN THI (3-STEP SLIDER) ==================== */}
+
+
+      {/* ==================== CHẤT LƯỢNG ĐƯỢC MINH CHỨNG (TABBED TESTIMONIALS) ==================== */}
       <motion.section
         className="py-16 md:py-24 bg-white relative overflow-hidden"
         variants={containerVariants}
         initial="hidden"
+      
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
       >
-        <motion.div
-          className="absolute -top-24 right-1/4 w-80 h-80 bg-gradient-to-br from-accent-green to-primary-100 rounded-full blur-3xl opacity-30 z-0"
-          style={{ y: parallaxY3 * 0.7 }}
-        />
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.h2
-            className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900"
+  
+            className="text-3xl md:text-4xl font-extrabold text-center mb-12 text-primary-700"
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
           >
-            What Our Users Say
+            Chất lượng được minh chứng bởi 
+            <br />
+            <span className="text-primary-400">Hàng nghìn gương mặt xuất sắc</span>
+         
           </motion.h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, idx) => (
-              <motion.div
-                key={idx}
-                className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 border border-primary-50 shadow-card hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center"
-                style={{ y: parallaxY3 * (0.1 + idx * 0.08) }}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.2 + idx * 0.1 }}
-              >
-                <div className="w-20 h-20 bg-gray-200 rounded-full mb-4 border-4 border-primary-100" /> {/* placeholder avatar */}
-                <p className="text-gray-700 mb-4 italic">“{testimonial.quote}”</p>
-                <div className="font-semibold text-primary-700">{testimonial.author}</div>
-                <div className="text-sm text-gray-500">{testimonial.role}</div>
-              </motion.div>
-            ))}
-          </div>
+
+          <Tab.Group>
+            {/* Tab List: TOEIC / IELTS */}
+            <Tab.List className="w-full flex space-x-1 p-1 mb-8 rounded-xl bg-gray-100 max-w-xs mx-auto">
+              {Object.keys(testimonialTabs).map((category) => (
+                <Tab
+                  key={category}
+                  className={({ selected }) =>
+                    classNames(
+                      'w-full py-2.5 text-sm font-bold leading-5 rounded-lg transition-colors',
+                      'focus:outline-none focus:ring-2 ring-offset-2 ring-offset-primary-400 ring-white ring-opacity-60',
+                      selected
+                        ? 'bg-primary-600 text-white shadow-md'
+                        : 'text-gray-700 hover:bg-white/[0.60] hover:text-primary-700'
+                    )
+                  }
+                >
+                  {category}
+                </Tab>
+              ))}
+            </Tab.List>
+
+            {/* Tab Panels: Content */}
+            <Tab.Panels className="mt-8">
+              {Object.values(testimonialTabs).map((testimonials, index) => (
+                <Tab.Panel
+                  key={index}
+                  className={classNames(
+                    'ring-white ring-opacity-60 focus:outline-none focus:ring-2',
+                    'p-3'
+                  )}
+                >
+                  {/* Hiện tại chỉ có 1 testimonial cho mỗi tab, nên ta render thẳng nó ra */}
+                  {testimonials.map((t, tIndex) => (
+                    <motion.div
+                      key={tIndex}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="bg-primary-600 rounded-3xl p-6 shadow-2xl mx-auto max-w-xl"
+                    >
+                      <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold text-white mb-2">
+                          Vinh danh học viên xuất sắc nhất tháng 12
+                        </h3>
+                      </div>
+                      
+                      <div className="flex bg-white rounded-2xl p-4 items-center">
+                        {/* Cột 1: Ảnh, Tên, Điểm */}
+                        <div className="w-1/2 flex flex-col items-center">
+                          {/* Placeholder cho ảnh */}
+                          <div className="w-24 h-24 bg-gray-200 rounded-full mb-3 border-4 border-primary-400">
+                             {/* Thực tế sẽ là một component ảnh với mask */}
+                          </div>
+                          
+                          <p className="text-lg font-bold text-gray-900">{t.name}</p>
+                          <p className="text-sm text-gray-500">{t.age} {t.date && `- ${t.date}`}</p>
+                          
+                          <div className="mt-4 text-center">
+                            <span className="text-4xl font-extrabold text-primary-600 block leading-none">{t.score}</span>
+                            <span className="text-sm font-semibold text-primary-400 block">{t.type}</span>
+                            
+                            <div className="flex justify-center flex-wrap gap-2 mt-2 text-xs">
+                              {Object.entries(t.subscores).map(([skill, score], i) => (
+                                <span key={i} className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full font-medium">
+                                  {skill} <span className="font-bold text-primary-600">{score}</span>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Cột 2: Lời nhận xét */}
+                        <div className="w-1/2 p-3 text-sm text-gray-700 italic">
+                          <p>"{t.quote}"</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </Tab.Panel>
+              ))}
+            </Tab.Panels>
+          </Tab.Group>
+
         </div>
       </motion.section>
+      {/* ==================== END CHẤT LƯỢNG ĐƯỢC MINH CHỨNG (TABBED TESTIMONIALS) ==================== */}
 
+
+      {/* ==================== 100.000+ HỌC VIÊN (MARQUEE SECTION) ==================== */}
+      <section className="pt-16 md:pt-24 pb-8 md:pb-12 bg-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <motion.div 
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">
+              100.000+ học viên
+            </h2>
+            <p className="text-lg text-primary-600 font-semibold">
+              đạt thành tích cao sau khi học tại NTTU HUB
+            </p>
+          </motion.div>
+
+          {/* Marquee Row 1 (Right to Left) */}
+          <div className="marquee-container overflow-hidden whitespace-nowrap mb-6 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+            <motion.div
+              className="flex gap-4 md:gap-8"
+              animate={{ x: ['0%', '-100%'] }}
+              transition={{
+                x: {
+                  repeat: Infinity,
+                  ease: "linear",
+                  duration: 40, // Tốc độ chạy
+                },
+              }}
+            >
+              {[...achieversRow1, ...achieversRow1].map((student, index) => (
+                <div key={index} className="inline-block w-40 md:w-52 flex-shrink-0">
+                  <div className="relative rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300">
+                    <img src={student.imgSrc} alt={student.name} className="w-full h-auto object-cover aspect-[4/5]" />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white">
+                      <p className="font-semibold text-sm truncate">{student.name}</p>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold mt-1 ${student.type === 'IELTS' ? 'bg-blue-600' : 'bg-orange-600'}`}>
+                        {student.score} {student.type}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Marquee Row 2 (Left to Right) */}
+          <div className="marquee-container overflow-hidden whitespace-nowrap mb-8 [mask-image:linear-gradient(to_left,transparent,black_10%,black_90%,transparent)]">
+            <motion.div
+              className="flex gap-4 md:gap-8"
+              animate={{ x: ['-100%', '0%'] }}
+              transition={{
+                x: {
+                  repeat: Infinity,
+                  ease: "linear",
+                  duration: 40, // Tốc độ chạy
+                },
+              }}
+            >
+              {[...achieversRow2, ...achieversRow2].map((student, index) => (
+                <div key={index} className="inline-block w-40 md:w-52 flex-shrink-0">
+                  <div className="relative rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300">
+                    <img src={student.imgSrc} alt={student.name} className="w-full h-auto object-cover aspect-[4/5]" />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white">
+                      <p className="font-semibold text-sm truncate">{student.name}</p>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold mt-1 ${student.type === 'IELTS' ? 'bg-blue-600' : 'bg-orange-600'}`}>
+                        {student.score} {student.type}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Xem thêm button */}
+          <div className="text-center">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-block px-6 py-3 bg-primary-500 text-white rounded-full font-semibold hover:bg-primary-600 transition-colors shadow-lg"
+            >
+              Xem thêm
+            </button>
+          </div>
+        </div>
+      </section>
+      {/* ==================== END 100.000+ HỌC VIÊN (MARQUEE SECTION) ==================== */}
+
+      {/* ==================== ĐƯỢC ĐÁNH GIÁ CAO BỞI HÀNG TRĂM NGHÌN HỌC VIÊN (REVIEWS MARQUEE) ==================== */}
+      <section className="bg-primary-700 py-16 md:py-24 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-10">
+          
+          {/* Cột 1: Header và Mô tả */}
+          <motion.div 
+            className="md:w-1/3 text-white text-center md:text-left"
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4 drop-shadow-lg">
+              Được đánh giá cao bởi hàng trăm nghìn học viên đã và đang theo học
+            </h2>
+            <p className="text-lg text-primary-100 mb-6 font-light">
+              Đây chính là sự ghi nhận lớn nhất với Prep (NTTU HUB), nhờ có động lực cải tiến không ngừng nghỉ và đem đến trải nghiệm học tập tuyệt vời nhất cho bạn.
+            </p>
+          </motion.div>
+
+          {/* Cột 2: Marquee dọc */}
+          <div className="md:w-2/3 h-[500px] overflow-hidden relative rounded-2xl shadow-2xl bg-white/10 p-4">
+            
+            {/* Masking gradients */}
+            <div className="absolute inset-0 z-10 [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)]"></div>
+            
+            <motion.div
+              className="flex flex-col gap-4"
+              animate={{ y: ['0%', '-50%'] }} // Cuộn lên 50% (chiều dài của 1 lần lặp lại dữ liệu)
+              transition={{
+                y: {
+                  repeat: Infinity,
+                  ease: "linear",
+                  duration: 60, // Tốc độ cuộn
+                },
+              }}
+            >
+              {/* Lặp lại dữ liệu đánh giá 2 lần để tạo hiệu ứng vô tận */}
+              {[...INFINITE_REVIEWS, ...INFINITE_REVIEWS].map((review, index) => (
+                <div key={index} className="flex-shrink-0 w-full">
+                  <div className="bg-white rounded-lg p-4 shadow-md flex items-start space-x-4">
+                    {/* Icon/Avatar */}
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        {/* Avatar Placeholder */}
+                    </div>
+                    {/* Content */}
+                    <div className="flex-1">
+                        <p className="font-semibold text-gray-800">{review.author}</p>
+                        <p className="text-sm text-gray-600 mt-1 italic">"{review.quote}"</p>
+                        <div className="flex items-center space-x-2 mt-2 text-xs text-gray-500">
+                            <div className="flex items-center text-yellow-500">
+                                <StarIcon className="h-4 w-4 fill-current" />
+                                <StarIcon className="h-4 w-4 fill-current" />
+                                <StarIcon className="h-4 w-4 fill-current" />
+                                <StarIcon className="h-4 w-4 fill-current" />
+                                <StarIcon className="h-4 w-4 fill-current" />
+                            </div>
+                            <span className="text-sm">5 stars</span>
+                            <span className="flex items-center text-primary-600 font-medium">
+                                <ThumbUpIcon className="h-4 w-4 mr-1" /> {review.likes}
+                            </span>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
+      </section>
+      {/* ==================== END REVIEWS MARQUEE ==================== */}
+
+      {/* ==================== ĐƯỢC ĐỒNG HÀNH BỞI NHỮNG ĐƠN VỊ UY TÍN (PARTNERS MARQUEE) ==================== */}
+      <section className="py-16 md:py-24 bg-gray-50 relative overflow-hidden">
+        <motion.div 
+            className="text-center mb-12 max-w-xl mx-auto"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+        >
+            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">
+                Được đồng hành bởi những đơn vị giáo dục uy tín hàng đầu Việt Nam
+            </h2>
+        </motion.div>
+
+        {/* Marquee Row */}
+        <div className="marquee-container overflow-hidden whitespace-nowrap [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+            <motion.div
+              className="flex gap-10 md:gap-16 items-center"
+              animate={{ x: ['0%', '-100%'] }} // Cuộn từ phải sang trái
+              transition={{
+                x: {
+                  repeat: Infinity,
+                  ease: "linear",
+                  duration: 25, // Tốc độ chạy
+                },
+              }}
+            >
+              {[...INFINITE_PARTNERS, ...INFINITE_PARTNERS].map((partner, index) => (
+                <div key={index} className="inline-block w-32 md:w-40 flex-shrink-0">
+                  <div className="bg-white p-4 rounded-lg shadow-md border border-gray-100 flex items-center justify-center h-20 opacity-80 hover:opacity-100 transition-opacity">
+                    {/* Placeholder cho Logo */}
+                    <span className="text-lg font-bold text-gray-700">{partner.name}</span>
+                    {/* Hoặc dùng image tag nếu có ảnh thật */}
+                    {/* <img src={partner.logo} alt={partner.name} className="max-h-12 max-w-full object-contain" /> */}
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+        </div>
+      </section>
+      {/* ==================== END PARTNERS MARQUEE ==================== */}
+
+      {/* ==================== READY TO TRANSFORM (CTA SECTION) ==================== */}
       <motion.section
         className="bg-primary-700 py-16 md:py-20 text-white"
         initial={{ opacity: 0 }}
@@ -4300,25 +5048,30 @@ const Home = () => {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+     
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to transform your learning experience?</h2>
           <p className="text-lg text-primary-100 mb-8 max-w-2xl mx-auto">
             Join thousands of teachers and students who are already using our platform to enhance their educational journey.
-          </p>
+ </p>
           <Link
-            to={isAuthenticated ? (user?.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard') : '/register'}
+            to={isAuthenticated ?
+ (user?.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard') : '/register'}
             className="inline-flex items-center px-6 py-3 bg-white text-primary-700 rounded-md font-medium hover:bg-gray-100 transition-colors shadow-lg"
           >
-            {isAuthenticated ? 'Go to Dashboard' : 'Get Started For Free'}
+            {isAuthenticated ?
+ 'Go to Dashboard' : 'Get Started For Free'}
             <ArrowRightIcon className="ml-2 h-5 w-5" />
           </Link>
         </div>
       </motion.section>
+      {/* ==================== END READY TO TRANSFORM (CTA SECTION) ==================== */}
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 0.2, scale: 1 }}
+     
           transition={{ duration: 1.2, delay: 0.2 }}
           className="absolute left-1/4 top-0 w-96 h-96 bg-gradient-to-br from-accent-yellow to-primary-400 rounded-full blur-3xl opacity-60 animate-pulse"
         />
@@ -4326,11 +5079,13 @@ const Home = () => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 0.15, scale: 1 }}
           transition={{ duration: 1.2, delay: 0.4 }}
+        
           className="absolute right-1/4 bottom-0 w-96 h-96 bg-gradient-to-tr from-secondary-500 to-primary-600 rounded-full blur-3xl opacity-60 animate-pulse"
         />
       </div>
 
       <Footer />
+      <StudentListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 };
@@ -6568,6 +7323,649 @@ const Register = () => {
 
 export default Register;
 
+
+==================================================
+FILE_PATH: client\src\pages\RoadmapIelts.js
+==================================================
+// FILE_PATH: client\src\pages\RoadmapIelts.js
+
+import React from 'react';
+import { motion } from 'framer-motion';
+
+const RoadmapIelts = () => {
+    // Dữ liệu từ thiết kế image_68a092.jpg
+    return (
+        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ duration: 0.5 }}
+                className="bg-white rounded-3xl shadow-xl overflow-hidden md:flex"
+            >
+                {/* Cột 1: Nội dung */}
+                <div className="md:w-1/2 p-10 bg-[#f0f5ff] flex flex-col justify-center">
+                    <h2 className="text-sm font-bold text-primary-600 uppercase mb-2">KHOÁ HỌC IELTS</h2>
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-secondary-900 mb-4 leading-tight">
+                        Lộ trình Học & Luyện IELTS toàn diện
+                    </h1>
+                    <p className="text-lg text-gray-700 mb-8 max-w-md">
+                        Phòng luyện thi IELTS ảo PREP AI – Nền tảng tự học có cam kết đầu ra.
+                    </p>
+                    <a href="#" className="inline-block px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-semibold max-w-fit">
+                        Thiết kế lộ trình học
+                    </a>
+                    <div className="mt-6 flex items-center">
+                        <div className="flex -space-x-2 mr-3">
+                            <img className="h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=NV&background=c7d2fe&color=3730a3" alt="" />
+                            <img className="h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=PT&background=a5b4fc&color=3730a3" alt="" />
+                        </div>
+                        <p className="text-sm font-medium text-gray-700">
+                            <strong>500.000+</strong> học viên đạt IELTS tại NTTU HUB
+                        </p>
+                    </div>
+                </div>
+
+                {/* Cột 2: Hình ảnh (Thêm tag hình ảnh để minh họa) */}
+                <div className="md:w-1/2 relative bg-[#1E90FF] overflow-hidden flex items-center justify-center">
+                    <div className="absolute inset-0 bg-primary-900 opacity-20"></div>
+                    
+                </div>
+            </motion.div>
+        </div>
+    );
+};
+
+export default RoadmapIelts;
+
+==================================================
+FILE_PATH: client\src\pages\RoadmapToeic.js
+==================================================
+// FILE_PATH: client\src\pages\RoadmapToeic.js (CODE HOÀN CHỈNH)
+
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/outline'; 
+
+
+// ==============================================================
+// 1. DỮ LIỆU CẤP ĐỘ, MỤC TIÊU & GÓI HỌC PHÍ
+// ==============================================================
+
+// Định nghĩa mã hóa mức điểm số (Min score) để so sánh logic
+const ScoreMap = {
+    '1-295': 1, '300-595': 300, '600-850': 600, '800+': 800,
+    'SW_1-99': 1, 'SW_100-199': 100, 'SW_200-250': 200, 'SW_300+': 300
+};
+
+const TAB_DATA = {
+    LR: {
+        title: 'TOEIC Listening & Reading',
+        currentLevels: [
+            { label: 'TOEIC LR 1-295', value: 'LR_1-295', minScore: 1 },
+            { label: 'TOEIC LR 300-595', value: 'LR_300-595', minScore: 300 },
+            { label: 'TOEIC LR 600-850', value: 'LR_600-850', minScore: 600 },
+        ],
+        goalLevels: [
+            { label: 'TOEIC LR 300+', value: 'LR_300+', minScore: 300 },
+            { label: 'TOEIC LR 600+', value: 'LR_600+', minScore: 600 },
+            { label: 'TOEIC LR 800+', value: 'LR_800+', minScore: 800 },
+        ],
+        packages: {
+            'LR_1-295_LR_300+': { chapter: 'TOEIC Listening - Reading Nền tảng', priceSelf: '500.000', priceFull: '1.250.000', commitment: 'LR 300+' },
+            'LR_300-595_LR_600+': { chapter: 'TOEIC Listening - Reading Trung cấp', priceSelf: '1.500.000', priceFull: '2.250.000', commitment: 'LR 600+' },
+            'LR_600-850_LR_800+': { chapter: 'TOEIC Listening - Reading Chuyên sâu', priceSelf: '2.000.000', priceFull: '2.750.000', commitment: 'LR 800+' },
+        }
+    },
+    SW: {
+        title: 'TOEIC Speaking & Writing',
+        currentLevels: [
+            { label: 'TOEIC SW 1-99', value: 'SW_1-99', minScore: ScoreMap['SW_1-99'] },
+            { label: 'TOEIC SW 100-199', value: 'SW_100-199', minScore: ScoreMap['SW_100-199'] },
+            { label: 'TOEIC SW 200-250', value: 'SW_200-250', minScore: ScoreMap['SW_200-250'] },
+        ],
+        goalLevels: [
+            { label: 'TOEIC SW 100+', value: 'SW_100+', minScore: ScoreMap['SW_100-199'] },
+            { label: 'TOEIC SW 200+', value: 'SW_200+', minScore: ScoreMap['SW_200-250'] },
+            { label: 'TOEIC SW 300+', value: 'SW_300+', minScore: ScoreMap['SW_300+'] },
+        ],
+        packages: {
+            'SW_1-99_SW_100+': { chapter: 'TOEIC Speaking - Writing Nền tảng', priceSelf: '600.000', priceFull: '1.350.000', commitment: 'SW 100+' },
+            'SW_100-199_SW_200+': { chapter: 'TOEIC Speaking - Writing Trung cấp', priceSelf: '2.200.000', priceFull: '3.700.000', commitment: 'SW 200+' },
+            'SW_200-250_SW_300+': { chapter: 'TOEIC Speaking - Writing Chuyên sâu', priceSelf: '3.800.000', priceFull: '5.300.000', commitment: 'SW 300+' },
+        }
+    },
+    '4K': {
+        title: 'TOEIC 4 Kỹ năng',
+        currentLevels: [
+            { label: 'TOEIC LR 1-295 & SW 1-99', value: '4K_1-99', minScore: ScoreMap['1-295'] },
+            { label: 'TOEIC LR 300-595 & SW 100-199', value: '4K_300-100', minScore: ScoreMap['300-595'] },
+            { label: 'TOEIC LR 600-850 & SW 200-250', value: '4K_600-200', minScore: ScoreMap['600-850'] },
+        ],
+        goalLevels: [
+            { label: 'TOEIC LR 300+ & SW 100+', value: '4K_300-100+', minScore: ScoreMap['300-595'] },
+            { label: 'TOEIC LR 600+ & SW 200+', value: '4K_600-200+', minScore: ScoreMap['600-850'] },
+            { label: 'TOEIC LR 800+ & SW 300+', value: '4K_800-300+', minScore: ScoreMap['800+'] },
+        ],
+        packages: {
+            '4K_1-99_4K_300-100+': { chapter: 'TOEIC 4 Kỹ năng Nền tảng', priceSelf: '1.000.000', priceFull: '1.750.000', commitment: 'LR 300+ & SW 100+' },
+            '4K_300-100_4K_600-200+': { chapter: 'TOEIC 4 Kỹ năng Trung cấp', priceSelf: '2.500.000', priceFull: '3.500.000', commitment: 'LR 600+ & SW 200+' },
+            '4K_600-200_4K_800-300+': { chapter: 'TOEIC 4 Kỹ năng Chuyên sâu', priceSelf: '4.400.000', priceFull: '6.650.000', commitment: 'LR 800+ & SW 300+' },
+        }
+    },
+};
+
+
+// ==============================================================
+// 2. Component TOEICLevelSelection (Component Đa năng MỚI)
+// ==============================================================
+const TOEICLevelSelection = () => {
+    const [activeTab, setActiveTab] = useState('LR'); 
+    
+    // Khởi tạo state bằng giá trị mặc định của tab LR
+    const [currentLevel, setCurrentLevel] = useState(TAB_DATA.LR.currentLevels[0].value);
+    const [goalLevel, setGoalLevel] = useState(TAB_DATA.LR.goalLevels[0].value);
+    const [selectedPackage, setSelectedPackage] = useState(TAB_DATA.LR.packages[Object.keys(TAB_DATA.LR.packages)[0]]);
+
+    // Cập nhật dữ liệu khi tab thay đổi
+    const updateDataForTab = useCallback((tab) => {
+        const data = TAB_DATA[tab];
+        const defaultCurrentLevel = data.currentLevels[0].value;
+        const defaultGoalLevel = data.goalLevels[0].value;
+        
+        setCurrentLevel(defaultCurrentLevel);
+        setGoalLevel(defaultGoalLevel);
+        setSelectedPackage(data.packages[`${defaultCurrentLevel}_${defaultGoalLevel}`] || data.packages[Object.keys(data.packages)[0]]);
+    }, []);
+
+    // Hook để tự động cập nhật goalLevel khi currentLevel thay đổi
+    useEffect(() => {
+        const tabData = TAB_DATA[activeTab];
+        
+        const currentLevelInfo = tabData.currentLevels.find(l => l.value === currentLevel);
+        const currentMinScore = currentLevelInfo ? currentLevelInfo.minScore : 0;
+        
+        const goalLevelInfo = tabData.goalLevels.find(g => g.value === goalLevel);
+        const goalMinScore = goalLevelInfo ? goalLevelInfo.minScore : 0;
+
+        // LOGIC KIỂM TRA: Nếu mục tiêu thấp hơn trình độ hiện tại, TỰ ĐỘNG nâng mục tiêu
+        if (goalMinScore < currentMinScore) {
+            const newGoal = tabData.goalLevels.find(g => g.minScore >= currentMinScore);
+            if (newGoal) {
+                setGoalLevel(newGoal.value);
+            }
+        }
+        
+        // Cập nhật gói học phí sau khi Level/Goal đã được đồng bộ
+        const packageKey = `${currentLevel}_${goalLevel}`;
+        const newPackage = tabData.packages[packageKey];
+        if (newPackage) {
+            setSelectedPackage(newPackage);
+        }
+
+    }, [currentLevel, goalLevel, activeTab]);
+
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+        updateDataForTab(tab);
+    };
+    
+    const tabData = TAB_DATA[activeTab];
+    const currentLevelInfo = tabData.currentLevels.find(l => l.value === currentLevel);
+    const currentMinScore = currentLevelInfo ? currentLevelInfo.minScore : 0;
+
+    // Hàm kiểm tra mục tiêu có hợp lệ hay không (dựa trên currentMinScore)
+    const isGoalAvailable = (goalValue) => {
+        const goalInfo = tabData.goalLevels.find(g => g.value === goalValue);
+        // Mục tiêu phải lớn hơn hoặc bằng trình độ hiện tại
+        return goalInfo && goalInfo.minScore >= currentMinScore;
+    };
+    
+    // Component hiển thị các tùy chọn trình độ và mục tiêu
+    const LevelOption = ({ level, type }) => {
+        const isCurrentSelection = (type === 'current' ? currentLevel : goalLevel) === level.value;
+        const isDisabled = type === 'goal' && !isGoalAvailable(level.value);
+        
+        const onClick = () => {
+            if (isDisabled) return;
+            if (type === 'current') {
+                setCurrentLevel(level.value);
+            } else {
+                setGoalLevel(level.value);
+            }
+        };
+
+        return (
+            <motion.button
+                key={level.value} // Dùng key để đảm bảo animation khi level thay đổi
+                whileHover={{ scale: isDisabled ? 1 : 1.03 }}
+                onClick={onClick}
+                disabled={isDisabled}
+                className={`w-full py-3 rounded-lg font-bold text-center transition-all border-2 
+                    ${isCurrentSelection 
+                        ? 'bg-white border-primary-400 text-primary-700 shadow-lg' 
+                        : isDisabled 
+                            ? 'bg-gray-700/50 border-gray-600 text-gray-400 cursor-not-allowed' 
+                            : 'bg-white/10 border-white/20 text-white/80 hover:bg-white/20'}`}
+            >
+                {level.label}
+            </motion.button>
+        );
+    };
+
+    return (
+        <section className="py-20 bg-[#00429D] text-white">
+            
+            {/* Header chung */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-12">
+                <h1 className="text-4xl font-extrabold mb-2">
+                    Thiết kế lộ trình học dành riêng cho bạn, ngay tại đây!
+                </h1>
+                
+                {/* Tab Navigation */}
+                <div className="flex justify-center space-x-4 bg-white/20 rounded-full p-1 mx-auto max-w-fit mt-6">
+                    {Object.keys(TAB_DATA).map((tabKey) => (
+                         <button 
+                             key={tabKey}
+                             onClick={() => handleTabChange(tabKey)}
+                             className={`py-2 px-6 rounded-full font-semibold text-sm transition-all ${
+                                activeTab === tabKey ? 'bg-white text-[#00429D] shadow-lg' : 'text-white/80 hover:bg-white/10'
+                            }`}
+                         >
+                            {TAB_DATA[tabKey].title}
+                         </button>
+                    ))}
+                </div>
+            </div>
+            
+            {/* Vùng Trình độ & Mục tiêu */}
+            <div className="max-w-6xl mx-auto px-4">
+                <div className="bg-primary-900/50 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        
+                        {/* 1. Trình độ của tôi */}
+                        <div>
+                            <h3 className="text-xl font-bold mb-4 text-white/90">Trình độ của tôi</h3>
+                            <div className="space-y-3">
+                                <AnimatePresence mode="wait">
+                                    <motion.div 
+                                        key={activeTab + "current"} 
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -20 }}
+                                        className="space-y-3"
+                                    >
+                                        {tabData.currentLevels.map((level) => (
+                                            <LevelOption key={level.value} level={level} type="current" />
+                                        ))}
+                                    </motion.div>
+                                </AnimatePresence>
+                            </div>
+                        </div>
+
+                        {/* 2. Mục tiêu của tôi */}
+                        <div>
+                            <h3 className="text-xl font-bold mb-4 text-white/90">Mục tiêu của tôi</h3>
+                            <div className="space-y-3">
+                                <AnimatePresence mode="wait">
+                                    <motion.div 
+                                        key={activeTab + "goal"} 
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 20 }}
+                                        className="space-y-3"
+                                    >
+                                        {tabData.goalLevels.map((goal) => (
+                                            <LevelOption key={goal.value} level={goal} type="goal" />
+                                        ))}
+                                    </motion.div>
+                                </AnimatePresence>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Kiểm tra đầu vào */}
+                    <p className="text-center mt-6 text-sm text-white/80">
+                        Bạn chưa rõ trình độ bản thân? 
+                        <a href="#" className="font-semibold text-accent-yellow hover:underline ml-1">Kiểm tra đầu vào</a>
+                    </p>
+                </div>
+            </div>
+
+            {/* Vùng Chương trình học & Gói học phí */}
+            <div className="max-w-6xl mx-auto px-4 mt-12">
+                <AnimatePresence mode="wait">
+                    <motion.div 
+                        key={currentLevel + goalLevel}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                        className="bg-primary-900/50 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/10"
+                    >
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-2xl font-extrabold text-white">Chặng 1</h3>
+                            <div className="flex items-center text-accent-yellow font-bold text-lg">
+                                Cam kết mục tiêu đầu ra: {selectedPackage.commitment}
+                            </div>
+                        </div>
+                        <p className="text-xl font-semibold text-white/90 mb-6">
+                            Chinh phục lộ trình **{selectedPackage.chapter}**
+                        </p>
+                        
+                        {/* Gói học phí (Packages) */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            
+                            {/* Gói 1: Tự học chủ động */}
+                            <motion.div className="bg-white p-6 rounded-xl text-text-dark shadow-xl">
+                                <h4 className="text-lg font-bold mb-4">⭐ Tự học chủ động</h4>
+                                <p className="text-2xl font-extrabold text-primary-600 mb-4">{selectedPackage.priceSelf} VND</p>
+                                <a href="#" className="inline-block bg-primary-600 text-white px-4 py-2 rounded-md font-semibold text-sm">Đăng ký học ngay</a>
+                                <div className="mt-4 border-t pt-4 space-y-2">
+                                    <h5 className="font-bold text-gray-700">Quyền lợi:</h5>
+                                    <ul className="text-sm space-y-2">
+                                        {[
+                                            'Sở hữu bộ giáo trình tích hợp chuyên sâu',
+                                            'Luyện đề Listening & Reading có giải thích đáp án chi tiết',
+                                            'Hỗ trợ trọn bộ & chiến lược làm đề TOEIC hiệu quả',
+                                            'Thực chiến với bộ đề TOEIC độc quyền, sát đề thi thật',
+                                            'Cá nhân hóa kế hoạch học tập một cách chuyên biệt',
+                                        ].map((item, i) => (
+                                            <li key={i} className="flex items-start">
+                                                <CheckCircleIcon className="h-5 w-5 text-accent-yellow mr-2 flex-shrink-0" />
+                                                <span>{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </motion.div>
+                            
+                            {/* Gói 2: Học và luyện đề toàn diện (Đề xuất) */}
+                            <motion.div className="bg-white p-6 rounded-xl text-text-dark shadow-xl border-4 border-accent-yellow relative">
+                                <span className="absolute top-0 right-0 bg-accent-yellow text-text-dark text-xs font-bold px-3 py-1 rounded-bl-lg">Đề xuất</span>
+                                <h4 className="text-lg font-bold mb-4">🎯 Học và luyện đề toàn diện</h4>
+                                <p className="text-2xl font-extrabold text-primary-600 mb-4">{selectedPackage.priceFull} VND</p>
+                                <a href="#" className="inline-block bg-primary-600 text-white px-4 py-2 rounded-md font-semibold text-sm">Đăng ký học ngay</a>
+                                <div className="mt-4 border-t pt-4 space-y-2">
+                                    <h5 className="font-bold text-gray-700">Quyền lợi:</h5>
+                                    <ul className="text-sm space-y-2">
+                                        {[
+                                            'Sở hữu bộ giáo trình tích hợp chuyên sâu',
+                                            'Luyện đề Listening & Reading có giải thích đáp án chi tiết',
+                                            'Nắm trọn bộ kỹ & chiến lược làm đề TOEIC hiệu quả',
+                                            'Thực chiến với bộ đề TOEIC độc quyền, sát đề thi thật',
+                                            'Cá nhân hóa kế hoạch học tập một cách chuyên biệt',
+                                            'Luyện speaking & writing hằng ngày với phòng luyện ảo Prep AI',
+                                            'Luyện writing ảo hằng ngày với bộ đề độc quyền, sát nhất' 
+                                        ].map((item, i) => (
+                                            <li key={i} className="flex items-start">
+                                                <CheckCircleIcon className="h-5 w-5 text-accent-yellow mr-2 flex-shrink-0" />
+                                                <span>{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            </motion.div>
+                        </div>
+                        
+                        <a href="#" className="text-center block mt-6 text-sm text-white/80 hover:underline">
+                            Xem chi tiết lộ trình
+                        </a>
+                        
+                    </motion.div>
+                </AnimatePresence>
+            </div>
+        </section>
+    );
+};
+
+
+// ==============================================================
+// 3. Component Step Slider (Được giữ nguyên)
+// ==============================================================
+const TOEIC_STEP_DATA = [
+    {
+        step: 1,
+        title: "Tứ Phòng Luyện Thi TOEIC Ảo Prep AI Đầu Tiên Việt Nam",
+        description: "Trải nghiệm luyện thi TOEIC thông minh - toàn diện. Bạn sẽ nhận được điểm số chi tiết và trình độ hiện tại ngay sau khi hoàn thành bài thi thử.",
+        substep: "Bước 1: Kiểm tra trình độ & Thiết lập lộ trình",
+        image: { tag: 'Kết quả thi thử TOEIC', file: 'image_683e7b.png' }
+    },
+    {
+        step: 2,
+        title: "Nói & Viết trôi chảy với Phòng luyện Speaking/Writing ảo",
+        description: "AI chấm chữa phát âm chi tiết, sửa từng lỗi ngữ pháp, nâng cấp từ vựng trong bài, giúp bạn cải thiện rõ rệt cả hai kỹ năng.",
+        substep: "Bước 2: Luyện tập chuyên sâu 4 kỹ năng",
+        image: { tag: 'Phản hồi chấm Speaking/Writing', file: 'image_683e5c.jpg' }
+    },
+    {
+        step: 3,
+        title: "Học tập trung cùng video bài giảng tương tác",
+        description: "Các câu hỏi tương tác được lồng xuyên suốt bài giảng để kiểm tra kiến thức bạn vừa học, tăng khả năng ghi nhớ và áp dụng nội dung ngay lập tức.",
+        substep: "Bước 3: Nắm vững kiến thức qua bài giảng tương tác",
+        image: { tag: 'Bài giảng video tương tác', file: 'image_683e26.jpg' }
+    },
+];
+
+const TOEICStepSlider = () => {
+    const [step, setStep] = useState(0); 
+    const sliderRef = useRef(null);
+    const debounceTimeout = useRef(null);
+    
+    const handleWheel = (e) => {
+        if (debounceTimeout.current) return;
+
+        const direction = e.deltaY > 0 ? 1 : -1;
+
+        setStep((prevStep) => {
+            let nextStep = prevStep + direction;
+            if (nextStep < 0) nextStep = 0;
+            if (nextStep >= TOEIC_STEP_DATA.length) nextStep = TOEIC_STEP_DATA.length - 1;
+
+            if (nextStep !== prevStep) {
+                debounceTimeout.current = setTimeout(() => {
+                    debounceTimeout.current = null;
+                }, 700); 
+                e.preventDefault(); 
+            }
+            return nextStep;
+        });
+    };
+
+    useEffect(() => {
+        const sliderElement = sliderRef.current;
+        if (sliderElement) {
+            sliderElement.addEventListener('wheel', handleWheel, { passive: false });
+        }
+
+        return () => {
+            if (sliderElement) {
+                sliderElement.removeEventListener('wheel', handleWheel);
+            }
+            clearTimeout(debounceTimeout.current);
+        };
+    }, []); 
+
+    const currentStep = TOEIC_STEP_DATA[step];
+
+    const slideVariants = {
+        enter: (direction) => ({
+            y: direction > 0 ? 500 : -500,
+            opacity: 0
+        }),
+        center: {
+            y: 0,
+            opacity: 1
+        },
+        exit: (direction) => ({
+            y: direction < 0 ? 500 : -500,
+            opacity: 0
+        })
+    };
+
+    return (
+        <section 
+            ref={sliderRef}
+            className="py-16 md:py-24 bg-[#00429D] text-white relative overflow-hidden h-[800px] flex items-center" 
+        >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                
+                <motion.div 
+                    className="text-center mb-16"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    viewport={{ once: true }}
+                >
+                    <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
+                        Tối ưu hành trình Luyện Thi TOEIC với 3 bước dễ dàng
+                    </h2>
+                    <p className="text-lg text-primary-100">
+                        Hệ thống TOEIC Prep AI sẽ đồng hành cùng bạn chinh phục mục tiêu điểm số.
+                    </p>
+                </motion.div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    
+                    <div className="space-y-6 flex flex-col justify-center min-h-[400px] relative">
+                         <AnimatePresence mode="wait">
+                            <motion.div 
+                                key={currentStep.step + "text"}
+                                variants={slideVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                custom={currentStep.step > (step + 1) ? -1 : 1} 
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                className="absolute inset-0 p-4"
+                            >
+                                <p className="text-6xl md:text-7xl font-extrabold text-white/20 leading-none">
+                                    Bước {currentStep.step}
+                                </p>
+                                <h3 className="text-3xl font-bold text-white mt-4">
+                                    {currentStep.title}
+                                </h3>
+                                <p className="text-lg text-primary-100 mt-4">
+                                    {currentStep.description}
+                                </p>
+                            </motion.div>
+                         </AnimatePresence>
+                    </div>
+
+                    <div className="relative h-96 w-full rounded-3xl overflow-hidden shadow-2xl bg-white">
+                        <AnimatePresence mode="wait"> 
+                            <motion.div
+                                key={currentStep.step + "image"}
+                                custom={1} 
+                                variants={slideVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{
+                                    y: { type: "spring", stiffness: 300, damping: 30 },
+                                    opacity: { duration: 0.3 }
+                                }}
+                                className="absolute inset-0 p-6 flex items-center justify-center"
+                            >
+                                <div className="text-center w-full h-full">
+                                    <p className="text-sm font-semibold text-gray-500 mb-2">{currentStep.substep}</p>
+                                    
+                                    <div className="w-full h-[85%] mx-auto bg-gray-100 rounded-lg flex items-center justify-center border-4 border-primary-400 overflow-hidden">
+                                        {/* Hiển thị hình ảnh tương ứng */}
+                                        <img 
+                                            src={currentStep.image.file} 
+                                            alt={currentStep.image.tag} 
+                                            className="object-contain w-full h-full"
+                                        />
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+
+                </div>
+
+                 <div className="text-center mt-12 flex justify-center space-x-3">
+                    {TOEIC_STEP_DATA.map((s, index) => (
+                        <button
+                            key={s.step}
+                            onClick={() => setStep(index)}
+                            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                                index === step ? 'bg-white scale-125' : 'bg-primary-300/50 hover:bg-primary-300'
+                            }`}
+                            aria-label={`Go to step ${s.step}`}
+                        />
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+
+// ==============================================================
+// 4. Component RoadmapToeic Chính
+// ==============================================================
+
+const RoadmapToeic = () => {
+    return (
+        <div className="bg-white min-h-screen">
+            {/* 1. Hero Section */}
+            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    transition={{ duration: 0.5 }}
+                    className="bg-white rounded-3xl shadow-xl overflow-hidden md:flex"
+                >
+                    {/* Cột 1: Nội dung */}
+                    <div className="md:w-1/2 p-10 bg-[#f0f5ff] flex flex-col justify-center">
+                        <h2 className="text-sm font-bold text-primary-600 uppercase mb-2">KHOÁ HỌC TOEIC</h2>
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-secondary-900 mb-4 leading-tight">
+                            Luyện Thi TOEIC Hiệu Quả!
+                        </h1>
+                        <p className="text-lg text-gray-700 mb-8 max-w-md">
+                            Với Phòng Luyện TOEIC Ảo Prep AI 4 kỹ năng đầu tiên & duy nhất tại Việt Nam
+                        </p>
+                        <a href="#" className="inline-block px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-semibold max-w-fit">
+                            Thiết kế lộ trình học
+                        </a>
+                        <div className="mt-6 flex items-center">
+                            <div className="flex -space-x-2 mr-3">
+                                <img className="h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=NV&background=c7d2fe&color=3730a3" alt="Student 1" />
+                                <img className="h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=PT&background=a5b4fc&color=3730a3" alt="Student 2" />
+                            </div>
+                            <p className="text-sm font-medium text-gray-700">
+                                <strong>30.000+</strong> học viên đạt được TOEIC tại NTTU HUB
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Cột 2: Hình ảnh */}
+                    <div className="md:w-1/2 relative bg-[#1E90FF] overflow-hidden flex items-center justify-center">
+                        <div className="absolute inset-0 bg-primary-900 opacity-20"></div>
+                        
+                    </div>
+                </motion.div>
+            </div>
+            
+            {/* 2. Phần Step Slider */}
+            <TOEICStepSlider />
+            
+            {/* 3. Phần Lựa chọn Trình độ & Mục tiêu */}
+            <TOEICLevelSelection />
+
+            {/* 4. CTA cuối trang */}
+            <div 
+                className="py-12 text-center bg-[#003885] text-white"
+            >
+                 <a href="#" className="inline-block px-8 py-3 bg-accent-yellow text-text-dark rounded-full font-bold hover:bg-yellow-400 transition-colors">
+                    Chọn lộ trình học và Trải nghiệm ngay
+                </a>
+            </div>
+        </div>
+    );
+};
+export default RoadmapToeic;
 
 ==================================================
 FILE_PATH: client\src\pages\student\Dashboard.js
