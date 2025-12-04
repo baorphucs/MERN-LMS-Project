@@ -273,7 +273,7 @@ export default App;
 ==================================================
 FILE_PATH: client\src\components\common\ChatWidget.js
 ==================================================
-// FILE_PATH: client/src/components/common/ChatWidget.js (ĐÃ SỬA LỖI CÚ PHÁP)
+// FILE_PATH: client/src/components/common/ChatWidget.js (ĐÃ SỬA LỖI LOẠN/TRÙNG LẶP)
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -317,7 +317,7 @@ const ChatWidget = () => {
   };
 
   // 1. Thiết lập Socket và Join Room
-  useEffect(() => { // <=== ĐÃ SỬA LỖI Ở ĐÂY
+  useEffect(() => {
     if (!isAuthenticated || !user) return;
 
     // Join room của user hiện tại
@@ -330,7 +330,8 @@ const ChatWidget = () => {
 
     // 2. Lắng nghe tin nhắn
     const handleReceiveMessage = (data) => {
-        // Chỉ thêm tin nhắn nếu nó thuộc phòng chat hiện tại (của chính mình)
+        // ChatRoomId là ID của Student, nên tin nhắn gửi đến Student (receiverId=chatRoomId)
+        // hoặc gửi từ Student (senderId=chatRoomId) đều thuộc về phòng này.
         if (data.senderId === chatRoomId || data.receiverId === chatRoomId) {
             
             setMessages(prev => {
@@ -339,9 +340,6 @@ const ChatWidget = () => {
                     return prev; 
                 }
                 
-                // Nếu tin nhắn đến từ chính người dùng (senderId == chatRoomId), 
-                // thì nó phải được thêm vào messages list.
-                // Nếu tin nhắn đến từ người khác (Admin), thì cũng thêm vào.
                 return [...prev, data];
             });
         }
@@ -459,6 +457,7 @@ const ChatWidget = () => {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Input Footer */}
             <form onSubmit={handleSendMessage} className="p-3 border-t flex bg-white">
               <input
                 type="text"
@@ -4087,10 +4086,10 @@ const Home = () => {
   };
 
   const features = [
-    { icon: <BookOpenIcon className="h-6 w-6" />, title: 'Digital Course Materials', description: 'Access all your learning resources in one place, from any device, anywhere.' },
-    { icon: <UserGroupIcon className="h-6 w-6" />, title: 'Collaborative Learning', description: 'Stay connected with classmates and instructors through announcements and updates.' },
-    { icon: <AcademicCapIcon className="h-6 w-6" />, title: 'Real-time Quizzes', description: 'Test your knowledge with interactive quizzes and get instant results.' },
-    { icon: <UserGroupIcon className="h-6 w-6" />, title: 'Collaborative Learning', description: 'Stay connected with classmates and instructors through announcements and updates.' },
+    { icon: <BookOpenIcon className="h-6 w-6" />, title: 'Tài liệu Khóa học Số', description: 'Truy cập tất cả tài nguyên học tập ở cùng một nơi, trên mọi thiết bị, tại bất cứ đâu.' },
+    { icon: <UserGroupIcon className="h-6 w-6" />, title: 'Học Tập Cộng Tác', description: 'Luôn kết nối với bạn học và giảng viên thông qua các thông báo và cập nhật.' },
+    { icon: <AcademicCapIcon className="h-6 w-6" />, title: 'Bài Kiểm tra/Đố Vui Trực tiếp', description: 'Kiểm tra kiến thức của bạn bằng các bài đố vui/kiểm tra tương tác và nhận kết quả tức thì.' },
+    { icon: <UserGroupIcon className="h-6 w-6" />, title: 'Học Tập Cộng Tác', description: 'Luôn kết nối với bạn học và giảng viên thông qua các thông báo và cập nhật.' },
   ];
 
   const testimonials = [
@@ -4136,11 +4135,11 @@ const Home = () => {
   >
     {/* GIẢM CỠ CHỮ TẠI ĐÂY */}
     <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 drop-shadow-2xl">
-      Hi there!, <span className="text-yellow-400">I'm PhamNgocBaoPhuc</span>
+      Chào các bạn!, <span className="text-yellow-400">Chúng tôi là NTTU HUB</span>
     </h1>
 
     <p className="text-lg md:text-xl text-white/90 mb-10 max-w-3xl mx-auto font-light leading-relaxed drop-shadow-lg">
-      We bring together world-class instructors, interactive content, and a supportive community to help you achieve your personal and professional goals.
+      Kết nối bạn với đội ngũ giảng viên hàng đầu, nội dung tương tác và cộng đồng hỗ trợ để cùng bạn chinh phục mục tiêu cá nhân và sự nghiệp.
     </p>
 
     <a
@@ -4180,9 +4179,9 @@ const Home = () => {
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div className="text-center mb-16" variants={itemVariants}>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Designed for Modern Learning</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Thiết kế cho việc học hiện đại</h2>
             <p className="max-w-2xl mx-auto text-lg text-gray-600">
-              Our platform provides all the tools you need for effective teaching and engaging learning experiences.
+              Nền tảng của chúng tôi cung cấp tất cả các công cụ bạn cần để giảng dạy hiệu quả và tạo ra những trải nghiệm học tập hấp dẫn.
             </p>
           </motion.div>
           
@@ -4220,17 +4219,17 @@ const Home = () => {
       <motion.section className="bg-gray-50 py-16 md:py-24" variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div className="text-center mb-16" variants={itemVariants}>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Benefits for Everyone</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Lợi Ích Dành Cho Tất Cả Mọi Người</h2>
             <p className="max-w-2xl mx-auto text-lg text-gray-600">
-              Whether you're a teacher or a student, our platform enhances the learning experience.
+              Dù bạn là giáo viên hay học viên, nền tảng của chúng tôi đều nâng cao trải nghiệm học tập.
             </p>
           </motion.div>
           
           <div className="md:flex md:items-center md:justify-between">
             <motion.div className="md:w-1/2 mb-10 md:mb-0" variants={itemVariants}>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-6">For Teachers</h3>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-6">Lợi Ích Dành Cho Giáo Viên</h3>
               <ul className="space-y-4">
-                {['Create and manage courses with ease','Share materials in various formats','Design assessments and quizzes','Track student progress and engagement','Communicate effectively with students'].map((item, i) => (
+                {['Tạo và quản lý khóa học dễ dàng.','Chia sẻ tài liệu dưới nhiều định dạng khác nhau.','Thiết kế các bài đánh giá và bài kiểm tra/đố vui.','Theo dõi tiến độ và mức độ tham gia của học viên.','Giao tiếp hiệu quả với học viên.'].map((item, i) => (
                   <li key={i} className="flex items-start">
                     <CheckCircleIcon className="h-6 w-6 text-green-500 mr-2 flex-shrink-0" />
                     <span className="text-gray-700">{item}</span>
@@ -4240,9 +4239,9 @@ const Home = () => {
             </motion.div>
             
             <motion.div className="md:w-1/2" variants={itemVariants}>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-6">For Students</h3>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-6">Lợi Ích Dành Cho Học Viên</h3>
               <ul className="space-y-4">
-                {['Access all course materials in one place','Submit assignments digitally','Take quizzes and get instant feedback','Track your grades and progress','Stay updated with course announcements'].map((item, i) => (
+                {['Truy cập tất cả tài liệu khóa học tại một nơi duy nhất.','Nộp bài tập dưới dạng kỹ thuật số.','Làm bài kiểm tra và nhận phản hồi tức thì.','Theo dõi điểm số và tiến độ học tập của bạn.','Luôn cập nhật các thông báo mới nhất của khóa học.'].map((item, i) => (
                   <li key={i} className="flex items-start">
                     <CheckCircleIcon className="h-6 w-6 text-green-500 mr-2 flex-shrink-0" />
                     <span className="text-gray-700">{item}</span>
@@ -7558,7 +7557,7 @@ export default TakeQuiz;
 ==================================================
 FILE_PATH: client\src\pages\teacher\AdminChat.js
 ==================================================
-// FILE_PATH: client/src/pages/teacher/AdminChat.js (ĐÃ SỬA LỖI REAL-TIME CỦA ADMIN)
+// FILE_PATH: client/src/pages/teacher/AdminChat.js (ĐÃ SỬA LỖI REAL-TIME ADMIN)
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshIcon, PaperAirplaneIcon, ChatIcon, ChevronLeftIcon } from '@heroicons/react/outline';
@@ -7615,16 +7614,14 @@ const AdminChat = () => {
     
     // 3. Xử lý khi chọn một phòng chat
     const handleSelectRoom = (room) => {
-        // Rời khỏi phòng cũ (nếu có)
         if (selectedRoom) {
             socket.emit('leave_room', selectedRoom.chatRoomId);
         }
         
         setSelectedRoom(room);
-        setMessages([]); // Xóa tin nhắn cũ
+        setMessages([]); 
         fetchMessages(room.chatRoomId);
         
-        // Join phòng mới
         // Admin join phòng của Student để nghe tin nhắn đến từ Student
         socket.emit('join_room', room.chatRoomId); 
     };
@@ -7633,12 +7630,10 @@ const AdminChat = () => {
     useEffect(() => {
         if (!user) return;
         
-        // Admin join phòng Admin để nhận thông báo
         socket.emit('join_admin_room');
         // Admin cũng join phòng của chính họ (user._id) để nhận self-update tin nhắn
         socket.emit('join_room', user._id); 
 
-        // Lắng nghe thông báo tin nhắn mới (khi Admin đang ở trang khác)
         const handleNewNotification = (data) => {
             toast.info(`Tin nhắn mới từ ${data.chatRoomId}. Cập nhật danh sách.`);
             fetchConversations();
@@ -7647,20 +7642,27 @@ const AdminChat = () => {
         // Lắng nghe tin nhắn Real-time
         const handleReceiveMessage = (data) => {
             
-            // Lắng nghe cho 2 trường hợp:
-            // 1. Tin nhắn là self-update của chính Admin (senderId == user._id)
-            // 2. Tin nhắn thuộc về phòng chat Admin đang mở (receiverId == selectedRoom.chatRoomId)
-            if (selectedRoom && (data.senderId === selectedRoom.chatRoomId || 
+            // Lấy ID người gửi để so sánh
+            const senderId = data.sender?._id || data.sender;
+
+            // Kiểm tra xem tin nhắn này có thuộc phòng đang mở VÀ nó không phải là self-update của Admin đang gửi từ ChatWidget hay không.
+            if (selectedRoom && (senderId === selectedRoom.chatRoomId || 
                                 data.receiverId === selectedRoom.chatRoomId ||
-                                data.senderId === user._id) 
+                                senderId === user._id) 
             ) {
                 setMessages(prev => {
-                    // Tránh duplicate nếu tin nhắn đã được gửi từ chính Admin này
+                    // Tránh duplicate
                     if (data.messageId && prev.some(m => m.messageId === data.messageId)) return prev;
+                    
+                    // Nếu là tin nhắn của Admin, ta cần thêm thông tin sender.name
+                    // Trong trường hợp này, ta có thể giả định tin nhắn gửi từ user._id (Admin)
+                    if (senderId === user._id && !data.sender?.name) {
+                        data.sender = { _id: user._id, name: user.name, role: user.role };
+                    }
+                    
                     return [...prev, data];
                 });
             }
-            // Nếu không phải phòng đang mở, chỉ cập nhật danh sách hội thoại
             else {
                 fetchConversations();
             }
@@ -7669,7 +7671,6 @@ const AdminChat = () => {
         socket.on('new_chat_notification', handleNewNotification);
         socket.on('receive_message', handleReceiveMessage);
         
-        // Tải danh sách hội thoại khi vào trang
         fetchConversations();
 
         return () => {
@@ -7679,7 +7680,7 @@ const AdminChat = () => {
                 socket.emit('leave_room', selectedRoom.chatRoomId);
             }
         };
-    }, [user, selectedRoom]);
+    }, [user, selectedRoom]); // Thêm selectedRoom vào dependency array
 
     // Auto scroll
     useEffect(() => {
@@ -7690,13 +7691,22 @@ const AdminChat = () => {
         e.preventDefault();
         if (!inputMessage.trim() || !selectedRoom) return;
 
+        // Tự thêm tin nhắn vào danh sách trước khi gửi (optimistic update)
+        // Đây là fix tốt nhất cho lỗi Admin không thấy tin nhắn của mình ngay lập tức
+        const optimisticMessage = {
+            messageId: Date.now().toString(), // ID tạm thời
+            sender: { _id: user._id, name: "Admin", role: user.role },
+            message: inputMessage.trim(),
+            createdAt: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, optimisticMessage]);
+
         const messageData = {
             senderId: user._id, // Teacher ID
             receiverId: selectedRoom.chatRoomId, // Student ID
             message: inputMessage.trim(),
         };
         
-        // Gửi qua Socket.IO
         socket.emit('send_message', messageData);
 
         setInputMessage('');
@@ -14902,322 +14912,238 @@ server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 ==================================================
 FILE_PATH: server.js
 ==================================================
-const Notice = require('../models/notice.model');
-const Course = require('../models/course.model');
-const fs = require('fs');
-const path = require('path');
+// FILE_PATH: server/server.js (CẬP NHẬT HOÀN TOÀN)
+const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
+const morgan = require('morgan');
+const path = require('path');
+require('dotenv').config();
 
-// Helper function to create directories if they don't exist
-const ensureDirectoryExists = (directory) => {
-  if (!fs.existsSync(directory)) {
-    fs.mkdirSync(directory, { recursive: true });
+// NEW IMPORTS FOR CHAT
+const http = require('http'); 
+const { Server } = require('socket.io'); 
+const { handleSocketMessage } = require('./controllers/chat.controller'); 
+
+// Import routes
+const authRoutes = require('./routes/auth.routes');
+const userRoutes = require('./routes/user.routes');
+const courseRoutes = require('./routes/course.routes');
+const noticeRoutes = require('./routes/notice.routes');
+const assignmentRoutes = require('./routes/assignment.routes');
+const quizRoutes = require('./routes/quiz.routes');
+const materialRoutes = require('./routes/material.routes');
+const submissionRoutes = require('./routes/submission.routes');
+const activityRoutes = require('./routes/activity.routes'); 
+const notificationRoutes = require('./routes/notification.routes');
+// NEW IMPORT
+const chatRoutes = require('./routes/chat.routes'); 
+
+const app = express();
+// Tạo HTTP server từ app Express
+const server = http.createServer(app); 
+
+// Cấu hình Socket.IO
+const io = new Server(server, {
+  cors: {
+    // Đảm bảo khớp với frontend port
+    origin: process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '*', 
+    methods: ["GET", "POST"]
   }
-};
+});
 
-// Add proper CORS handling to allow cross-origin requests
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true
-}));
+// Disable caching for all API responses
+app.use((req, res, next) => {
+  if (req.url.startsWith('/api/')) {
+    res.set('Cache-Control', 'no-store');
+  }
+  next();
+});
 
-// @desc    Create new notice
-// @route   POST /api/notices
-// @access  Private/Teacher
-exports.createNotice = async (req, res) => {
-  try {
-    console.log('Creating notice with data:', req.body);
-    const { title, content, courseId, priority, pinned, attachments } = req.body;
-    
-    // Validate required fields
-    if (!title || !content || !courseId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide title, content and course ID'
-      });
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(morgan('dev'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// MongoDB connection
+const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/lms_new';
+
+mongoose
+  .connect(mongoURI)
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => {
+    console.error('MongoDB connection error:', err);
+    // Server still runs, but DB is not connected
+  });
+
+// Add debug logging middleware to catch API errors
+app.use((req, res, next) => {
+  const originalSend = res.send;
+  res.send = function(data) {
+    console.log(`${req.method} ${req.originalUrl} - Status: ${res.statusCode}`);
+    if (res.statusCode >= 400) {
+      console.error(`Error response: ${data}`);
     }
+    return originalSend.call(this, data);
+  };
+  next();
+});
+
+// Add a debug middleware for content routes
+app.use(['/api/materials', '/api/assignments', '/api/quizzes', '/api/notices'], (req, res, next) => {
+  console.log(`DEBUG: ${req.method} ${req.originalUrl}`);
+  console.log('Query params:', req.query);
+  console.log('URL params:', req.params);
+  console.log('Body:', req.body);
+  next();
+});
+
+// KẾT NỐI SOCKET.IO LOGIC
+io.on('connection', (socket) => {
+  console.log('A user connected:', socket.id);
+  
+  // 1. User tham gia phòng chat của chính họ (User ID)
+  socket.on('join_room', (userId) => {
+    socket.join(userId); 
+    console.log(`User ${userId} joined room ${userId}`);
+  });
+  
+  // 2. Admin tham gia phòng hỗ trợ chung
+  socket.on('join_admin_room', () => {
+    socket.join('admin_support_room');
+    console.log(`Admin joined admin_support_room`);
+  });
+
+  // 3. Nhận tin nhắn và gửi lại cho người nhận (Real-time)
+  socket.on('send_message', async (data) => {
+    const { senderId, receiverId, message } = data;
+
+    // Lưu tin nhắn vào DB (sử dụng logic từ controller)
+    const savedMessage = await handleSocketMessage({ senderId, receiverId, message }); 
     
-    // Check if course exists
-    const course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found'
-      });
-    }
-    
-    // Check if user is the teacher of the course
-    if (course.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to create notices for this course'
-      });
-    }
-    
-    let files = [];
-    
-    // Handle file uploads
-    if (req.files && req.files.attachments) {
-      const attachments = Array.isArray(req.files.attachments) 
-        ? req.files.attachments 
-        : [req.files.attachments];
+    if (savedMessage) {
+        // Data để gửi đi, bao gồm cả timestamp từ DB
+        const responseData = { 
+            ...data, 
+            messageId: savedMessage._id,
+            createdAt: savedMessage.createdAt,
+            // Gửi đối tượng sender đầy đủ
+            sender: { 
+              _id: savedMessage.sender._id.toString(),
+              name: savedMessage.sender.name,
+              role: savedMessage.sender.role
+            },
+        };
+
+        // *** FIX BACKEND: Chỉ gửi tin nhắn đến room ID của Student và Admin Room. ***
+        // *** Frontend (Student/Admin) sẽ tự xử lý hiển thị tin nhắn đã gửi (Optimistic Update) ***
         
-      // Ensure uploads directory exists
-      const uploadsDir = path.join(__dirname, '../uploads/notices');
-      ensureDirectoryExists(uploadsDir);
-      
-      // Save each file
-      for (const file of attachments) {
-        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
-        const filename = `notice_${uniqueSuffix}_${file.name.replace(/\s+/g, '_')}`;
-        const filepath = path.join(uploadsDir, filename);
-        
-        await file.mv(filepath);
-        files.push(`notices/${filename}`);
-      }
-    }
-    
-    // Create notice
-    const notice = await Notice.create({
-      title,
-      content,
-      courseId,
-      author: req.user.id,
-      priority: priority || 'low',
-      pinned: pinned || false,
-      attachments: files
-    });
-    
-    res.status(201).json({
-      success: true,
-      data: notice
-    });
-  } catch (error) {
-    console.error('Error creating notice:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
-  }
-};
+        // Gửi tin nhắn đến phòng chat của Student (luôn là chatRoomId)
+        io.to(savedMessage.chatRoomId.toString()).emit('receive_message', responseData);
 
-// @desc    Get all notices (global or for a specific course)
-// @route   GET /api/notices
-// @route   GET /api/notices/course/:courseId
-// @access  Private
-exports.getNotices = async (req, res) => {
-  try {
-    // Add logging for debugging
-    console.log('Fetching notices with query:', req.query);
-    
-    let query = {};
-    
-    // If courseId is provided in query params, filter by course
-    if (req.query.courseId) {
-      query.courseId = req.query.courseId;
-    }
-    
-    const notices = await Notice.find(query)
-      .populate('courseId')
-      .populate('userId', 'name email role');
-    
-    console.log(`Found ${notices.length} notices`);
-    
-    res.status(200).json({
-      success: true,
-      count: notices.length,
-      data: notices
-    });
-  } catch (error) {
-    console.error('Error fetching notices:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
-  }
-};
-
-// @desc    Get all notices for a course
-// @route   GET /api/notices/course/:courseId
-// @access  Private
-exports.getNoticesForCourse = async (req, res) => {
-  try {
-    console.log('Getting notices for course:', req.params.courseId);
-    
-    const notices = await Notice.find({ courseId: req.params.courseId })
-      .populate('author', 'name avatar')
-      .sort('-pinned -createdAt');
-    
-    res.status(200).json({
-      success: true,
-      count: notices.length,
-      data: notices
-    });
-  } catch (error) {
-    console.error('Error getting notices:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
-  }
-};
-
-// @desc    Get single notice
-// @route   GET /api/notices/:id
-// @access  Private
-exports.getNotice = async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    console.log(`Fetching notice with id: ${id}`);
-    
-    const notice = await Notice.findById(id)
-      .populate('courseId')
-      .populate('userId', 'name email role');
-    
-    if (!notice) {
-      console.log('Notice not found');
-      return res.status(404).json({
-        success: false,
-        message: 'Notice not found'
-      });
-    }
-    
-    res.status(200).json({
-      success: true,
-      data: notice
-    });
-  } catch (error) {
-    console.error('Error fetching notice:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
-  }
-};
-
-// @desc    Update notice
-// @route   PUT /api/notices/:id
-// @access  Private/Teacher
-exports.updateNotice = async (req, res) => {
-  try {
-    let notice = await Notice.findById(req.params.id);
-    
-    if (!notice) {
-      return res.status(404).json({
-        success: false,
-        message: 'Notice not found'
-      });
-    }
-    
-    // Check course ownership
-    const course = await Course.findById(notice.courseId);
-    if (course.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to update this notice'
-      });
-    }
-    
-    notice = await Notice.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    ).populate('author', 'name avatar');
-    
-    res.status(200).json({
-      success: true,
-      data: notice
-    });
-  } catch (error) {
-    console.error('Error updating notice:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
-  }
-};
-
-// @desc    Delete notice
-// @route   DELETE /api/notices/:id
-// @access  Private/Teacher
-exports.deleteNotice = async (req, res) => {
-  try {
-    const notice = await Notice.findById(req.params.id);
-    
-    if (!notice) {
-      return res.status(404).json({
-        success: false,
-        message: 'Notice not found'
-      });
-    }
-    
-    // Check course ownership
-    const course = await Course.findById(notice.courseId);
-    if (course.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to delete this notice'
-      });
-    }
-    
-    await Notice.findByIdAndDelete(req.params.id);
-    
-    res.status(200).json({
-      success: true,
-      data: {}
-    });
-  } catch (error) {
-    console.error('Error deleting notice:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
-  }
-};
-
-// @desc    Get unread notices count
-// @route   GET /api/notices/unread
-// @access  Private
-exports.getUnreadCount = async (req, res) => {
-  try {
-    // Find courses the user is in
-    let courseQuery = {};
-    
-    if (req.user.role === 'student') {
-      courseQuery.students = req.user.id;
-    } else if (req.user.role === 'teacher') {
-      courseQuery.teacher = req.user.id;
-    }
-    
-    const courses = await Course.find(courseQuery);
-    const courseIds = courses.map(course => course._id);
-    
-    // Find notices that the user has not read yet
-    const unreadNoticesCount = await Notice.countDocuments({
-      $and: [
-        { readBy: { $ne: req.user.id } },
-        {
-          $or: [
-            { course: { $in: courseIds } },
-            { course: null } // Global notices
-          ]
+        // Nếu người gửi là Student, gửi đến Admin Room
+        if (savedMessage.sender.role === 'student') {
+             io.to('admin_support_room').emit('new_chat_notification', { 
+                chatRoomId: savedMessage.chatRoomId, 
+                message: message 
+            });
         }
-      ]
+        
+        // Nếu người gửi là Teacher/Admin, gửi tin nhắn trực tiếp đến phòng của Student
+        if (savedMessage.sender.role === 'teacher') {
+             io.to(savedMessage.chatRoomId.toString()).emit('receive_message', responseData);
+        }
+
+        // Gửi self-update đến chính người gửi (để đồng bộ hóa messageId/createdAt)
+        io.to(senderId).emit('receive_message', responseData);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api/notices', noticeRoutes);
+app.use('/api/assignments', assignmentRoutes);
+app.use('/api/quizzes', quizRoutes);
+app.use('/api/materials', materialRoutes);
+app.use('/api/submissions', submissionRoutes);
+app.use('/api/activities', activityRoutes); 
+app.use('/api/notifications', notificationRoutes);
+// NEW ROUTE
+app.use('/api/chat', chatRoutes); 
+
+// Global error handler for any uncaught errors in the routes
+app.use('/api/*', (error, req, res, next) => {
+  console.error('API Error caught by middleware:', error);
+  res.status(500).json({
+    success: false,
+    message: 'Something went wrong on the server',
+    details: process.env.NODE_ENV === 'development' ? error.message : undefined
+  });
+});
+
+// Serve static files
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/build')));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+  });
+} else {
+  app.use(express.static(path.join(__dirname, '../client/public')));
+
+  app.get('*', (req, res, next) => {
+    if (req.url.startsWith('/api')) {
+      return next(); // Let API routes be handled above
+    }
+    res.sendFile(path.join(__dirname, '../client/public', 'index.html'));
+  });
+}
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Server Error:', err.stack);
+
+  if (err.name === 'MongoServerError' && err.code === 11000) {
+    return res.status(400).json({
+      success: false,
+      message: 'This email is already registered'
     });
-    
-    res.json({
-      success: true,
-      unreadCount: unreadNoticesCount
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
   }
-};
+
+  res.status(500).json({
+    success: false,
+    message: err.message || 'Something went wrong on the server'
+  });
+});
+
+// Error handler middleware
+app.use((err, req, res, next) => {
+  console.error('Server error:', err.stack);
+  res.status(500).json({
+    success: false,
+    message: 'Server Error',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+  console.log('UNHANDLED REJECTION! 💥 Shutting down...');
+  console.error('Error:', err.message);
+  // Close server & exit process
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+// Start server (Sử dụng server.listen thay vì app.listen)
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
