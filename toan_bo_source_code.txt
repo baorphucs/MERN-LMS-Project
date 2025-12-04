@@ -8,6 +8,7 @@ FILE_PATH: client\package.json
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^1.0.6",
     "@testing-library/jest-dom": "^5.17.0",
@@ -20,13 +21,14 @@ FILE_PATH: client\package.json
     "react": "^18.2.0",
     "react-datepicker": "^4.16.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.68.0",
     "react-icons": "^4.10.1",
     "react-router-dom": "^6.15.0",
     "react-scripts": "5.0.1",
     "react-toastify": "^9.1.3",
+    "socket.io-client": "^4.7.2",
     "web-vitals": "^2.1.4",
-    "zxcvbn": "^4.4.2",
-    "socket.io-client": "^4.7.2"
+    "zxcvbn": "^4.4.2"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -120,17 +122,15 @@ FILE_PATH: client\public\manifest.json
 ==================================================
 FILE_PATH: client\src\App.js
 ==================================================
-// FILE_PATH: client\src\App.js (CẬP NHẬT HOÀN TOÀN)
+// FILE_PATH: client\src\App.js (CẬP NHẬT HOÀN CHỈNH)
 
-import React, 
-{ useContext } from 'react'; // <=== ĐÃ THÊM useContext VÀO ĐÂY 
+import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 
 // Auth Context
 import AuthContext, { AuthProvider } from './context/AuthContext';
-// Bổ sung AuthContext
 
 // Layout Components
 import Layout from './components/layout/Layout';
@@ -141,6 +141,7 @@ import StudentRoute from './components/routing/StudentRoute';
 // NEW IMPORT CHO CHAT
 import ChatWidget from './components/common/ChatWidget';
 import AdminChat from './pages/teacher/AdminChat';
+
 // Auth Pages
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -149,28 +150,29 @@ import Register from './pages/auth/Register';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 // NEW: Roadmap Pages
-import RoadmapToeic from './pages/RoadmapToeic'; // <=== ĐÃ THÊM IMPORT NÀY
-import RoadmapIelts from './pages/RoadmapIelts'; // <=== ĐÃ THÊM IMPORT NÀY
+import RoadmapToeic from './pages/RoadmapToeic'; 
+import RoadmapIelts from './pages/RoadmapIelts';
+// NEW: FAQ Page
+import FAQ from './pages/FAQ'; 
+// NEW: Contact Page
+import Contact from './pages/Contact'; 
+
 // Dashboard Pages
 import TeacherDashboard from './pages/teacher/Dashboard';
 import StudentDashboard from './pages/student/Dashboard';
-
 // Course Pages
 import Courses from './pages/courses/Courses';
 import CourseDetails from './pages/courses/CourseDetails';
 import CreateCourse from './pages/teacher/CreateCourse';
 import EditCourse from './pages/teacher/EditCourse';
-
 // NEW: Quản lý người dùng cho Teacher
 import Users from './pages/teacher/Users';
-import ManageStudents from './pages/teacher/ManageStudents'; 
-
+import ManageStudents from './pages/teacher/ManageStudents';
 // Assignment Pages
 import Assignments from './pages/assignments/Assignments';
 import AssignmentDetails from './pages/assignments/AssignmentDetails';
 import CreateAssignment from './pages/teacher/CreateAssignment';
-import SubmitAssignment from './pages/student/SubmitAssignment'; 
-
+import SubmitAssignment from './pages/student/SubmitAssignment';
 // Quiz Pages
 import Quizzes from './pages/quizzes/Quizzes';
 import QuizDetails from './pages/quizzes/QuizDetails';
@@ -181,8 +183,7 @@ import EditQuiz from './pages/teacher/EditQuiz';
 
 // Material
 import Materials from './pages/materials/Materials';
-import CreateMaterial from './pages/teacher/CreateMaterial'; 
-
+import CreateMaterial from './pages/teacher/CreateMaterial';
 // Notice
 import Notices from './pages/notices/Notices';
 import CreateNotice from './pages/teacher/CreateNotice';
@@ -197,47 +198,60 @@ return (
                 {/* Public Routes */}
                 <Route path="/" element={<Layout><Home /></Layout>} />
                 
+                {/* NEW: FAQ Public Route */}
+                <Route path="/faq" element={<Layout><FAQ /></Layout>} />
+         
+                {/* NEW: Contact Public Route */}
+                <Route path="/contact" element={<Layout><Contact /></Layout>} /> 
+
                 {/* NEW: Roadmap Public Routes */}
                 <Route path="/roadmap/toeic" element={<Layout><RoadmapToeic /></Layout>} />
                 <Route path="/roadmap/ielts" element={<Layout><RoadmapIelts /></Layout>} />
                 
                 <Route path="/login" element={<Login />} />
      
-           <Route path="/register" element={<Register />} /> 
+       
+                <Route path="/register" element={<Register />} /> 
 
                 {/* Protected Routes - Cả Teacher & Student */}
                 <Route element={<PrivateRoute />}>
                     <Route path="/courses" element={<Layout><Courses /></Layout>} />
                   
-  <Route path="/courses/:id" element={<Layout><CourseDetails /></Layout>} /> 
+                    <Route path="/courses/:id" element={<Layout><CourseDetails /></Layout>} /> 
+ 
                     <Route path="/notices" element={<Layout><Notices /></Layout>} />
                     <Route path="/materials" element={<Layout><Materials /></Layout>} />
                     <Route path="/assignments" element={<Layout><Assignments /></Layout>} />
                     <Route 
 path="/assignments/:id" element={<Layout><AssignmentDetails /></Layout>} /> 
+   
                     <Route path="/quizzes" element={<Layout><Quizzes /></Layout>} />
                     <Route path="/quizzes/:id" element={<Layout><QuizDetails /></Layout>} />
                     <Route path="/quizzes/:id/result" element={<Layout><QuizResult /></Layout>} />
                 </Route>
 
         
-        {/* Teacher Routes - Bao gồm cả Super Admin */}
+       
+                {/* Teacher Routes - Bao gồm cả Super Admin */}
                 <Route element={<TeacherRoute />}>
                     <Route path="/teacher/dashboard" element={<Layout><TeacherDashboard /></Layout>} />
                     <Route path="/teacher/create-course" element={<Layout><CreateCourse /></Layout>} />
                  
    
+    
                     {/* MỚI: Quản lý tất cả khóa học */} 
                     <Route path="/teacher/courses" element={<Layout><Courses /></Layout>} />
                     
                     {/* MỚI: Sửa khóa 
 học */}
+      
                     <Route path="/teacher/edit-course/:id" element={<Layout><EditCourse /></Layout>} /> 
                     
                     {/* MỚI: Quản lý người dùng */}
                     <Route path="/teacher/users" element={<Layout><Users /></Layout>} />
 
     
+       
                 {/* NEW: Quản lý sinh viên trong khóa học */} 
                     <Route path="/teacher/courses/:id/manage-students" element={<Layout><ManageStudents /></Layout>} />
 
@@ -245,24 +259,28 @@ học */}
                     <Route path="/teacher/chat" element={<Layout><AdminChat /></Layout>} />
 
  
-                   {/* Các route tạo nội dung */} 
+       
+                    {/* Các route tạo nội dung */} 
                     <Route path="/teacher/assignments/create/:courseId" element={<Layout><CreateAssignment /></Layout>} />
                     <Route path="/teacher/quizzes/create/:courseId" element={<Layout><CreateQuiz /></Layout>} />
                     <Route path="/teacher/materials/create/:courseId" element={<Layout><CreateMaterial /></Layout>} />
   
-                  <Route path="/teacher/notices/create/:courseId" element={<Layout><CreateNotice /></Layout>} /> 
+       
+                    <Route path="/teacher/notices/create/:courseId" element={<Layout><CreateNotice /></Layout>} /> 
                     
                     {/* Edit Quiz */}
                     <Route path="/quizzes/:id/edit" element={<Layout><EditQuiz /></Layout>} />
           
       </Route>
 
+ 
                 {/* Student Routes */}
                 <Route element={<StudentRoute />}>
                     <Route path="/student/dashboard" element={<Layout><StudentDashboard /></Layout>} />
                     <Route path="/assignments/:id/submit" element={<Layout><SubmitAssignment /></Layout>} />
          
-           <Route path="/quizzes/:id/take" element={<Layout><TakeQuiz /></Layout>} />
+       
+                    <Route path="/quizzes/:id/take" element={<Layout><TakeQuiz /></Layout>} />
                 </Route>
 
                 {/* 404 */}
@@ -270,12 +288,13 @@ học */}
             </Routes>
             
        
-     {/* NEW: Ẩn/Hiện Chat Widget tùy thuộc vào trạng thái đăng nhập */} 
+     {/* NEW: 
+ Ẩn/Hiện Chat Widget tùy thuộc vào trạng thái đăng nhập */} 
             {isAuthenticated && <ChatWidget />}
             
         </Router>
     );
-}
+ }
 
 
 const App = () => {
@@ -284,7 +303,7 @@ const App = () => {
             <AppContent />
         </AuthProvider>
     );
-};
+ };
 
 export default App;
 
@@ -651,7 +670,7 @@ export default Layout;
 ==================================================
 FILE_PATH: client\src\components\layout\Navbar.js
 ==================================================
-// FILE_PATH: client\src\components\layout\Navbar.js (FIXED & UPDATED)
+// FILE_PATH: client\src\components\layout\Navbar.js (CẬP NHẬT HOÀN CHỈNH)
 
 import React, { useContext, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -670,10 +689,15 @@ const Navbar = () => {
   const { user, isAuthenticated, logout } = useContext(AuthContext);
   const location = useLocation();
   const { notifications, markAsRead } = useNotifications();
+  
+  // CẬP NHẬT: Thêm link FAQ và Contact vào mảng navLinks
   const navLinks = [
-    { name: 'Home', to: '/', public: true },
+    { name: 'Trang chủ', to: '/', public: true },
     { name: 'Courses', to: '/courses', public: false },
+    { name: 'FAQ', to: '/faq', public: true }, // Link FAQ đã thêm
+    { name: 'Liên hệ', to: '/contact', public: true }, // NEW: Link Contact
   ];
+
   function isActive(path) {
     // Thêm kiểm tra cho lộ trình
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
@@ -691,7 +715,8 @@ const Navbar = () => {
       {({ open }) => (
         <>
           <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-            <div className="relative flex h-16 items-center justify-between">
+            <div className="relative flex h-16 items-center 
+justify-between">
               <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
 
                 {/* Mobile menu button*/}
@@ -699,7 +724,6 @@ const Navbar = () => {
                   <span className="sr-only">Open main menu</span>
                   {open ? (
                     <XIcon className="block h-6 w-6" aria-hidden="true" />
-
                   ) : (
                     <MenuIcon className="block h-6 w-6" aria-hidden="true" />
                   )}
@@ -711,12 +735,10 @@ const Navbar = () => {
                   <Link to="/">
                     <motion.div
                       whileHover={{ scale: 1.05 }}
-
                       className="text-2xl font-extrabold font-heading text-primary-400 drop-shadow-lg tracking-tight bg-gradient-to-r from-primary-400 to-secondary-500 bg-clip-text text-transparent"
                     >
                       NTTU HUB
                     </motion.div>
-
                   </Link>
                 </div>
 
@@ -724,23 +746,19 @@ const Navbar = () => {
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-2">
 
-                    {/* 1. HIỂN THỊ CÁC LINK CỐ ĐỊNH (HOME, COURSES) */}
+                    {/* 1. HIỂN THỊ CÁC LINK CỐ ĐỊNH (HOME, COURSES, FAQ, CONTACT) */}
                     {navLinks.map((item) => (
-
                       (item.public || isAuthenticated) && (
                         <Link
                           key={item.name}
                           to={item.to}
-
                           className={classNames(
                             isActive(item.to)
                               ? 'bg-primary-100 text-primary-700 shadow-lg'
-
                               : 'text-text-dark hover:bg-primary-50 hover:text-primary-500',
                             'rounded-xl px-4 py-2 text-base font-semibold transition-all duration-200 ease-in-out backdrop-blur-md'
                           )}
                         >
-
                           {item.name}
                         </Link>
                       )
@@ -806,30 +824,24 @@ const Navbar = () => {
                       {/* Notification dropdown */}
                       <Menu as="div" className="relative ml-3">
                         <div>
-
                           <Menu.Button className="relative flex rounded-full bg-white/70 shadow border border-primary-100 text-sm focus:outline-none transition-all duration-200">
                             <span className="sr-only">View notifications</span>
                             <BellIcon className="h-6 w-6 text-gray-700" />
-
                             {notifications.filter(n => !n.read).length > 0 && (
                               <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400"></span>
                             )}
                           </Menu.Button>
-
                         </div>
                         <Transition
                           enter="transition ease-out duration-100"
                           enterFrom="transform opacity-0 scale-95"
-
                           enterTo="transform opacity-100 scale-100"
                           leave="transition ease-in duration-75"
                           leaveFrom="transform opacity-100 scale-100"
                           leaveTo="transform opacity-0 scale-95"
-
                         >
                           <Menu.Items className="absolute right-0 z-10 mt-2 w-72 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                             <div className="px-4 py-2 font-semibold text-gray-700 border-b">
-
                               Notifications
                             </div>
                             {notifications.length > 0 ?
@@ -837,28 +849,22 @@ const Navbar = () => {
                                 notifications.map(notification => (
                                   <Menu.Item key={notification._id}>
                                     <div
-
                                       className={`block px-4 py-2 text-sm cursor-pointer ${notification.read ? 'text-gray-500' : 'text-gray-700 font-medium bg-blue-50'}`}
                                       onClick={() => markAsRead(notification._id)}
-
                                     >
                                       {notification.text}
                                     </div>
-
                                   </Menu.Item>
                                 ))
                               ) : (
                                 <Menu.Item>
-
                                   <div className="block px-4 py-2 text-sm text-gray-500">
                                     No new notifications
                                   </div>
-
                                 </Menu.Item>
                               )}
                           </Menu.Items>
                         </Transition>
-
                       </Menu>
                       {/* Profile dropdown */}
                       <Menu as="div" className="relative ml-3">
@@ -867,13 +873,11 @@ const Navbar = () => {
 bg-white/70 shadow border border-primary-100 text-sm focus:outline-none transition-all duration-200">
                             <span className="sr-only">Open user menu</span>
                             <div className="h-8 w-8 rounded-full flex items-center justify-center bg-primary-100 text-primary-700 font-bold border-2 border-primary-400 shadow">
-
                               {user?.name?.charAt(0).toUpperCase()}
                             </div>
                           </Menu.Button>
                         </div>
                         <Transition
-
                           enter="transition ease-out duration-100"
                           enterFrom="transform opacity-0 scale-95"
                           enterTo="transform opacity-100 scale-100"
@@ -887,30 +891,24 @@ right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white/90 shadow-lg ring-1 
                             <Menu.Item>
                               {({ active }) => (
                                 <Link
-
                                   to={user?.role === 'teacher' ?
                                     '/teacher/dashboard' : '/student/dashboard'}
                                   className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
                                 >
-
                                   Dashboard
                                 </Link>
                               )}
                             </Menu.Item>
-
                             <Menu.Item>
                               {({ active }) => (
                                 <button
-
                                   onClick={logout}
                                   className={classNames(active ? 'bg-gray-100' : '', 'block w-full text-left px-4 py-2 text-sm text-gray-700')}
                                 >
-
                                   Sign out
                                 </button>
                               )}
                             </Menu.Item>
-
                           </Menu.Items>
                         </Transition>
                       </Menu>
@@ -921,18 +919,16 @@ right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white/90 shadow-lg ring-1 
                       <Link
                         to="/login"
                         className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
-
                       >
                         Login
                       </Link>
                       <Link
                         to="/register"
-
-                        className="bg-primary-600 text-white hover:bg-primary-700 px-3 py-2 rounded-md text-sm font-medium"
+                        className="bg-primary-600 text-white hover:bg-primary-700 px-3 
+py-2 rounded-md text-sm font-medium"
                       >
                         Register
                       </Link>
-
                     </div>
                   )}
               </div>
@@ -940,26 +936,24 @@ right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white/90 shadow-lg ring-1 
           </div>
           <Disclosure.Panel className="sm:hidden">
             <div className="space-y-1 px-2 pb-3 pt-2">
+              {/* Mobile Links bao gồm cả FAQ và Contact */}
               {navLinks.map((item) => (
-
                 (item.public ||
                   isAuthenticated) && (
                   <Disclosure.Button
                     key={item.name}
                     as={Link}
                     to={item.to}
-
                     className={classNames(
                       isActive(item.to)
                         ? 'bg-primary-100 text-primary-700 shadow'
                         : 'text-gray-700 hover:bg-primary-50 hover:text-primary-700',
-                      'block rounded-md px-3 py-2 text-base font-semibold' // Dòng này đã được fix lỗi cú pháp
+                      'block rounded-md px-3 py-2 text-base font-semibold' 
                     )}
                   >
                     {item.name}
                   </Disclosure.Button>
                 )
-
               ))}
               {/* BỔ SUNG: Mobile Link cho Roadmap */}
               <Disclosure.Button
@@ -2864,6 +2858,264 @@ const ResetPassword = () => {
 export default ResetPassword; 
 
 ==================================================
+FILE_PATH: client\src\pages\Contact.js
+==================================================
+// FILE_PATH: client\src\pages\Contact.js (TẠO MỚI FILE NÀY)
+
+import React from 'react';
+import { motion } from 'framer-motion';
+import { useForm } from 'react-hook-form';
+import emailjs from '@emailjs/browser';
+import { toast } from 'react-toastify';
+// Sử dụng Heroicons thay cho MUI icons
+import { LocationMarkerIcon, MailIcon, PhoneIcon, PaperAirplaneIcon, ExternalLinkIcon } from '@heroicons/react/outline'; 
+import { AcademicCapIcon } from '@heroicons/react/solid'; 
+import Footer from '../components/layout/Footer';
+
+// Hàm helper để gán class
+function classNames(...classes) {
+    return classes.filter(Boolean).join(' ');
+}
+
+// ==============================================================
+// 1. DỮ LIỆU CỐ ĐỊNH
+// ==============================================================
+const CONTACT_INFO = [
+    { 
+        icon: LocationMarkerIcon, 
+        title: 'Address', 
+        value: 'Phòng 213, Tòa nhà F, Số 300A Nguyễn Tất Thành, P.13, Q.4, TP.HCM',
+        link: 'https://maps.app.goo.gl/r6R5m7xYh1P2qjLNA'
+    },
+    { 
+        icon: MailIcon, 
+        title: 'Email', 
+        value: '2200001971@nttu.edu.vn',
+        link: 'mailto:2200001971@nttu.edu.vn' 
+    },
+    { 
+        icon: PhoneIcon, 
+        title: 'Phone', 
+        value: '0399246128',
+        link: 'tel:0399246128' 
+    },
+];
+
+const SOCIAL_LINKS = [
+    { 
+        label: 'Facebook', 
+        icon: 'FB', // Placeholder
+        url: 'https://www.facebook.com/DaihocNguyenTatThanh'
+    },
+    { 
+        label: 'GitHub', 
+        icon: 'GH', // Placeholder
+        url: 'https://github.com/baorphucs' // Sử dụng GitHub link từ mẫu
+    },
+];
+
+// ==============================================================
+// 2. Component Contact
+// ==============================================================
+export default function Contact() {
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset,
+    } = useForm();
+
+    const onSubmit = (data) => {
+        // Thay thế bằng Service ID, Template ID, Public Key của EmailJS của bạn
+        const serviceID = 'service_odo7xzm'; 
+        const templateID = 'template_iy35o7f'; 
+        const publicKey = 'BM-yrfjfz0EoLCCPV'; 
+
+        const templateParams = {
+            name: data.name,
+            email: data.email,
+            subject: data.subject,
+            message: data.message,
+            time: new Date().toLocaleString(),
+        };
+
+        // Gửi qua emailjs
+        emailjs
+            .send(serviceID, templateID, templateParams, publicKey)
+            .then((response) => {
+                toast.success('Your message has been sent successfully!');
+                reset(); // clear form
+            })
+            .catch((err) => {
+                console.error('FAILED...', err);
+                toast.error('Failed to send message. Please try again or call us.');
+            });
+    };
+
+    const inputClasses = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 text-gray-800 transition-shadow";
+    const errorClasses = "mt-1 text-xs text-red-500 font-medium";
+
+    return (
+        <div className="bg-gray-50 min-h-screen">
+            <div className="max-w-7xl mx-auto py-12 md:py-20 px-4 sm:px-6 lg:px-8">
+                
+                {/* Header */}
+                <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-center mb-12">
+                    {/* Dùng AcademicCapIcon làm icon đại diện cho NTTU HUB */}
+                    <AcademicCapIcon className="h-10 w-10 text-primary-600 mx-auto mb-2" />
+                    <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
+                        Liên hệ
+                    </h1>
+                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                        Chúng tôi luôn sẵn lòng lắng nghe ý kiến và hỗ trợ bạn. Vui lòng gửi tin nhắn hoặc liên hệ trực tiếp.
+                    </p>
+                </motion.div>
+                
+                {/* Contact Content Wrapper */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 bg-white shadow-2xl rounded-2xl p-6 md:p-10 border border-primary-50">
+                    
+                    {/* Cột 1: Contact Info */}
+                    <motion.div 
+                        initial={{ opacity: 0, x: -20 }} 
+                        animate={{ opacity: 1, x: 0 }} 
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="md:col-span-1 space-y-6"
+                    >
+                        <h3 className="text-2xl font-bold text-gray-900">Đăng ký nhận tin</h3>
+                        <p className="text-gray-600">
+                            Nếu bạn có bất kỳ câu hỏi, góp ý về hệ thống, hoặc muốn biết thêm thông tin về các khóa học, hãy liên hệ với chúng tôi.
+                        </p>
+                        
+                        <ul className="space-y-4">
+                            {CONTACT_INFO.map((item, index) => (
+                                <li key={index} className="flex items-start space-x-3">
+                                    <div className="p-2 rounded-full bg-primary-100 text-primary-600 flex-shrink-0 mt-1">
+                                        <item.icon className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-semibold text-gray-500 block">{item.title}</span>
+                                        <a 
+                                            href={item.link} 
+                                            target="_blank" 
+                                            rel="noreferrer" 
+                                            className="text-base font-medium text-gray-800 hover:text-primary-600 transition-colors flex items-center"
+                                        >
+                                            {item.value}
+                                            <ExternalLinkIcon className="h-4 w-4 ml-1 text-gray-400" />
+                                        </a>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+
+                        {/* Social Links */}
+                        <ul className="flex space-x-4 pt-4">
+                            {SOCIAL_LINKS.map((social, index) => (
+                                <li key={index}>
+                                    <a
+                                        href={social.url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-primary-600 hover:text-white transition-colors text-lg font-bold"
+                                        title={social.label}
+                                    >
+                                        {social.icon} 
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </motion.div>
+
+                    {/* Cột 2: Contact Form */}
+                    <motion.div 
+                        initial={{ opacity: 0, x: 20 }} 
+                        animate={{ opacity: 1, x: 0 }} 
+                        transition={{ duration: 0.5, delay: 0.3 }}
+                        className="md:col-span-2"
+                    >
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                            
+                            {/* Name and Email Fields */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <input
+                                        {...register("name", {
+                                            required: "Tên không được để trống",
+                                            validate: (value) => value.trim() !== "" ? true : "Tên không được để trống",
+                                        })}
+                                        type="text"
+                                        placeholder="TÊN CỦA BẠN"
+                                        className={inputClasses}
+                                    />
+                                    {errors.name && (<span className={errorClasses}>{errors.name?.message}</span>)}
+                                </div>
+                                <div>
+                                    <input
+                                        {...register("email", {
+                                            required: "Email không được để trống",
+                                            pattern: {
+                                                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                                                message: "Địa chỉ email không hợp lệ"
+                                            },
+                                        })}
+                                        type="email"
+                                        placeholder="EMAIL"
+                                        className={inputClasses}
+                                    />
+                                    {errors.email && (<span className={errorClasses}>{errors.email?.message}</span>)}
+                                </div>
+                            </div>
+                            
+                            {/* Subject Field */}
+                            <div>
+                                <input
+                                    {...register("subject", {
+                                        required: "Chủ đề không được để trống",
+                                        validate: (value) => value.trim() !== "" ? true : "Chủ đề không được để trống",
+                                    })}
+                                    type="text"
+                                    placeholder="CHỦ ĐỀ"
+                                    className={inputClasses}
+                                />
+                                {errors.subject && (<span className={errorClasses}>{errors.subject?.message}</span>)}
+                            </div>
+                            
+                            {/* Message Field */}
+                            <div>
+                                <textarea
+                                    {...register("message", {
+                                        required: "Tin nhắn không được để trống",
+                                        validate: (value) => value.trim() !== "" ? true : "Tin nhắn không được để trống",
+                                    })}
+                                    placeholder="TIN NHẮN CỦA BẠN"
+                                    rows="6"
+                                    className={inputClasses + " resize-none"}
+                                ></textarea>
+                                {errors.message && (<span className={errorClasses}>{errors.message?.message}</span>)}
+                            </div>
+                            
+                            {/* Submit Button */}
+                            <div>
+                                <button
+                                    type="submit"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 bg-primary-600 text-white rounded-lg font-semibold shadow-lg hover:bg-primary-700 transition-colors"
+                                >
+                                    <span className="btn-text uppercase mr-2">send message</span>
+                                    <PaperAirplaneIcon className="h-5 w-5 transform rotate-45" />
+                                </button>
+                            </div>
+                        </form>
+                    </motion.div>
+                </div>
+            </div>
+
+            {/* Footer */}
+            <Footer />
+        </div>
+    );
+}
+
+==================================================
 FILE_PATH: client\src\pages\courses\CourseDetails.js
 ==================================================
 import React, { useState, useEffect, useContext } from 'react';
@@ -4161,6 +4413,380 @@ const TeacherDashboard = () => {
 export default TeacherDashboard;
 
 ==================================================
+FILE_PATH: client\src\pages\FAQ.js
+==================================================
+// FILE_PATH: client\src\pages\FAQ.js (TẠO MỚI FILE NÀY)
+
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Tab, Disclosure } from '@headlessui/react';
+import { ChevronDownIcon, SearchIcon } from '@heroicons/react/outline';
+import Footer from '../components/layout/Footer';
+// Bạn cần đảm bảo có hàm helper này hoặc import từ thư viện khác
+// Dùng hàm classNames để tiện quản lý classes TailwindCSS
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ');
+}
+
+
+// ==============================================================
+// 1. DỮ LIỆU CỐ ĐỊNH CHO TRANG FAQ (Dựa trên hình ảnh bạn cung cấp)
+// ==============================================================
+
+const FAQ_DATA = {
+    // Tab 1
+    'Dịch vụ sau thi': [
+        { 
+            q: 'Cách phục khảo bài thi CFA (lĩnh vực tài chính)', 
+            a: 'Thông tin về quy trình và lệ phí phục khảo sẽ được cung cấp trên website chính thức của CFA Institute hoặc liên hệ trực tiếp với IIG Việt Nam.'
+        },
+        { 
+            q: 'Cách phục khảo lại điểm thi GRE', 
+            a: 'Bạn cần gửi yêu cầu đến ETS (Educational Testing Service) theo quy trình phục khảo của họ. Lệ phí phục khảo có thể áp dụng.'
+        },
+        { 
+            q: 'Thí sinh muốn phục tra lại điểm số sẽ đăng ký như thế nào? Thời gian nhận kết quả trong bao lâu?', 
+            a: 'Liên hệ trung tâm khảo thí hoặc tổ chức cấp chứng chỉ (như IIG) để biết thủ tục. Thời gian thường kéo dài từ 4-6 tuần.'
+        },
+        { 
+            q: 'Để nhận Giấy xác nhận kết quả thi TOEFL ITP cần thủ tục gì?', 
+            a: 'Thường chỉ cần mang CMND/CCCD/Hộ chiếu đến địa điểm đăng ký thi hoặc liên hệ qua email. Vui lòng kiểm tra thông báo từ IIG.'
+        },
+        { 
+            q: 'Cấp lại chứng chỉ Autodesk cần làm gì?', 
+            a: 'Đăng nhập vào tài khoản Certiport của bạn. Tìm mục lịch sử thi và tải lại chứng chỉ. Nếu không được, liên hệ bộ phận hỗ trợ của Certiport.'
+        },
+        { 
+            q: 'Cấp lại chứng chỉ MTA/MCE cần thủ tục gì?', 
+            a: 'Đăng nhập vào tài khoản Certiport của bạn. Tìm mục lịch sử thi và tải lại chứng chỉ. Nếu không được, liên hệ bộ phận hỗ trợ của Certiport.'
+        },
+        { 
+            q: 'Hiệu lực của chứng chỉ MCE?', 
+            a: 'Chứng chỉ MCE thường không có hiệu lực hết hạn, nhưng các yêu cầu về công nghệ có thể thay đổi, dẫn đến cần cập nhật chứng chỉ.'
+        },
+        { 
+            q: 'Số hiệu chứng chỉ ACPro?', 
+            a: 'Liên hệ trung tâm khảo thí hoặc tổ chức cấp chứng chỉ để tra cứu thông tin số hiệu chứng chỉ của bạn.'
+        },
+        { 
+            q: 'Cấp lại chứng chỉ ACPro?', 
+            a: 'Liên hệ trực tiếp với trung tâm khảo thí để được hỗ trợ thủ tục cấp lại. Có thể áp dụng phí và yêu cầu cung cấp thông tin cá nhân/lịch sử thi.'
+        },
+        { 
+            q: 'Thủ tục nhận ủy quyền nhận kết quả?', 
+            a: 'Người được ủy quyền cần có thư ủy quyền có chữ ký của thí sinh và các giấy tờ tùy thân của cả hai bên (bản gốc & bản sao).'
+        },
+    ],
+    // Tab 2
+    'Đăng ký': [
+        { 
+            q: 'Cách đăng ký thi SAT', 
+            a: 'Đăng ký qua trang web của College Board. Bạn cần tạo tài khoản, chọn ngày thi, địa điểm và thanh toán lệ phí.' 
+        },
+        { 
+            q: 'Cách đăng ký thi SSAT', 
+            a: 'Đăng ký trực tuyến trên website chính thức của SSAT. Chọn ngày thi và trung tâm khảo thí.'
+        },
+        { 
+            q: 'Cách đăng ký thi CFA (lĩnh vực tài chính)', 
+            a: 'Đăng ký trên website chính thức của CFA Institute. Yêu cầu có tài khoản và đáp ứng các tiêu chuẩn về học thuật/kinh nghiệm.'
+        },
+        { 
+            q: 'Cách thức đăng ký thi TOEFL IBT', 
+            a: 'Đăng ký trực tuyến qua tài khoản ETS. Chọn trung tâm khảo thí và ngày thi phù hợp.'
+        },
+        { 
+            q: 'Thủ tục đăng ký thi Autodesk?', 
+            a: 'Đăng ký tại các trung tâm ủy quyền của Certiport hoặc IIG Việt Nam. Chuẩn bị CMND/CCCD/Hộ chiếu và lệ phí.'
+        },
+        { 
+            q: 'Thủ tục đăng ký thi MTA/MCE?', 
+            a: 'Đăng ký tại các trung tâm ủy quyền của Certiport hoặc IIG Việt Nam. Chuẩn bị CMND/CCCD/Hộ chiếu và lệ phí.'
+        },
+        { 
+            q: 'Thủ tục đăng ký thi ACPro?', 
+            a: 'Đăng ký tại các trung tâm ủy quyền của Certiport hoặc IIG Việt Nam. Chuẩn bị CMND/CCCD/Hộ chiếu và lệ phí.'
+        },
+        { 
+            q: 'Thủ tục đăng ký thi IC3 Spark?', 
+            a: 'Liên hệ IIG Việt Nam hoặc trung tâm được ủy quyền để đăng ký trực tiếp. Thường cần nộp đơn đăng ký và lệ phí.'
+        },
+        { 
+            q: 'Thủ tục đăng ký thi MOS/IC3?', 
+            a: 'Đăng ký trực tiếp tại các trung tâm ủy quyền của Certiport hoặc IIG Việt Nam. Chuẩn bị CMND/CCCD/Hộ chiếu và lệ phí.'
+        },
+        { 
+            q: 'Thủ tục đăng ký thi TOEFL ITP?', 
+            a: 'Đăng ký tại IIG Việt Nam hoặc các đơn vị đối tác được ủy quyền. Cần CMND/CCCD/Hộ chiếu gốc và lệ phí.'
+        },
+    ],
+    // Tab 3
+    'Hướng dẫn thi': [
+        { 
+            q: 'Đồ dùng được mang vào phòng thi SAT?', 
+            a: 'Chỉ được phép mang theo CMND/CCCD/Hộ chiếu, phiếu báo danh, bút chì 2B (không dùng bút mực), tẩy, máy tính được cho phép (nếu có).'
+        },
+        { 
+            q: 'Đồ dùng được mang vào phòng thi SSAT?', 
+            a: 'Chỉ mang theo CMND/CCCD, phiếu báo danh và 2-3 cây bút chì đã gọt.'
+        },
+        { 
+            q: 'Cách thay đổi lịch thi, địa điểm thi SSAT?', 
+            a: 'Bạn cần đăng nhập vào tài khoản SSAT để yêu cầu thay đổi. Có thể áp dụng phí đổi lịch/địa điểm và phải thực hiện trước ngày hết hạn.'
+        },
+        { 
+            q: 'Thời gian và giấy tờ dự thi SSAT?', 
+            a: 'Giấy tờ tùy thân (CMND/CCCD/Hộ chiếu), phiếu báo danh. Thời gian thi có thể khác nhau tùy theo cấp độ (Middle, Upper, Lower).'
+        },
+        { 
+            q: 'Dụng cụ được mang vào phòng thi CFA (lĩnh vực tài chính)', 
+            a: 'Chỉ được mang các vật dụng được quy định nghiêm ngặt, bao gồm máy tính được cho phép, CMND/CCCD và Vé vào phòng thi.'
+        },
+        { 
+            q: 'Thời gian và giấy tờ dự thi CFA (lĩnh vực tài chính)', 
+            a: 'Giấy tờ tùy thân (CMND/CCCD/Hộ chiếu), vé vào phòng thi. Thời gian thi được công bố rõ trong thông báo thi.'
+        },
+        { 
+            q: 'Thí sinh sẽ được mang những đồ vật gì vào phòng thi TOEFL IBT và GRE', 
+            a: 'CMND/CCCD/Hộ chiếu, phiếu báo danh. Không mang theo giấy nháp, bút, điện thoại hay đồng hồ thông minh.'
+        },
+        { 
+            q: 'Thời gian và giấy tờ dự thi GRE?', 
+            a: 'CMND/CCCD/Hộ chiếu gốc hợp lệ. Thời gian thi khoảng 3 giờ 45 phút, bao gồm các phần thi và nghỉ giải lao.'
+        },
+        { 
+            q: 'Văn phòng IIG Việt Nam ở đâu?', 
+            a: 'Vui lòng kiểm tra trên trang web chính thức của IIG Việt Nam để biết các địa chỉ văn phòng và chi nhánh trên toàn quốc.'
+        },
+        { 
+            q: 'Trường hợp bị quên mật khẩu đăng nhập?', 
+            a: 'Sử dụng chức năng "Quên mật khẩu" trên trang đăng nhập của hệ thống đăng ký thi (ví dụ: ETS, Certiport, College Board) hoặc liên hệ hỗ trợ.'
+        },
+    ],
+    // Tab 4
+    'Lịch thi': [
+        { 
+            q: 'Khi nào được thi lại bài Autodesk?', 
+            a: 'Thí sinh cần đợi một khoảng thời gian nhất định (thường là 24 giờ sau lần thi thứ nhất) trước khi được đăng ký thi lại.' 
+        },
+        { 
+            q: 'Cách đổi lịch thi Autodesk?', 
+            a: 'Đăng nhập vào tài khoản Certiport hoặc liên hệ trực tiếp với trung tâm đăng ký thi. Có thể áp dụng phí và phải thực hiện trước thời hạn.'
+        },
+        { 
+            q: 'Khi nào được thi lại bài MTA/MCE?', 
+            a: 'Thí sinh cần đợi một khoảng thời gian nhất định (thường là 24 giờ sau lần thi thứ nhất) trước khi được đăng ký thi lại.'
+        },
+        { 
+            q: 'Khi nào được thi lại bài ACPro?', 
+            a: 'Thí sinh cần đợi một khoảng thời gian nhất định (thường là 24 giờ sau lần thi thứ nhất) trước khi được đăng ký thi lại.'
+        },
+        { 
+            q: 'Đổi lịch thi ACPro như thế nào?', 
+            a: 'Đăng nhập vào tài khoản Certiport hoặc liên hệ trực tiếp với trung tâm đăng ký thi. Có thể áp dụng phí và phải thực hiện trước thời hạn.'
+        },
+        { 
+            q: 'Khi nào được thi lại bài IC3?', 
+            a: 'Thí sinh cần đợi một khoảng thời gian nhất định (thường là 24 giờ sau lần thi thứ nhất) trước khi được đăng ký thi lại.'
+        },
+        { 
+            q: 'Khi nào được thi lại MOS?', 
+            a: 'Thí sinh cần đợi một khoảng thời gian nhất định (thường là 24 giờ sau lần thi thứ nhất) trước khi được đăng ký thi lại.'
+        },
+        { 
+            q: 'Đổi lịch thi MOS/IC3 như thế nào?', 
+            a: 'Liên hệ trung tâm đăng ký thi để yêu cầu đổi lịch. Việc này phải được thực hiện trước ngày thi theo quy định và có thể phát sinh phí.'
+        },
+        { 
+            q: 'Khoảng cách giữa các lần thi TOEFL ITP là bao lâu?', 
+            a: 'Không có giới hạn về khoảng cách thời gian giữa các lần thi TOEFL ITP, bạn có thể đăng ký thi lại ngay khi có lịch.'
+        },
+        { 
+            q: 'Lịch thi mở tiếp theo là ngày nào?', 
+            a: 'Kiểm tra trên trang web chính thức của IIG Việt Nam hoặc các trung tâm khảo thí được ủy quyền.'
+        },
+    ],
+    // Tab 5
+    'Trả kết quả': [
+        { 
+            q: 'Tra cứu kết quả thi tại IIG Việt Nam như thế nào?', 
+            a: 'Đối với một số bài thi trên máy tính (TOEIC, MOS,...) thí sinh sẽ biết điểm ngay sau khi hoàn thành bài thi. Chứng chỉ được gửi trực tiếp cho thí sinh.'
+        },
+        { 
+            q: 'Tra cứu kết quả các bài thi tiếng Nhật (JLFW) như thế nào?', 
+            a: 'Liên hệ trực tiếp với tổ chức tổ chức thi tiếng Nhật tại Việt Nam để biết thông tin chính xác về thời gian và cách tra cứu kết quả.'
+        },
+        { 
+            q: 'Tra cứu kết quả thi bài thi tiếng Hàn (TOPIK và TOPIK IBT) bằng cách nào?', 
+            a: 'Tra cứu trực tuyến trên website của TOPIK. Cần nhập số báo danh và ngày sinh để xem kết quả. Thời gian có kết quả thường được thông báo cụ thể.'
+        },
+        { 
+            q: 'Tra cứu kết quả bài thi tin học (MOS, IC3, IC3 Spark, ACPro,...) bằng cách nào?', 
+            a: 'Đăng nhập vào tài khoản Certiport/IIG để tra cứu. Đối với thi trên máy, kết quả thường có ngay. Chứng chỉ sẽ được gửi sau đó.'
+        },
+        { 
+            q: 'Tra cứu kết quả các bài thi tiếng anh (TOEIC LR trên máy tính, TOEIC LR trên giấy, TOEIC Speaking&Writing, TOEFL ITP,...) bằng cách nào?', 
+            a: 'Tra cứu trên website IIG Việt Nam hoặc tài khoản ETS/Certiport tương ứng. Thời gian có kết quả có thể khác nhau tùy loại hình thi.'
+        },
+        { 
+            q: 'Bao giờ có kết quả thi SAT?', 
+            a: 'Kết quả SAT thường có sau khoảng 2-4 tuần kể từ ngày thi. Bạn có thể xem trên tài khoản College Board của mình.'
+        },
+        { 
+            q: 'Được gửi kết quả thi SSAT miễn phí tối đa bao nhiêu trường?', 
+            a: 'Thường là 3-5 trường tùy thuộc vào loại hình đăng ký của bạn. Bạn có thể mua thêm báo cáo điểm cho các trường khác.'
+        },
+        { 
+            q: 'Thời gian có kết quả thi SSAT?', 
+            a: 'Khoảng 2-3 tuần sau ngày thi (đối với hình thức thông thường).'
+        },
+        { 
+            q: 'Thời gian có kết quả thi CFA (lĩnh vực tài chính)', 
+            a: 'Kết quả thi CFA thường được thông báo sau khoảng 60 ngày kể từ khi kết thúc kỳ thi.'
+        },
+        { 
+            q: 'Thời gian có kết quả thi GRE?', 
+            a: 'Kết quả chính thức của GRE thường có sau 10-15 ngày kể từ ngày thi và được gửi qua email/tài khoản ETS.'
+        },
+    ],
+};
+
+// ==============================================================
+// 2. Component FAQ
+// ==============================================================
+
+const FAQ = () => {
+    const categories = Object.keys(FAQ_DATA);
+    const [searchTerm, setSearchTerm] = useState('');
+    
+    // Lọc tất cả câu hỏi và câu trả lời theo từ khóa
+    const filterData = (data) => {
+        if (!searchTerm) {
+            return data;
+        }
+        const term = searchTerm.toLowerCase();
+        
+        // Tạo một cấu trúc dữ liệu mới chỉ chứa các câu hỏi khớp
+        const filtered = {};
+        for (const [key, questions] of Object.entries(data)) {
+            // Lọc các câu hỏi trong từng category
+            const filteredQuestions = questions.filter(item => 
+                item.q.toLowerCase().includes(term) ||
+                item.a.toLowerCase().includes(term)
+            );
+            // Chỉ thêm category nếu có câu hỏi khớp
+            if (filteredQuestions.length > 0) {
+                 filtered[key] = filteredQuestions;
+            } else {
+                 filtered[key] = []; // Giữ cấu trúc để không bị lỗi Tab.Panel
+            }
+           
+        }
+        return filtered;
+    };
+    
+    const filteredFAQData = filterData(FAQ_DATA);
+    
+    return (
+        <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8 bg-white min-h-screen">
+            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-8">
+                <h1 className="text-3xl font-extrabold text-gray-900 mb-4 text-center">
+                    Câu Hỏi Thường Gặp (FAQ)
+                </h1>
+                
+                {/* Search Bar */}
+                <div className="relative max-w-lg mx-auto">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <SearchIcon className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                        type="text"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        placeholder="Câu hỏi FAQ"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+            </motion.div>
+
+            {/* Tab/Filter Navigation */}
+            <Tab.Group>
+                <Tab.List className="flex flex-wrap justify-center space-x-2 md:space-x-4 p-1 mb-8">
+                    {categories.map((category) => (
+                        <Tab
+                            key={category}
+                            className={({ selected }) =>
+                                // Dùng classNames để có style đồng nhất
+                                classNames(
+                                    'py-2 px-4 rounded-lg font-semibold text-sm transition-colors duration-200',
+                                    'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
+                                    selected
+                                        ? 'bg-primary-600 text-white shadow-lg'
+                                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                                )
+                            }
+                        >
+                            {category}
+                        </Tab>
+                    ))}
+                </Tab.List>
+
+                {/* Tab Content/Answer Accordion */}
+                <Tab.Panels className="mt-8">
+                    {categories.map((category, index) => (
+                        <Tab.Panel
+                            key={index}
+                            className={classNames(
+                                'ring-white ring-opacity-60 focus:outline-none focus:ring-2'
+                            )}
+                        >
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="space-y-4"
+                            >
+                                {/* SỬ DỤNG DỮ LIỆU ĐÃ LỌC */}
+                                {filteredFAQData[category] && filteredFAQData[category].length > 0 ? (
+                                    filteredFAQData[category].map((item, qIndex) => (
+                                        <Disclosure as="div" key={qIndex} className="bg-white border border-gray-200 rounded-lg shadow-md">
+                                            {({ open }) => (
+                                                <>
+                                                    <Disclosure.Button className="flex justify-between w-full px-6 py-4 text-left text-lg font-medium text-gray-900 hover:bg-gray-50 transition-colors">
+                                                        <span>{item.q}</span>
+                                                        <ChevronDownIcon
+                                                            className={classNames(
+                                                                'h-6 w-6 text-primary-600 transition-transform duration-200',
+                                                                open ? 'rotate-180' : ''
+                                                            )}
+                                                        />
+                                                    </Disclosure.Button>
+                                                    <Disclosure.Panel as="dd" className="px-6 pt-2 pb-4 text-base text-gray-700 border-t border-gray-100 bg-gray-50">
+                                                        {item.a}
+                                                    </Disclosure.Panel>
+                                                </>
+                                            )}
+                                        </Disclosure>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-10 text-gray-500 bg-white rounded-lg shadow-md">
+                                        Không tìm thấy câu hỏi nào trong mục này.
+                                    </div>
+                                )}
+                            </motion.div>
+                        </Tab.Panel>
+                    ))}
+                </Tab.Panels>
+            </Tab.Group>
+            {/* NEW: Footer Section */}
+            <Footer />
+        </div>
+    );
+};
+
+export default FAQ;
+
+==================================================
 FILE_PATH: client\src\pages\Home.js
 ==================================================
 // FILE_PATH: client\src\pages\Home.js (ĐÃ SẮP XẾP LẠI THỨ TỰ ĐÚNG VÀ KHÔI PHỤC HOÀN TOÀN PHẦN BENEFITS)
@@ -5079,11 +5705,9 @@ const Home = () => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 0.15, scale: 1 }}
           transition={{ duration: 1.2, delay: 0.4 }}
-        
           className="absolute right-1/4 bottom-0 w-96 h-96 bg-gradient-to-tr from-secondary-500 to-primary-600 rounded-full blur-3xl opacity-60 animate-pulse"
         />
       </div>
-
       <Footer />
       <StudentListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
@@ -7327,54 +7951,615 @@ export default Register;
 ==================================================
 FILE_PATH: client\src\pages\RoadmapIelts.js
 ==================================================
-// FILE_PATH: client\src\pages\RoadmapIelts.js
+// FILE_PATH: client\src\pages\RoadmapIelts.js (CẬP NHẬT HOÀN TOÀN MÀU NỀN VÀ DỮ LIỆU PACKAGES)
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/outline';
+import Footer from '../components/layout/Footer';
+// ==============================================================
+// 1. DỮ LIỆU CẤP ĐỘ, MỤC TIÊU & GÓI HỌC PHÍ IELTS (ĐÃ CẬP NHẬT PACKAGES)
+// ==============================================================
 
-const RoadmapIelts = () => {
-    // Dữ liệu từ thiết kế image_68a092.jpg
-    return (
-        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <motion.div 
-                initial={{ opacity: 0, y: 20 }} 
-                animate={{ opacity: 1, y: 0 }} 
-                transition={{ duration: 0.5 }}
-                className="bg-white rounded-3xl shadow-xl overflow-hidden md:flex"
+const ScoreMap = {
+    '0-3.5': 0, '4.0-5.0': 40, '5.5-6.5': 55, '7.0+': 70,
+};
+const TAB_DATA = {
+    IELTS: {
+        title: 'IELTS Học Thuật (Academic)',
+        currentLevels: [
+            { label: 'Band 0 - 3.5 (Mất gốc)', value: 'IELTS_0-3.5', minScore: ScoreMap['0-3.5'] },
+            { label: 'Band 4.0 - 5.0 (Nền tảng)', value: 'IELTS_4.0-5.0', minScore: ScoreMap['4.0-5.0'] },
+            { label: 'Band 5.5 - 6.5 (Trung cấp)', value: 'IELTS_5.5-6.5', minScore: ScoreMap['5.5-6.5'] },
+        ],
+        goalLevels: [
+            { label: 'Mục tiêu Band 5.0+', value: 'IELTS_5.0+', minScore: ScoreMap['4.0-5.0'] },
+            { label: 'Mục tiêu Band 6.5+', value: 'IELTS_6.5+', minScore: ScoreMap['5.5-6.5'] },
+            { label: 'Mục tiêu Band 7.5+', value: 'IELTS_7.0+', minScore: ScoreMap['7.0+'] },
+        ],
+        
+        packages: {
+            // === TRÌNH ĐỘ HIỆN TẠI: Band 0 - 3.5 (Mất gốc) ===
+            'IELTS_0-3.5_IELTS_5.0+': { chapter: 'IELTS Nền tảng (Foundation)', priceSelf: '1.200.000', priceFull: '2.990.000', commitment: 'Band 5.0+' },
+            'IELTS_0-3.5_IELTS_6.5+': { chapter: 'IELTS Nền tảng & Tăng tốc (Intensive)', priceSelf: '3.500.000', priceFull: '6.990.000', commitment: 'Band 6.5+' },
+            'IELTS_0-3.5_IELTS_7.0+': { chapter: 'IELTS Nền tảng & Chuyên sâu (Pro)', priceSelf: '4.800.000', priceFull: '9.990.000', commitment: 'Band 7.5+' },
+            
+            // === TRÌNH ĐỘ HIỆN TẠI: Band 4.0 - 5.0 (Nền tảng) ===
+            'IELTS_4.0-5.0_IELTS_5.0+': { chapter: 'IELTS Tăng tốc (Intermediate)', priceSelf: '1.500.000', priceFull: '2.990.000', commitment: 'Band 5.0+' },
+            'IELTS_4.0-5.0_IELTS_6.5+': { chapter: 'IELTS Tăng tốc (Intermediate)', priceSelf: '2.500.000', priceFull: '4.990.000', commitment: 'Band 6.5+' },
+            'IELTS_4.0-5.0_IELTS_7.0+': { chapter: 'IELTS Chuyên sâu (Advanced)', priceSelf: '3.800.000', priceFull: '7.990.000', commitment: 'Band 7.5+' },
+            
+            // === TRÌNH ĐỘ HIỆN TẠI: Band 5.5 - 6.5 (Trung cấp) ===
+            'IELTS_5.5-6.5_IELTS_5.0+': { chapter: 'IELTS Về đích (Goal Setter)', priceSelf: '800.000', priceFull: '1.500.000', commitment: 'Band 5.0+' },
+            'IELTS_5.5-6.5_IELTS_6.5+': { chapter: 'IELTS Về đích (Goal Setter)', priceSelf: '1.500.000', priceFull: '2.990.000', commitment: 'Band 6.5+' },
+            'IELTS_5.5-6.5_IELTS_7.0+': { chapter: 'IELTS Chuyên sâu (Advanced)', priceSelf: '3.800.000', priceFull: '7.990.000', commitment: 'Band 7.5+' },
+        }
+    },
+};
+// ==============================================================
+// 2. Component IELTSLevelSelection
+// ==============================================================
+const IELTSLevelSelection = () => {
+    const activeTab = 'IELTS';
+    const tabData = TAB_DATA[activeTab];
+
+    const [currentLevel, setCurrentLevel] = useState(tabData.currentLevels[0].value);
+    const [goalLevel, setGoalLevel] = useState(tabData.goalLevels[0].value);
+    
+    const initialPackageKey = `${tabData.currentLevels[0].value}_${tabData.goalLevels[0].value}`;
+    const [selectedPackage, setSelectedPackage] = useState(tabData.packages[initialPackageKey] || tabData.packages[Object.keys(tabData.packages)[0]]);
+
+    useEffect(() => {
+        const currentLevelInfo = tabData.currentLevels.find(l => l.value === currentLevel);
+        const currentMinScore = currentLevelInfo ? currentLevelInfo.minScore : 0;
+        
+        let newGoalLevel = goalLevel;
+        const goalLevelInfo = tabData.goalLevels.find(g => g.value === goalLevel);
+        const goalMinScore = goalLevelInfo ? goalLevelInfo.minScore : 0;
+
+        if (goalMinScore < currentMinScore) 
+        {
+            const newGoal = tabData.goalLevels.find(g => g.minScore >= currentMinScore);
+            if (newGoal) {
+                newGoalLevel = newGoal.value;
+                setGoalLevel(newGoalLevel);
+            }
+        }
+        
+        const packageKey = `${currentLevel}_${newGoalLevel}`;
+        const newPackage = tabData.packages[packageKey];
+        if (newPackage) {
+            setSelectedPackage(newPackage);
+        } else {
+             const fallbackKey = Object.keys(tabData.packages).find(key => key.startsWith(currentLevel));
+             if(fallbackKey) {
+                 setSelectedPackage(tabData.packages[fallbackKey]);
+                 setGoalLevel(fallbackKey.split('_').slice(-2).join('_'));
+             }
+        }
+
+    }, [currentLevel, goalLevel, tabData.currentLevels, tabData.goalLevels, tabData.packages]);
+
+    const isGoalAvailable = (goalValue) => {
+        const goalInfo = tabData.goalLevels.find(g => g.value === goalValue);
+        const currentLevelInfo = tabData.currentLevels.find(l => l.value === currentLevel);
+        const currentMinScore = currentLevelInfo ? currentLevelInfo.minScore : 0;
+        return goalInfo && goalInfo.minScore >= currentMinScore;
+    };
+    
+    const LevelOption = ({ level, type }) => {
+        const isCurrentSelection = (type === 'current' ? currentLevel : goalLevel) === level.value;
+        const isDisabled = type === 'goal' && !isGoalAvailable(level.value);
+        
+        const onClick = () => {
+            if (isDisabled) return;
+            if (type === 'current') {
+                setCurrentLevel(level.value);
+            } else {
+                setGoalLevel(level.value);
+            }
+        };
+
+        // CHỈNH SỬA MÀU NỀN TẠI ĐÂY (Dùng primary-400 thay cho secondary-400/700)
+        return (
+            <motion.button
+                key={level.value}
+                whileHover={{ scale: isDisabled ? 1 : 1.03 }}
+                onClick={onClick}
+                disabled={isDisabled}
+                className={`w-full py-3 rounded-lg font-bold text-center transition-all border-2 
+                    ${isCurrentSelection 
+                        ? 'bg-white border-primary-400 text-primary-700 shadow-lg' 
+                        : isDisabled 
+                            ? 'bg-gray-700/50 border-gray-600 text-gray-400 cursor-not-allowed' 
+                            : 'bg-white/10 border-white/20 text-white/80 hover:bg-white/20'}`}
             >
-                {/* Cột 1: Nội dung */}
-                <div className="md:w-1/2 p-10 bg-[#f0f5ff] flex flex-col justify-center">
-                    <h2 className="text-sm font-bold text-primary-600 uppercase mb-2">KHOÁ HỌC IELTS</h2>
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-secondary-900 mb-4 leading-tight">
-                        Lộ trình Học & Luyện IELTS toàn diện
-                    </h1>
-                    <p className="text-lg text-gray-700 mb-8 max-w-md">
-                        Phòng luyện thi IELTS ảo PREP AI – Nền tảng tự học có cam kết đầu ra.
-                    </p>
-                    <a href="#" className="inline-block px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-semibold max-w-fit">
-                        Thiết kế lộ trình học
-                    </a>
-                    <div className="mt-6 flex items-center">
-                        <div className="flex -space-x-2 mr-3">
-                            <img className="h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=NV&background=c7d2fe&color=3730a3" alt="" />
-                            <img className="h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=PT&background=a5b4fc&color=3730a3" alt="" />
-                        </div>
-                        <p className="text-sm font-medium text-gray-700">
-                            <strong>500.000+</strong> học viên đạt IELTS tại NTTU HUB
-                        </p>
+            
+            {level.label}
+            </motion.button>
+        );
+    };
+
+    return (
+        <section className="py-20 bg-[#00429D] text-white"> 
+            
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-12">
+                <h1 className="text-4xl font-extrabold mb-2">
+                    Xây dựng lộ trình IELTS cá nhân hóa
+                </h1>
+                <p className="text-lg text-white/80">Chọn trình độ hiện tại và mục tiêu Band của bạn.</p>
+                
+                <div className="flex justify-center space-x-4 bg-white/20 rounded-full p-1 mx-auto max-w-fit mt-6">
+                    {/* CHỈNH SỬA MÀU NỀN TẠI ĐÂY (Dùng primary-700 thay cho secondary-700) */}
+                    <div className='py-2 px-6 rounded-full font-semibold text-sm bg-white text-primary-700 shadow-lg'>
+                        {tabData.title}
                     </div>
                 </div>
+    
+            </div>
+            
+            <div className="max-w-6xl mx-auto px-4">
+                {/* CHỈNH SỬA MÀU NỀN TẠI ĐÂY (Dùng primary-900/50 thay cho secondary-800/50) */}
+                <div className="bg-primary-900/50 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/10">
+              
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        
+                        <div>
+                            <h3 className="text-xl font-bold mb-4 text-white/90">Trình độ của tôi (Band hiện tại)</h3>
+    
+                            <div className="space-y-3">
+                                <AnimatePresence mode="wait">
+                                    <motion.div 
+     
+                                        key={activeTab + "current"} 
+                                        initial={{ opacity: 0, x: -20 }}
+                 
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -20 }}
+                           
+                                        className="space-y-3"
+                                    >
+                                        {tabData.currentLevels.map((level) => (
+         
+                                            <LevelOption key={level.value} level={level} type="current" />
+                                        ))}
+                     
+                                    </motion.div>
+                                </AnimatePresence>
+                            </div>
+                        </div>
 
-                {/* Cột 2: Hình ảnh (Thêm tag hình ảnh để minh họa) */}
-                <div className="md:w-1/2 relative bg-[#1E90FF] overflow-hidden flex items-center justify-center">
-                    <div className="absolute inset-0 bg-primary-900 opacity-20"></div>
+ 
+                        <div>
+                            <h3 className="text-xl font-bold mb-4 text-white/90">Mục tiêu của tôi (Band mong muốn)</h3>
+                            <div className="space-y-3">
+          
+                                <AnimatePresence mode="wait">
+                                    <motion.div 
+                                        
+                                        key={activeTab + "goal"} 
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+       
+                                        exit={{ opacity: 0, x: 20 }}
+                                        className="space-y-3"
+                      
+                                    >
+                                        {tabData.goalLevels.map((goal) => (
+                                            
+                                            <LevelOption key={goal.value} level={goal} type="goal" />
+                                        ))}
+                                    </motion.div>
                     
+                                </AnimatePresence>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <p className="text-center mt-6 text-sm text-white/80">
+                        Bạn chưa rõ trình độ Band của mình?
+                        <a href="#" className="font-semibold text-accent-yellow hover:underline ml-1">Làm bài Test Đầu vào IELTS</a>
+                    </p>
                 </div>
-            </motion.div>
-        </div>
+            </div>
+
+            <div className="max-w-6xl mx-auto px-4 mt-12">
+                <AnimatePresence mode="wait">
+         
+                    {/* CHỈNH SỬA MÀU NỀN TẠI ĐÂY (Dùng primary-900/50 thay cho secondary-800/50) */}
+                    <motion.div 
+                        key={currentLevel + goalLevel}
+                        initial={{ opacity: 0, y: 20 }}
+ 
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                
+                        className="bg-primary-900/50 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/10"
+                    >
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-2xl font-extrabold text-white">Chặng Luyện Thi</h3>
+     
+                            <div className="flex items-center text-accent-yellow font-bold text-lg">
+                                Cam kết mục tiêu đầu ra: {selectedPackage.commitment}
+                            </div>
+      
+                        </div>
+                        <p className="text-xl font-semibold text-white/90 mb-6">
+                            Chinh phục lộ trình **{selectedPackage.chapter}**
+                      
+                        </p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            
+                  
+                            {/* Gói 1: Tự học chủ động (Self-study) */}
+                            <motion.div className="bg-white p-6 rounded-xl text-text-dark shadow-xl">
+                                <h4 className="text-lg font-bold mb-4">⭐ Tự học chủ động</h4>
+          
+                                {/* CHỈNH SỬA MÀU NỀN TẠI ĐÂY (Dùng primary-600 thay cho secondary-600) */}
+                                <p className="text-2xl font-extrabold text-primary-600 mb-4">{selectedPackage.priceSelf} VND</p>
+                             
+                                <a href="#" className="inline-block bg-primary-600 text-white px-4 py-2 rounded-md font-semibold text-sm">Đăng ký học ngay</a>
+                                <div className="mt-4 border-t pt-4 space-y-2">
+                                    <h5 className="font-bold text-gray-700">Quyền lợi:</h5>
+          
+                                    <ul className="text-sm space-y-2">
+                                        {[
+                                
+                                            'Sở hữu toàn bộ video bài giảng IELTS chuyên sâu',
+                                            'Luyện 4 kỹ năng với Phòng luyện IELTS ảo PREP AI',
+                         
+                                            'Luyện Writing/Speaking với kho đề độc quyền',
+                                            'Hướng dẫn chiến lược làm bài thi hiệu quả',
+                       
+                                            'Cá nhân hóa kế hoạch học tập theo Band mục tiêu',
+                                        ].map((item, i) => (
+                          
+                                            <li key={i} className="flex items-start">
+                                                <CheckCircleIcon className="h-5 w-5 text-accent-yellow mr-2 flex-shrink-0" />
+                         
+                                                <span>{item}</span>
+                                            </li>
+                                 
+                                        ))}
+                                    </ul>
+                                </div>
+                         
+                            </motion.div>
+                            
+                            {/* Gói 2: Học và luyện đề toàn diện (Full Package) */}
+                            <motion.div className="bg-white 
+p-6 rounded-xl text-text-dark shadow-xl border-4 border-accent-yellow relative">
+                                <span className="absolute top-0 right-0 bg-accent-yellow text-text-dark text-xs font-bold px-3 py-1 rounded-bl-lg">Đề xuất</span>
+                                <h4 className="text-lg font-bold mb-4">🎯 Học và luyện đề toàn diện</h4>
+          
+                                {/* CHỈNH SỬA MÀU NỀN TẠI ĐÂY (Dùng primary-600 thay cho secondary-600) */}
+                                <p className="text-2xl font-extrabold text-primary-600 mb-4">{selectedPackage.priceFull} VND</p>
+                             
+                                <a href="#" className="inline-block bg-primary-600 text-white px-4 py-2 rounded-md font-semibold text-sm">Đăng ký học ngay</a>
+                                <div className="mt-4 border-t pt-4 space-y-2">
+                                    <h5 className="font-bold text-gray-700">Quyền lợi:</h5>
+          
+                                    <ul className="text-sm space-y-2">
+                                        {[
+                                
+                                            'TẤT CẢ quyền lợi của Gói Tự học chủ động',
+                                            'Được chấm chữa Writing/Speaking bởi GIÁO VIÊN',
+                             
+                                            'Được giải đáp 1-1 mọi thắc mắc trong quá trình học',
+                                            'Lớp học bổ trợ kiến thức hàng tuần',
+                        
+                                            'Hỗ trợ đăng ký thi IELTS (IDP/BC) với ưu đãi đặc biệt',
+                                        ].map((item, i) => (
+                          
+                                            <li key={i} className="flex items-start">
+                                                <CheckCircleIcon className="h-5 w-5 text-accent-yellow mr-2 flex-shrink-0" />
+                         
+                                                <span>{item}</span>
+                                            </li>
+                                 
+                                        ))}
+                                    </ul>
+                                </div>
+                         
+                            </motion.div>
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
+            </div>
+        </section>
     );
 };
 
+// ==============================================================
+// 3. Component Step Slider IELTS
+// ==============================================================
+
+const IELTS_STEP_DATA = [
+    {
+        step: 1,
+        title: "Xây dựng nền tảng từ A đến Z",
+        description: "Bắt đầu với các kiến thức cơ bản nhất về Ngữ pháp, Từ vựng học thuật, và Format bài thi IELTS. Chuẩn bị vững chắc trước khi bước vào luyện đề.",
+        substep: "Bước 1: Nền tảng vững chắc (Foundation)",
+      
+        image: { tag: 'Xây dựng nền tảng từ A đến Z', file: '/img/ielts-step-1-foundation.jpg' }
+    },
+    {
+        step: 2,
+        title: "Tối ưu kỹ năng với Phòng luyện IELTS ảo PREP AI",
+        description: "Luyện tập Speaking & Writing với AI chấm chữa chi tiết, sửa lỗi phát âm, ngữ pháp và gợi ý nâng cấp từ vựng theo tiêu chí Band Score.",
+        // Dòng này đã được FIX LỖI CÚ PHÁP
+        substep: "Bước 2: Luyện tập chuyên sâu 4 kỹ năng (Skill Boost)", 
+        image: { tag: 'Phòng luyện IELTS ảo PREP AI', file: '/img/ielts-step-2-ai-practice.jpg' }
+    },
+    {
+        step: 3,
+        title: "Thực chiến & Bứt phá điểm số",
+        description: "Làm quen với áp lực phòng thi thật qua kho đề thi thử mô phỏng sát đề thi mới nhất.Giáo viên chấm chữa chuyên sâu 1-1 để bứt phá band score mục tiêu.",
+        substep: "Bước 3: Thực chiến và Về đích (Exam Simulation)",
+        image: { tag: 'Thực chiến & Bứt phá điểm số', file: '/img/ielts-step-3-exam.jpg' }
+    },
+];
+
+const IELTSStepSlider = () => {
+    const [step, setStep] = useState(0); 
+    const sliderRef = useRef(null);
+    const debounceTimeout = useRef(null);
+    
+    const handleWheel = (e) => {
+     
+        if (debounceTimeout.current) return;
+        const direction = e.deltaY > 0 ? 1 : -1;
+        setStep((prevStep) => {
+            let nextStep = prevStep + direction;
+            if (nextStep < 0) nextStep = 0;
+            if (nextStep >= IELTS_STEP_DATA.length) nextStep = IELTS_STEP_DATA.length - 1;
+
+            if 
+(nextStep !== prevStep) {
+                debounceTimeout.current = setTimeout(() => {
+                     debounceTimeout.current = null;
+                }, 700); 
+                e.preventDefault(); 
+            }
+       
+            return nextStep;
+        });
+    };
+
+    useEffect(() => {
+        const sliderElement = sliderRef.current;
+        if (sliderElement) {
+            sliderElement.addEventListener('wheel', handleWheel, { passive: false });
+        }
+
+        return () => {
+            if (sliderElement) {
+                sliderElement.removeEventListener('wheel', handleWheel);
+ 
+            }
+            clearTimeout(debounceTimeout.current);
+        };
+    }, []);
+    const currentStep = IELTS_STEP_DATA[step];
+
+    const slideVariants = {
+        enter: (direction) => ({
+            y: direction > 0 ? 500 : -500,
+            opacity: 0
+        }),
+        center: {
+            y: 0,
+            opacity: 1
+       
+        },
+        exit: (direction) => ({
+            y: direction < 0 ? 500 : -500,
+            opacity: 0
+        })
+    };
+    return (
+        <section 
+            ref={sliderRef}
+            className="py-16 md:py-24 bg-[#00429D] text-white relative overflow-hidden h-[800px] flex items-center" // CHỈNH SỬA MÀU NỀN TẠI ĐÂY (Dùng #00429D thay cho primary-700)
+        >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                
+    
+                <motion.div 
+                    className="text-center mb-16"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                
+                    transition={{ duration: 0.5 }}
+                    viewport={{ once: true }}
+                >
+                    <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
+                        Hành trình Chinh phục IELTS theo 
+3 chặng rõ ràng
+                    </h2>
+                    <p className="text-lg text-primary-100">
+                        Hệ thống IELTS Prep AI sẽ đồng hành cùng bạn chinh phục mục tiêu Band Score.
+                
+                    </p>
+                </motion.div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    
+                    <div className="space-y-6 flex flex-col justify-center min-h-[400px] relative">
+              
+                        <AnimatePresence mode="wait">
+                            <motion.div 
+                                key={currentStep.step + "text"}
+                          
+                                variants={slideVariants}
+                                initial="enter"
+                                animate="center"
+                              
+                                exit="exit"
+                                custom={currentStep.step > (step + 1) ? -1 : 1} 
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                className="absolute inset-0 p-4"
+                        
+                            >
+                                <p className="text-6xl md:text-7xl font-extrabold text-white/20 leading-none">
+                                    Chặng {currentStep.step}
+                      
+                                </p>
+                                <h3 className="text-3xl font-bold text-white mt-4">
+                                    {currentStep.title}
+                  
+                                </h3>
+                                <p className="text-lg text-primary-100 mt-4">
+                                    {currentStep.description}
+               
+                                </p>
+                            </motion.div>
+                         </AnimatePresence>
+                    </div>
+
+          
+                    <div className="relative h-96 w-full rounded-3xl overflow-hidden shadow-2xl bg-white">
+                        <AnimatePresence mode="wait"> 
+                            <motion.div
+                             
+                                key={currentStep.step + "image"}
+                                custom={1} 
+                                variants={slideVariants}
+                              
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{
+  
+                                    y: { type: "spring", stiffness: 300, damping: 30 },
+                                    opacity: { duration: 0.3 }
+                  
+                                }}
+                                className="absolute inset-0 p-6 flex items-center justify-center"
+                            >
+                     
+                            <div className="text-center w-full h-full">
+                                    <p className="text-sm font-semibold text-gray-500 mb-2">{currentStep.substep}</p>
+                                    
+          
+                                    <div className="w-full h-[85%] mx-auto bg-gray-100 rounded-lg flex items-center justify-center border-4 border-primary-400 overflow-hidden">
+                                        [Image of: {currentStep.image.tag}]
+                     
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
+ 
+                    </div>
+
+                </div>
+
+                 <div className="text-center mt-12 flex justify-center space-x-3">
+                    {IELTS_STEP_DATA.map((s, index) => (
+                    
+                        <button
+                            key={s.step}
+                            onClick={() => setStep(index)}
+                            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+     
+                                index === step ? 'bg-white scale-125' : 'bg-primary-300/50 hover:bg-primary-300'
+                            }`}
+                            aria-label={`Go to step ${s.step}`}
+                        />
+             
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+
+// ==============================================================
+// 4. Component RoadmapIelts Chính
+// ==============================================================
+
+const RoadmapIelts = () => {
+    return (
+        <div className="bg-white min-h-screen">
+            {/* 1. Hero Section */}
+            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+                <motion.div 
+                    initial={{ opacity: 
+0, y: 20 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    transition={{ duration: 0.5 }}
+                    className="bg-white rounded-3xl shadow-xl overflow-hidden md:flex"
+                >
+       
+                    {/* Cột 1: Nội dung */}
+                    {/* CHỈNH SỬA MÀU NỀN TẠI ĐÂY (Dùng bg-[#f0f5ff] thay cho bg-[#f0f5ff] và text-primary-600 thay cho secondary-600) */}
+                    <div className="md:w-1/2 p-10 bg-[#f0f5ff] flex flex-col justify-center">
+                   
+                        <h2 className="text-sm font-bold text-primary-600 uppercase mb-2">KHOÁ HỌC IELTS</h2>
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-secondary-900 mb-4 leading-tight">
+                            Luyện Thi IELTS **Trọn vẹn 4 Kỹ năng**
+                       
+                        </h1>
+                        <p className="text-lg text-gray-700 mb-8 max-w-md">
+                            Phòng luyện thi IELTS ảo PREP AI – Nền tảng tự học thông minh, cam kết đầu ra Band Score.
+                        </p>
+                        {/* CHỈNH SỬA MÀU NỀN TẠI ĐÂY (Dùng bg-primary-600 thay cho secondary-600) */}
+                        <a href="#" className="inline-block px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-semibold max-w-fit">
+                            Thiết kế 
+lộ trình học
+                        </a>
+                        <div className="mt-6 flex items-center">
+                            <div className="flex -space-x-2 mr-3">
+                
+                                {/* Dùng primary-400 cho avatars */}
+                                <img className="h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=NV&background=b8cbe0&color=0A3D62" alt="Student 1" />
+                                <img className="h-8 w-8 rounded-full ring-2 ring-white" 
+src="https://ui-avatars.com/api/?name=PT&background=8dacce&color=0A3D62" alt="Student 2" />
+                            </div>
+                            <p className="text-sm font-medium text-gray-700">
+                                <strong>500.000+</strong> học viên đạt IELTS tại 
+NTTU HUB
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Cột 2: Hình ảnh (Dùng primary-500 
+thay cho secondary-500) */}
+                    <div className="md:w-1/2 relative bg-primary-500 overflow-hidden flex items-center justify-center">
+                        <div className="absolute inset-0 bg-primary-900 opacity-20"></div>
+                        [Image of: Banner IELTS Mockup]
+              
+                    </div>
+                </motion.div>
+            </div>
+            
+            {/* 2. Phần Step Slider */}
+            <IELTSStepSlider />
+        
+            {/* 3. Phần Lựa 
+chọn Trình độ & Mục tiêu */}
+            <IELTSLevelSelection />
+
+            {/* 4. CTA cuối trang */}
+            {/* CHỈNH SỬA MÀU NỀN TẠI ĐÂY (Dùng bg-primary-900 thay cho secondary-900) */}
+            <div 
+                className="py-12 text-center bg-[#003885] text-white" 
+       
+            >
+                 <a href="#" className="inline-block px-8 py-3 bg-accent-yellow text-text-dark rounded-full font-bold hover:bg-yellow-400 transition-colors">
+                    Chọn lộ trình học và Trải nghiệm ngay
+                </a>
+            </div>
+            
+ 
+            {/* 5. Footer */}
+            <Footer />
+        </div>
+    );
+};
 export default RoadmapIelts;
 
 ==================================================
@@ -7384,9 +8569,9 @@ FILE_PATH: client\src\pages\RoadmapToeic.js
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/outline'; 
-
-
+import { CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/outline';
+// <=== ĐÃ THÊM IMPORT NÀY
+import Footer from '../components/layout/Footer'; 
 // ==============================================================
 // 1. DỮ LIỆU CẤP ĐỘ, MỤC TIÊU & GÓI HỌC PHÍ
 // ==============================================================
@@ -7396,7 +8581,6 @@ const ScoreMap = {
     '1-295': 1, '300-595': 300, '600-850': 600, '800+': 800,
     'SW_1-99': 1, 'SW_100-199': 100, 'SW_200-250': 200, 'SW_300+': 300
 };
-
 const TAB_DATA = {
     LR: {
         title: 'TOEIC Listening & Reading',
@@ -7453,20 +8637,16 @@ const TAB_DATA = {
         }
     },
 };
-
-
 // ==============================================================
 // 2. Component TOEICLevelSelection (Component Đa năng MỚI)
 // ==============================================================
 const TOEICLevelSelection = () => {
-    const [activeTab, setActiveTab] = useState('LR'); 
-    
-    // Khởi tạo state bằng giá trị mặc định của tab LR
+    const [activeTab, setActiveTab] = useState('LR');
+// Khởi tạo state bằng giá trị mặc định của tab LR
     const [currentLevel, setCurrentLevel] = useState(TAB_DATA.LR.currentLevels[0].value);
     const [goalLevel, setGoalLevel] = useState(TAB_DATA.LR.goalLevels[0].value);
     const [selectedPackage, setSelectedPackage] = useState(TAB_DATA.LR.packages[Object.keys(TAB_DATA.LR.packages)[0]]);
-
-    // Cập nhật dữ liệu khi tab thay đổi
+// Cập nhật dữ liệu khi tab thay đổi
     const updateDataForTab = useCallback((tab) => {
         const data = TAB_DATA[tab];
         const defaultCurrentLevel = data.currentLevels[0].value;
@@ -7476,8 +8656,7 @@ const TOEICLevelSelection = () => {
         setGoalLevel(defaultGoalLevel);
         setSelectedPackage(data.packages[`${defaultCurrentLevel}_${defaultGoalLevel}`] || data.packages[Object.keys(data.packages)[0]]);
     }, []);
-
-    // Hook để tự động cập nhật goalLevel khi currentLevel thay đổi
+// Hook để tự động cập nhật goalLevel khi currentLevel thay đổi
     useEffect(() => {
         const tabData = TAB_DATA[activeTab];
         
@@ -7516,7 +8695,7 @@ const TOEICLevelSelection = () => {
     // Hàm kiểm tra mục tiêu có hợp lệ hay không (dựa trên currentMinScore)
     const isGoalAvailable = (goalValue) => {
         const goalInfo = tabData.goalLevels.find(g => g.value === goalValue);
-        // Mục tiêu phải lớn hơn hoặc bằng trình độ hiện tại
+// Mục tiêu phải lớn hơn hoặc bằng trình độ hiện tại
         return goalInfo && goalInfo.minScore >= currentMinScore;
     };
     
@@ -7551,7 +8730,6 @@ const TOEICLevelSelection = () => {
             </motion.button>
         );
     };
-
     return (
         <section className="py-20 bg-[#00429D] text-white">
             
@@ -7625,7 +8803,7 @@ const TOEICLevelSelection = () => {
                     
                     {/* Kiểm tra đầu vào */}
                     <p className="text-center mt-6 text-sm text-white/80">
-                        Bạn chưa rõ trình độ bản thân? 
+                        Bạn chưa rõ trình độ bản thân?
                         <a href="#" className="font-semibold text-accent-yellow hover:underline ml-1">Kiểm tra đầu vào</a>
                     </p>
                 </div>
@@ -7745,7 +8923,6 @@ const TOEIC_STEP_DATA = [
         image: { tag: 'Bài giảng video tương tác', file: 'image_683e26.jpg' }
     },
 ];
-
 const TOEICStepSlider = () => {
     const [step, setStep] = useState(0); 
     const sliderRef = useRef(null);
@@ -7753,9 +8930,7 @@ const TOEICStepSlider = () => {
     
     const handleWheel = (e) => {
         if (debounceTimeout.current) return;
-
         const direction = e.deltaY > 0 ? 1 : -1;
-
         setStep((prevStep) => {
             let nextStep = prevStep + direction;
             if (nextStep < 0) nextStep = 0;
@@ -7783,8 +8958,7 @@ const TOEICStepSlider = () => {
             }
             clearTimeout(debounceTimeout.current);
         };
-    }, []); 
-
+    }, []);
     const currentStep = TOEIC_STEP_DATA[step];
 
     const slideVariants = {
@@ -7801,7 +8975,6 @@ const TOEICStepSlider = () => {
             opacity: 0
         })
     };
-
     return (
         <section 
             ref={sliderRef}
@@ -7827,7 +9000,7 @@ const TOEICStepSlider = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     
                     <div className="space-y-6 flex flex-col justify-center min-h-[400px] relative">
-                         <AnimatePresence mode="wait">
+                        <AnimatePresence mode="wait">
                             <motion.div 
                                 key={currentStep.step + "text"}
                                 variants={slideVariants}
@@ -7879,7 +9052,7 @@ const TOEICStepSlider = () => {
                                     </div>
                                 </div>
                             </motion.div>
-                        </AnimatePresence>
+                         </AnimatePresence>
                     </div>
 
                 </div>
@@ -7962,6 +9135,9 @@ const RoadmapToeic = () => {
                     Chọn lộ trình học và Trải nghiệm ngay
                 </a>
             </div>
+            
+            {/* 5. Footer */}
+            <Footer />
         </div>
     );
 };

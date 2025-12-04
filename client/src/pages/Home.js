@@ -1,4 +1,4 @@
-// FILE_PATH: client\src\pages\Home.js (ĐÃ SẮP XẾP LẠI THỨ TỰ ĐÚNG VÀ KHÔI PHỤC HOÀN TOÀN PHẦN BENEFITS)
+// FILE_PATH: client\src\pages\Home.js (CẬP NHẬT HOÀN CHỈNH - THAY THẾ CTA BẰNG FORM ĐĂNG KÝ EMAIL/PHONE)
 import React, { useContext, useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,13 +11,20 @@ import {
   ArrowRightIcon,
   XIcon,
   StarIcon,
-  ThumbUpIcon
+  ThumbUpIcon,
+  MailIcon, // NEW: Dùng cho form
+  PhoneIcon // NEW: Dùng cho form
 } from '@heroicons/react/outline';
 import Footer from '../components/layout/Footer';
 import { Tab } from '@headlessui/react';
+// NEW: Imports cho form
+import { useForm } from 'react-hook-form'; 
+import emailjs from '@emailjs/browser'; 
+import { toast } from 'react-toastify';
+
 
 // ==============================================================
-// DỮ LIỆU CỐ ĐỊNH CHO CÁC PHẦN (Modal/Marquee)
+// DỮ LIỆU CỐ ĐỊNH CHO CÁC PHẦN
 // ==============================================================
 const ALL_STUDENTS_DATA = [
   // Dữ liệu mô phỏng từ ảnh 83ea95.jpg và 83ea59.jpg
@@ -248,7 +255,7 @@ const ThreeStepSlider = () => {
                                     {currentStep.description}
                                 </p>
                             </motion.div>
-                         </AnimatePresence>
+                        </AnimatePresence>
                     </div>
 
                     {/* Cột 2: Image and Motion Container */}
@@ -267,7 +274,7 @@ const ThreeStepSlider = () => {
                                 }}
                                 className="absolute inset-0 p-6 flex items-center justify-center"
                             >
-                                <div className="text-center">
+                                <div className="text-center w-full h-full">
                                     <p className="text-sm font-semibold text-white/70 mb-2">{currentStep.substep}</p>
                                     {/* Placeholder Image for the step */}
                                     <div className="w-64 h-64 mx-auto bg-gray-200 rounded-lg flex items-center justify-center border-4 border-blue-400">
@@ -281,7 +288,7 @@ const ThreeStepSlider = () => {
                 </div>
 
                  {/* Pagination/Step Indicator */}
-                 <div className="text-center mt-12 flex justify-center space-x-3">
+                <div className="text-center mt-12 flex justify-center space-x-3">
                     {STEP_DATA.map((s, index) => (
                         <button
                             key={s.step}
@@ -300,7 +307,154 @@ const ThreeStepSlider = () => {
 
 
 // ==============================================================
-// Component chính Home (Tiếp tục)
+// Component MỚI: Form Đăng ký nhận tư vấn (CTA mới)
+// ==============================================================
+const SubscriptionCTA = ({ isAuthenticated }) => {
+    // Sử dụng EmailJS keys đã cung cấp trong Contact.js
+    const serviceID = 'service_odo7xzm'; 
+    const templateID = 'template_iy35o7f'; 
+    const publicKey = 'BM-yrfjfz0EoLCCPV'; 
+    
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset,
+    } = useForm();
+    
+    const [submitting, setSubmitting] = useState(false);
+    
+    const onSubmit = (data) => {
+        setSubmitting(true);
+        
+        const templateParams = {
+            // Đặt tên trường rõ ràng để Admin biết đây là form đăng ký tư vấn
+            name: data.email, // Dùng email làm tên nếu không có trường tên
+            email: data.email,
+            subject: "YÊU CẦU TƯ VẤN - TỪ HOMEPAGE",
+            message: `Yêu cầu tư vấn từ khách hàng:\n- Email: ${data.email}\n- Số điện thoại: ${data.phone}\n- Nhu cầu: Đăng ký học/Tư vấn lộ trình.`,
+            time: new Date().toLocaleString(),
+        };
+
+        // Gửi qua emailjs
+        emailjs
+            .send(serviceID, templateID, templateParams, publicKey)
+            .then((response) => {
+                toast.success('Yêu cầu của bạn đã được gửi! Chúng tôi sẽ liên hệ lại sớm.');
+                reset(); // clear form
+            })
+            .catch((err) => {
+                console.error('FAILED...', err);
+                toast.error('Gửi yêu cầu thất bại. Vui lòng thử lại.');
+            })
+            .finally(() => {
+                setSubmitting(false);
+            });
+    };
+    
+    const inputClasses = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-accent-yellow focus:border-accent-yellow placeholder-gray-500 text-gray-800 transition-shadow";
+    const errorClasses = "absolute -bottom-5 left-0 text-xs text-red-300 font-medium";
+
+    if (isAuthenticated) {
+        return (
+            <motion.section
+                className="bg-primary-700 py-16 md:py-20 text-white"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+            >
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-3">Sẵn sàng học tập?</h2>
+                    <p className="text-lg text-primary-100 mb-8 max-w-2xl mx-auto">
+                        Tiếp tục hành trình học tập và chinh phục Band Score mục tiêu ngay!
+                    </p>
+                    <Link
+                        to="/dashboard"
+                        className="inline-flex items-center px-8 py-4 bg-white text-primary-700 rounded-full font-extrabold text-lg hover:bg-gray-100 transition-colors shadow-lg"
+                    >
+                        Go to Dashboard <ArrowRightIcon className="ml-2 h-6 w-6" />
+                    </Link>
+                </div>
+            </motion.section>
+        );
+    }
+    
+    // Form Đăng ký nếu chưa đăng nhập
+    return (
+        <motion.section
+            className="bg-primary-700 py-16 md:py-20 text-white"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+        >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 className="text-3xl md:text-4xl font-bold mb-3">Sẵn sàng nhận lộ trình học cá nhân hóa?</h2>
+                <p className="text-lg text-primary-100 mb-8 max-w-3xl mx-auto">
+                    Để lại thông tin liên hệ, chuyên viên tư vấn sẽ gọi lại cho bạn **trong vòng 30 phút** để thiết kế lộ trình miễn phí.
+                </p>
+                
+                <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl mx-auto space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Email Field */}
+                        <div className="relative">
+                            <input
+                                {...register("email", {
+                                    required: "Email không được trống",
+                                    pattern: {
+                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                        message: "Email không hợp lệ"
+                                    }
+                                })}
+                                type="email"
+                                placeholder="Email của bạn"
+                                className={inputClasses}
+                                disabled={submitting}
+                            />
+                            <MailIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                            {errors.email && (<span className={errorClasses}>{errors.email?.message}</span>)}
+                        </div>
+                        
+                        {/* Phone Field */}
+                        <div className="relative">
+                            <input
+                                {...register("phone", {
+                                    required: "SĐT không được trống",
+                                    pattern: {
+                                        value: /^\d{10,11}$/, // Kiểm tra 10 hoặc 11 chữ số
+                                        message: "Số điện thoại không hợp lệ"
+                                    }
+                                })}
+                                type="tel"
+                                placeholder="Số điện thoại"
+                                className={inputClasses}
+                                disabled={submitting}
+                            />
+                            <PhoneIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                            {errors.phone && (<span className={errorClasses}>{errors.phone?.message}</span>)}
+                        </div>
+                    </div>
+                    
+                    {/* Submit Button */}
+                    <motion.button
+                        type="submit"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        disabled={submitting}
+                        className="w-full inline-flex items-center justify-center px-8 py-3 bg-accent-yellow text-primary-700 rounded-xl font-extrabold text-lg shadow-xl hover:bg-yellow-300 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                        {submitting ? 'Đang gửi yêu cầu...' : 'GỬI YÊU CẦU TƯ VẤN MIỄN PHÍ'}
+                    </motion.button>
+                </form>
+            </div>
+        </motion.section>
+    );
+};
+
+
+// ==============================================================
+// Component chính Home 
 // ==============================================================
 const Home = () => {
   const { isAuthenticated, user } = useContext(AuthContext);
@@ -331,8 +485,7 @@ const Home = () => {
         setParallaxY2(Math.max(0, -rect.top * 0.15));
       }
       if (benefitsRef.current) {
-        const 
- rect = benefitsRef.current.getBoundingClientRect();
+        const rect = benefitsRef.current.getBoundingClientRect();
         setParallaxY3(Math.max(0, -rect.top * 0.1));
       }
     };
@@ -464,16 +617,14 @@ const Home = () => {
       >
         <motion.div
           className="absolute -top-32 left-1/2 w-96 h-96 bg-gradient-to-br from-primary-200 to-accent-yellow rounded-full blur-3xl opacity-30 z-0"
-     
-      style={{ y: parallaxY2 * 0.5 }}
+          style={{ y: parallaxY2 * 0.5 }}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div className="text-center mb-16" variants={itemVariants}>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Thiết kế cho việc học hiện đại</h2>
             <p className="max-w-2xl mx-auto text-lg text-gray-600">
-              Nền 
- tảng của chúng tôi cung cấp tất cả các công cụ bạn cần để giảng dạy hiệu quả và tạo ra những trải nghiệm học tập hấp dẫn.
- </p>
+              Nền tảng của chúng tôi cung cấp tất cả các công cụ bạn cần để giảng dạy hiệu quả và tạo ra những trải nghiệm học tập hấp dẫn.
+            </p>
           </motion.div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -481,30 +632,25 @@ const Home = () => {
               <motion.div
                 key={index}
                 variants={itemVariants}
-     
-            whileHover={{ scale: 1.04, boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.2)' }}
+                whileHover={{ scale: 1.04, boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.2)' }}
                 className="bg-white/80 backdrop-blur-lg rounded-xl p-8 border border-primary-50 shadow-card hover:shadow-xl transition-all duration-300 flex flex-col md:flex-row items-center gap-6"
                 style={{ y: parallaxY2 * (0.1 + index * 0.05) }}
               >
-        
-         <motion.img
+                <motion.img
                   src={featureImages[index]}
                   alt={feature.title}
                   className="w-28 h-28 object-cover rounded-2xl shadow-lg mb-4 md:mb-0 md:mr-6"
                   style={{ y: parallaxY2 * 0.15 }}
-        
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 + index * 0.1, duration: 0.7, type: 'spring' }}
                 />
                 <div>
- 
                   <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600 mb-5">
                     {feature.icon}
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-              
-     <p className="text-gray-600">{feature.description}</p>
+                  <p className="text-gray-600">{feature.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -520,26 +666,23 @@ const Home = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Lợi Ích Dành Cho Tất Cả Mọi Người</h2>
             <p className="max-w-2xl mx-auto text-lg text-gray-600">
               Dù bạn là giáo viên hay học viên, nền tảng của chúng tôi đều nâng cao trải nghiệm học tập.
- </p>
+            </p>
           </motion.div>
           
           <div className="md:flex md:items-center md:justify-between">
             <motion.div className="md:w-1/2 mb-10 md:mb-0" variants={itemVariants}>
               <h3 className="text-2xl font-semibold text-gray-900 mb-6">Lợi Ích Dành Cho Giáo Viên</h3>
               <ul className="space-y-4">
-             
-    {['Tạo và quản lý khóa học dễ dàng.','Chia sẻ tài liệu dưới nhiều định dạng khác nhau.','Thiết kế các bài đánh giá và bài kiểm tra/đố vui.','Theo dõi tiến độ và mức độ tham gia của học viên.','Giao tiếp hiệu quả với học viên.'].map((item, i) => (
+                {['Tạo và quản lý khóa học dễ dàng.','Chia sẻ tài liệu dưới nhiều định dạng khác nhau.','Thiết kế các bài đánh giá và bài kiểm tra/đố vui.','Theo dõi tiến độ và mức độ tham gia của học viên.','Giao tiếp hiệu quả với học viên.'].map((item, i) => (
                   <li key={i} className="flex items-start">
                     <CheckCircleIcon className="h-6 w-6 text-green-500 mr-2 flex-shrink-0" />
-    
-                 <span className="text-gray-700">{item}</span>
+                    <span className="text-gray-700">{item}</span>
                   </li>
                 ))}
               </ul>
             </motion.div>
             
-           
-  <motion.div className="md:w-1/2" variants={itemVariants}>
+            <motion.div className="md:w-1/2" variants={itemVariants}>
               <h3 className="text-2xl font-semibold text-gray-900 mb-6">Lợi Ích Dành Cho Học Viên</h3>
               <ul className="space-y-4">
                 {['Truy cập tất cả tài liệu khóa học tại một nơi duy nhất.','Nộp bài tập dưới dạng kỹ thuật số.','Làm bài kiểm tra và nhận phản hồi tức thì.','Theo dõi điểm số và tiến độ học tập của bạn.','Luôn cập nhật các thông báo mới nhất của khóa học.'].map((item, i) => (
@@ -547,8 +690,7 @@ const Home = () => {
                     <CheckCircleIcon className="h-6 w-6 text-green-500 mr-2 flex-shrink-0" />
                     <span className="text-gray-700">{item}</span>
                   </li>
-      
-           ))}
+                ))}
               </ul>
             </motion.div>
           </div>
@@ -565,13 +707,11 @@ const Home = () => {
         className="py-16 md:py-24 bg-white relative overflow-hidden"
         variants={containerVariants}
         initial="hidden"
-      
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
       >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.h2
-  
             className="text-3xl md:text-4xl font-extrabold text-center mb-12 text-primary-700"
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -580,7 +720,6 @@ const Home = () => {
             Chất lượng được minh chứng bởi 
             <br />
             <span className="text-primary-400">Hàng nghìn gương mặt xuất sắc</span>
-         
           </motion.h2>
 
           <Tab.Group>
@@ -776,6 +915,7 @@ const Home = () => {
             <h2 className="text-3xl md:text-4xl font-extrabold mb-4 drop-shadow-lg">
               Được đánh giá cao bởi hàng trăm nghìn học viên đã và đang theo học
             </h2>
+            
             <p className="text-lg text-primary-100 mb-6 font-light">
               Đây chính là sự ghi nhận lớn nhất với Prep (NTTU HUB), nhờ có động lực cải tiến không ngừng nghỉ và đem đến trải nghiệm học tập tuyệt vời nhất cho bạn.
             </p>
@@ -783,7 +923,7 @@ const Home = () => {
 
           {/* Cột 2: Marquee dọc */}
           <div className="md:w-2/3 h-[500px] overflow-hidden relative rounded-2xl shadow-2xl bg-white/10 p-4">
-            
+          
             {/* Masking gradients */}
             <div className="absolute inset-0 z-10 [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)]"></div>
             
@@ -875,38 +1015,14 @@ const Home = () => {
       </section>
       {/* ==================== END PARTNERS MARQUEE ==================== */}
 
-      {/* ==================== READY TO TRANSFORM (CTA SECTION) ==================== */}
-      <motion.section
-        className="bg-primary-700 py-16 md:py-20 text-white"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-      >
-     
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to transform your learning experience?</h2>
-          <p className="text-lg text-primary-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of teachers and students who are already using our platform to enhance their educational journey.
- </p>
-          <Link
-            to={isAuthenticated ?
- (user?.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard') : '/register'}
-            className="inline-flex items-center px-6 py-3 bg-white text-primary-700 rounded-md font-medium hover:bg-gray-100 transition-colors shadow-lg"
-          >
-            {isAuthenticated ?
- 'Go to Dashboard' : 'Get Started For Free'}
-            <ArrowRightIcon className="ml-2 h-5 w-5" />
-          </Link>
-        </div>
-      </motion.section>
-      {/* ==================== END READY TO TRANSFORM (CTA SECTION) ==================== */}
+      {/* ==================== NEW CTA SECTION (FORM ĐĂNG KÝ) ==================== */}
+      <SubscriptionCTA isAuthenticated={isAuthenticated} />
+      {/* ==================== END NEW CTA SECTION (FORM ĐĂNG KÝ) ==================== */}
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 0.2, scale: 1 }}
-     
           transition={{ duration: 1.2, delay: 0.2 }}
           className="absolute left-1/4 top-0 w-96 h-96 bg-gradient-to-br from-accent-yellow to-primary-400 rounded-full blur-3xl opacity-60 animate-pulse"
         />
@@ -914,11 +1030,9 @@ const Home = () => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 0.15, scale: 1 }}
           transition={{ duration: 1.2, delay: 0.4 }}
-        
           className="absolute right-1/4 bottom-0 w-96 h-96 bg-gradient-to-tr from-secondary-500 to-primary-600 rounded-full blur-3xl opacity-60 animate-pulse"
         />
       </div>
-
       <Footer />
       <StudentListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
