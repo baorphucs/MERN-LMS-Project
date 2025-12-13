@@ -73,25 +73,25 @@ const TeacherDashboard = () => {
 
   const statCards = [
     {
-      title: 'Courses',
+      title: 'Khóa học',
       value: stats.totalCourses,
       icon: <BookOpenIcon className="h-6 w-6 text-blue-500" />,
       color: 'bg-blue-100',
     },
     {
-      title: 'Students',
+      title: 'Học sinh',
       value: stats.totalStudents,
       icon: <DocumentTextIcon className="h-6 w-6 text-green-500" />,
       color: 'bg-green-100',
     },
     {
-      title: 'Pending Submissions',
+      title: 'Bản nộp đang chờ',
       value: stats.pendingAssignments,
       icon: <ClipboardCheckIcon className="h-6 w-6 text-yellow-500" />,
       color: 'bg-yellow-100',
     },
     {
-      title: 'Announcements',
+      title: 'Thông báo',
       value: recentActivities.length,
       icon: <BellIcon className="h-6 w-6 text-purple-500" />,
       color: 'bg-purple-100',
@@ -110,8 +110,8 @@ const TeacherDashboard = () => {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Teacher Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {user?.name}!</p>
+          <h1 className="text-2xl font-bold text-gray-800">Bảng điều khiển giảng dạy của bạn</h1>
+          <p className="text-gray-600">Chào mừng trở lại, {user?.name}!</p>
         </div>
         <div className="mt-4 md:mt-0">
           <Link
@@ -119,7 +119,7 @@ const TeacherDashboard = () => {
             className="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
           >
             <PlusCircleIcon className="mr-2 h-5 w-5" />
-            Create New Course
+            Tạo Khóa Học Mới
           </Link>
         </div>
       </div>
@@ -149,7 +149,7 @@ const TeacherDashboard = () => {
 
       {/* My Courses */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">My Courses</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Các khóa học của tôi</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.length > 0 ? (
             courses.map((course, index) => (
@@ -170,14 +170,14 @@ const TeacherDashboard = () => {
                   <h3 className="text-lg font-semibold text-gray-800">{course.title}</h3>
                   <p className="text-gray-600 text-sm mt-1">Code: {course.code}</p>
                   <p className="text-gray-600 text-sm mt-1">
-                    {course.students?.length || 0} Students
+                    {course.students?.length || 0} Học sinh
                   </p>
                   <div className="mt-4">
                     <Link
                       to={`/courses/${course._id}`}
                       className="text-primary-600 hover:text-primary-700 font-medium text-sm"
                     >
-                      View Course
+                      Xem Khóa Học
                     </Link>
                   </div>
                 </div>
@@ -186,9 +186,9 @@ const TeacherDashboard = () => {
           ) : (
             <div className="col-span-full">
               <p className="text-gray-500 text-center py-8">
-                You haven't created any courses yet. 
+                Bạn chưa tạo khóa học nào cả. 
                 <Link to="/teacher/courses/create" className="text-primary-600 hover:underline ml-1">
-                  Create your first course
+                  Tạo khóa học đầu tiên của bạn
                 </Link>
               </p>
             </div>
@@ -198,7 +198,7 @@ const TeacherDashboard = () => {
 
       {/* Recent Activities */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Recent Activities</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Hoạt động gần đây</h2>
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {recentActivities.length > 0 ? (
             <div className="divide-y divide-gray-200">
@@ -214,7 +214,7 @@ const TeacherDashboard = () => {
                         to={activity.link}
                         className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                       >
-                        View Details
+                        Xem chi tiết
                       </Link>
                     )}
                   </div>
@@ -222,7 +222,7 @@ const TeacherDashboard = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-8">No recent activities found.</p>
+            <p className="text-gray-500 text-center py-8">Không tìm thấy hoạt động gần đây.</p>
           )}
         </div>
       </div>

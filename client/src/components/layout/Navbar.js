@@ -1,4 +1,3 @@
-// FILE_PATH: client\src\components\layout\Navbar.js (CẬP NHẬT HOÀN CHỈNH)
 
 import React, { useContext, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -23,7 +22,7 @@ const Navbar = () => {
     { name: 'Trang chủ', to: '/', public: true }, // Đã đổi tên
     { name: 'Giới thiệu', to: '/about', public: true }, 
     { name: 'Cam Kết Đầu Ra', to: '/commitment', public: true }, // NEW: Link Cam Kết
-    { name: 'Courses', to: '/courses', public: false },
+    { name: 'Khóa học', to: '/courses', public: false },
     { name: 'FAQ', to: '/faq', public: true },
     { name: 'Liên hệ', to: '/contact', public: true }, // Đã đổi tên
   ];
@@ -154,7 +153,7 @@ const Navbar = () => {
                       <Menu as="div" className="relative ml-3">
                         <div>
                           <Menu.Button className="relative flex rounded-full bg-white/70 shadow border border-primary-100 text-sm focus:outline-none transition-all duration-200">
-                            <span className="sr-only">View notifications</span>
+                            <span className="sr-only">Xem thông báo</span>
                             <BellIcon className="h-6 w-6 text-gray-700" />
                             {notifications.filter(n => !n.read).length > 0 && (
                               <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400"></span>
@@ -171,7 +170,7 @@ const Navbar = () => {
                         >
                           <Menu.Items className="absolute right-0 z-10 mt-2 w-72 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                             <div className="px-4 py-2 font-semibold text-gray-700 border-b">
-                              Notifications
+                              Thông báo
                             </div>
                             {notifications.length > 0 ?
                               (
@@ -188,7 +187,7 @@ const Navbar = () => {
                               ) : (
                                 <Menu.Item>
                                   <div className="block px-4 py-2 text-sm text-gray-500">
-                                    No new notifications
+                                    Không có thông báo mới
                                   </div>
                                 </Menu.Item>
                               )}
@@ -223,7 +222,7 @@ right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white/90 shadow-lg ring-1 
                                     '/teacher/dashboard' : '/student/dashboard'}
                                   className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
                                 >
-                                  Dashboard
+                                  Bảng điều khiển
                                 </Link>
                               )}
                             </Menu.Item>
@@ -233,7 +232,7 @@ right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white/90 shadow-lg ring-1 
                                   onClick={logout}
                                   className={classNames(active ? 'bg-gray-100' : '', 'block w-full text-left px-4 py-2 text-sm text-gray-700')}
                                 >
-                                  Sign out
+                                 Đăng xuất
                                 </button>
                               )}
                             </Menu.Item>
@@ -248,13 +247,13 @@ right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white/90 shadow-lg ring-1 
                         to="/login"
                         className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                       >
-                        Login
+                        Đăng nhâp
                       </Link>
                       <Link
                         to="/register"
                         className="bg-primary-600 text-white hover:bg-primary-700 px-3 py-2 rounded-md text-sm font-medium"
                       >
-                        Register
+                        Đăng ký
                       </Link>
                     </div>
                   )}

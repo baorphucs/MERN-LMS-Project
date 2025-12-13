@@ -1,7 +1,8 @@
-// src/pages/teacher/Users.js (TẠO MỚI FILE NÀY)
+// src/pages/teacher/Users.js (THAY THẾ TOÀN BỘ NỘI DUNG)
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { TrashIcon } from '@heroicons/react/outline'; // Import TrashIcon
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -24,9 +25,31 @@ const Users = () => {
     fetchUsers();
   }, []);
 
+  // NEW: Hàm xử lý xóa người dùng
+  const handleDeleteUser = async (userId, userName) => {
+    // Xác nhận từ người dùng
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa người dùng ${userName} không? Hành động này không thể hoàn tác.`)) {
+      return;
+    }
+
+    try {
+      // Gọi API xóa người dùng
+      await axios.delete(`/api/users/${userId}`);
+      
+      // Cập nhật state để xóa người dùng khỏi danh sách
+      setUsers(users.filter(u => u._id !== userId));
+      
+      toast.success(`Đã xóa người dùng ${userName} thành công.`);
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      toast.error(err.response?.data?.message || 'Xóa người dùng thất bại.');
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto py-10 px-4">
-      <h1 className="text-4xl font-bold mb-10 text-center">Quản Lý Người Dùng</h1>
+      <h1 className="text-4xl font-bold mb-10 
+text-center">Quản Lý Người Dùng</h1>
       {loading ? (
         <p className="text-center text-xl">Đang tải...</p>
       ) : (
@@ -35,30 +58,47 @@ const Users = () => {
             <thead className="bg-primary-600 text-white">
               <tr>
                 <th className="px-6 py-4 text-left">Tên</th>
+           
                 <th className="px-6 py-4 text-left">Email</th>
                 <th className="px-6 py-4 text-left">Vai trò</th>
                 <th className="px-6 py-4 text-left">Ngày tạo</th>
+                {/* NEW: Thêm cột Actions */}
+                <th className="px-6 py-4 text-left">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {users.map(u => (
+       
                 <tr key={u._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">{u.name}</td>
                   <td className="px-6 py-4">{u.email}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 px-3 py-1 rounded-full text-sm font-bold ${
+             
                       u.role === 'teacher' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
                     }`}>
                       {u.role === 'teacher' ? 'Giáo viên' : 'Học sinh'}
                     </span>
                   </td>
+      
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {new Date(u.createdAt).toLocaleDateString('vi-VN')}
+                  </td>
+                  {/* NEW: Nút xóa */}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                          onClick={() => handleDeleteUser(u._id, u.name)}
+                          className="text-red-600 hover:text-red-900"
+                          title="Xóa người dùng"
+                      >
+                          <TrashIcon className="h-5 w-5" />
+                      </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+    
         </div>
       )}
     </div>

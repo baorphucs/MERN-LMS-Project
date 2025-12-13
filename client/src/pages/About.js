@@ -18,7 +18,7 @@ const INTRO_DATA = {
             "Tại Việt Nam, với mạng lưới chi nhánh trải dài cả 3 miền đất nước, NTTU HUB ngày càng khẳng định uy tín trong các lĩnh vực hoạt động như: Tổ chức các bài thi tiếng Anh quốc tế (như TOEIC, IELTS), các bài thi Tin học quốc tế (MOS, IC3), và các bài thi khác như SAT, GRE, CFA. Chúng tôi cũng cung cấp giải pháp tiếng Anh, Tin học quốc tế cho các doanh nghiệp, các trường học, cơ quan quản lý giáo dục."
         ],
         // Dùng ảnh văn phòng mô phỏng
-        image: "https://images.unsplash.com/photo-1542838132332-ce05b9b660c1?auto=format&fit=crop&w=800&q=80", 
+        image: "https://iigvietnam.com/wp-content/uploads/2021/05/gioi-thieu-2.png", 
     },
     // 3 cột chính
     cores: [

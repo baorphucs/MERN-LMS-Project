@@ -80,7 +80,7 @@ FILE_PATH: client\public\index.html
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <title>LMS - Learning Management System</title>
+    <title>NTTU-HUB</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -593,44 +593,104 @@ export default CourseNotices;
 ==================================================
 FILE_PATH: client\src\components\layout\Footer.js
 ==================================================
+// FILE_PATH: client\src\components\layout\Footer.js (CẬP NHẬT HOÀN CHỈNH - BỐ CỤC 2 CỘT HÀI HÒA)
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { MailIcon, PhoneIcon, ChevronDownIcon } from '@heroicons/react/outline'; // Sử dụng Heroicons
 
 const Footer = () => (
   <motion.footer
     initial={{ opacity: 0, y: 40 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.7, delay: 0.2 }}
-    className="bg-gradient-to-tr from-primary-700 to-secondary-800 text-white py-10 mt-16 shadow-inner"
+    className="bg-primary-700 text-primary-100 py-10 mt-16 shadow-inner border-t-8 border-primary-800"
   >
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:justify-between items-center gap-6">
-      <div className="flex flex-col items-center md:items-start">
-        <span className="text-2xl font-extrabold font-heading tracking-tight bg-gradient-to-r from-primary-300 to-accent-yellow bg-clip-text text-transparent mb-2">
-          NTTU HUB
-        </span>
-        <span className="text-sm text-primary-100">&copy; {new Date().getFullYear()} Modern LMS. All rights reserved.</span>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      {/* ==================== 1. Cột Chính và Logo (Bố cục 3 cột tổng thể: Logo | Links 1 | Links 2) ==================== */}
+      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-start gap-8 border-b border-primary-600 pb-8 mb-8">
+        
+        {/* Cột 1: Logo và Kết nối (Chiều rộng 1/3) */}
+        <div className="w-full md:w-1/3 space-y-4">
+          <span className="text-3xl font-extrabold font-heading tracking-tight bg-gradient-to-r from-primary-300 to-accent-yellow bg-clip-text text-transparent">
+            NTTU HUB
+          </span>
+          <p className="text-sm text-primary-200">
+            © {new Date().getFullYear()} Modern LMS. All rights reserved.
+          </p>
+
+          {/* Kết nối với chúng tôi */}
+          <div className="pt-4 space-y-2">
+            <h5 className="text-sm font-bold uppercase text-white">Kết nối với chúng tôi</h5>
+            <div className="flex gap-3">
+                <a href="mailto:nttuhub@nttu.edu.vn" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center hover:bg-primary-500 transition-colors" aria-label="Email">
+                    <MailIcon className="h-4 w-4 text-white" />
+                </a>
+                <a href="tel:02873002424" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center hover:bg-primary-500 transition-colors" aria-label="Phone">
+                    <PhoneIcon className="h-4 w-4 text-white" />
+                </a>
+                <a href="https://www.facebook.com/DaihocNguyenTatThanh" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center hover:bg-primary-500 transition-colors text-white text-sm font-bold" aria-label="Facebook">
+                    FB
+                </a>
+            </div>
+          </div>
+        </div>
+        
+        {/* Cột 2 & 3: Thông tin chi tiết (Chiều rộng 2/3, chia đều thành 2 cột) */}
+        <div className="w-full md:w-2/3 grid grid-cols-2 gap-8">
+            
+            {/* Cột 2: Chương trình học */}
+            <div className="space-y-2">
+                <h5 className="text-sm font-bold uppercase text-white mb-3">Chương trình học</h5>
+                <Link to="/roadmap/ielts" className="block text-sm hover:text-accent-yellow transition-colors">IELTS</Link>
+                <Link to="/roadmap/toeic" className="block text-sm hover:text-accent-yellow transition-colors">TOEIC</Link>
+                <a href="#" className="block text-sm hover:text-accent-yellow transition-colors">HSK (coming soon)</a>
+                <a href="#" className="block text-sm hover:text-accent-yellow transition-colors">Tiếng Anh Giao tiếp (coming soon)</a>
+            </div>
+
+            {/* Cột 3: Về Prep (NTTU HUB) */}
+            <div className="space-y-2">
+                <h5 className="text-sm font-bold uppercase text-white mb-3">Về NTTU HUB</h5>
+                <Link to="/about" className="block text-sm hover:text-accent-yellow transition-colors">Giới thiệu chung</Link>
+                <Link to="/commitment" className="block text-sm hover:text-accent-yellow transition-colors">Cam Kết Đầu Ra</Link>
+                <a href="#" className="block text-sm hover:text-accent-yellow transition-colors">Tuyển dụng</a>
+                <Link to="/faq" className="block text-sm hover:text-accent-yellow transition-colors">FAQ</Link>
+                <a href="#" className="block text-sm hover:text-accent-yellow transition-colors">Điều khoản & chính sách</a>
+            </div>
+
+            {/* Cột Hướng dẫn sử dụng đã bị loại bỏ */}
+            
+        </div>
+        
       </div>
-      <nav className="flex flex-wrap gap-6 text-primary-100 text-sm font-medium">
-        <Link to="/" className="hover:text-accent-yellow transition-colors">Home</Link>
-        <Link to="/courses" className="hover:text-accent-yellow transition-colors">Courses</Link>
-        <Link to="/login" className="hover:text-accent-yellow transition-colors">Login</Link>
-        <Link to="/register" className="hover:text-accent-yellow transition-colors">Register</Link>
-      </nav>
-      <div className="flex gap-4 mt-4 md:mt-0">
-        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-accent-yellow transition-colors">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557a9.93 9.93 0 0 1-2.828.775 4.932 4.932 0 0 0 2.165-2.724c-.951.564-2.005.974-3.127 1.195A4.92 4.92 0 0 0 16.616 3c-2.73 0-4.942 2.21-4.942 4.932 0 .386.045.762.127 1.124C7.728 8.807 4.1 6.884 1.671 3.965c-.423.722-.666 1.561-.666 2.475 0 1.708.87 3.216 2.188 4.099a4.904 4.904 0 0 1-2.237-.616c-.054 2.281 1.581 4.415 3.949 4.89a4.936 4.936 0 0 1-2.224.084c.627 1.956 2.444 3.377 4.6 3.417A9.867 9.867 0 0 1 0 21.543a13.94 13.94 0 0 0 7.548 2.209c9.057 0 14.009-7.496 14.009-13.986 0-.213-.005-.425-.014-.636A9.936 9.936 0 0 0 24 4.557z"/></svg>
-        </a>
-        <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-accent-yellow transition-colors">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.021c0 4.428 2.865 8.184 6.839 9.504.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.157-1.11-1.465-1.11-1.465-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.339-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.987 1.029-2.686-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.025A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.338 1.909-1.295 2.748-1.025 2.748-1.025.546 1.378.202 2.397.1 2.65.64.699 1.028 1.593 1.028 2.686 0 3.847-2.338 4.695-4.566 4.944.359.309.678.919.678 1.852 0 1.336-.012 2.417-.012 2.747 0 .267.18.577.688.48C19.138 20.2 22 16.448 22 12.021 22 6.484 17.523 2 12 2z"/></svg>
-        </a>
+      
+      {/* ==================== 2. Thông tin Công ty/Trung tâm (2 Cột) ==================== */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-xs text-primary-200">
+        
+        {/* Cột Thông tin Công ty */}
+        <div className="space-y-2">
+            <h5 className="font-bold uppercase text-white">Công ty Cổ phần Công nghệ (Mô phỏng)</h5>
+            <p><strong>MSDN:</strong> 0109817671</p>
+            <p><strong>Địa chỉ liên hệ:</strong> Số 300A Nguyễn Tất Thành, P.13, Q.4, TP.HCM.</p>
+            <p><strong>Trụ sở chính:</strong> Lô C1-C2 Khu đô thị Nam Trung Yên, P. Yên Hòa, Q. Cầu Giấy, TP. Hà Nội.</p>
+        </div>
+        
+        {/* Cột Trung tâm Đào tạo */}
+        <div className="space-y-2">
+            <h5 className="font-bold uppercase text-white">Trung tâm Đào tạo ngoại ngữ NTTU HUB</h5>
+            <p><strong>Phòng luyện ảo:</strong> Trải nghiệm thực tế - Công nghệ hàng đầu.</p>
+            <p><strong>Hotline:</strong> 028 7300 2424</p>
+            <p>Giấy chứng nhận hoạt động giáo dục: Số 1309/QĐ-SGDĐT ngày 31 tháng 07 năm 2023.</p>
+        </div>
       </div>
+      
     </div>
   </motion.footer>
 );
 
 export default Footer;
-
 
 ==================================================
 FILE_PATH: client\src\components\layout\Layout.js
@@ -705,7 +765,7 @@ const Navbar = () => {
     { name: 'Trang chủ', to: '/', public: true }, // Đã đổi tên
     { name: 'Giới thiệu', to: '/about', public: true }, 
     { name: 'Cam Kết Đầu Ra', to: '/commitment', public: true }, // NEW: Link Cam Kết
-    { name: 'Courses', to: '/courses', public: false },
+    { name: 'Khóa học', to: '/courses', public: false },
     { name: 'FAQ', to: '/faq', public: true },
     { name: 'Liên hệ', to: '/contact', public: true }, // Đã đổi tên
   ];
@@ -836,7 +896,7 @@ const Navbar = () => {
                       <Menu as="div" className="relative ml-3">
                         <div>
                           <Menu.Button className="relative flex rounded-full bg-white/70 shadow border border-primary-100 text-sm focus:outline-none transition-all duration-200">
-                            <span className="sr-only">View notifications</span>
+                            <span className="sr-only">Xem thông báo</span>
                             <BellIcon className="h-6 w-6 text-gray-700" />
                             {notifications.filter(n => !n.read).length > 0 && (
                               <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400"></span>
@@ -853,7 +913,7 @@ const Navbar = () => {
                         >
                           <Menu.Items className="absolute right-0 z-10 mt-2 w-72 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                             <div className="px-4 py-2 font-semibold text-gray-700 border-b">
-                              Notifications
+                              Thông báo
                             </div>
                             {notifications.length > 0 ?
                               (
@@ -870,7 +930,7 @@ const Navbar = () => {
                               ) : (
                                 <Menu.Item>
                                   <div className="block px-4 py-2 text-sm text-gray-500">
-                                    No new notifications
+                                    Không có thông báo mới
                                   </div>
                                 </Menu.Item>
                               )}
@@ -905,7 +965,7 @@ right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white/90 shadow-lg ring-1 
                                     '/teacher/dashboard' : '/student/dashboard'}
                                   className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
                                 >
-                                  Dashboard
+                                  Bảng điều khiển
                                 </Link>
                               )}
                             </Menu.Item>
@@ -915,7 +975,7 @@ right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white/90 shadow-lg ring-1 
                                   onClick={logout}
                                   className={classNames(active ? 'bg-gray-100' : '', 'block w-full text-left px-4 py-2 text-sm text-gray-700')}
                                 >
-                                  Sign out
+                                 Đăng xuất
                                 </button>
                               )}
                             </Menu.Item>
@@ -930,13 +990,13 @@ right-0 z-10 mt-2 w-48 origin-top-right rounded-xl bg-white/90 shadow-lg ring-1 
                         to="/login"
                         className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium"
                       >
-                        Login
+                        Đăng nhâp
                       </Link>
                       <Link
                         to="/register"
                         className="bg-primary-600 text-white hover:bg-primary-700 px-3 py-2 rounded-md text-sm font-medium"
                       >
-                        Register
+                        Đăng ký
                       </Link>
                     </div>
                   )}
@@ -1582,7 +1642,7 @@ const INTRO_DATA = {
             "Tại Việt Nam, với mạng lưới chi nhánh trải dài cả 3 miền đất nước, NTTU HUB ngày càng khẳng định uy tín trong các lĩnh vực hoạt động như: Tổ chức các bài thi tiếng Anh quốc tế (như TOEIC, IELTS), các bài thi Tin học quốc tế (MOS, IC3), và các bài thi khác như SAT, GRE, CFA. Chúng tôi cũng cung cấp giải pháp tiếng Anh, Tin học quốc tế cho các doanh nghiệp, các trường học, cơ quan quản lý giáo dục."
         ],
         // Dùng ảnh văn phòng mô phỏng
-        image: "https://images.unsplash.com/photo-1542838132332-ce05b9b660c1?auto=format&fit=crop&w=800&q=80", 
+        image: "https://iigvietnam.com/wp-content/uploads/2021/05/gioi-thieu-2.png", 
     },
     // 3 cột chính
     cores: [
@@ -4535,7 +4595,7 @@ const StudentDashboard = () => {
           />
           <div>
             <h1 className="text-2xl font-extrabold font-heading text-text-dark">Welcome, {user?.name}</h1>
-            <p className="text-text-medium mt-1">Your learning dashboard</p>
+            <p className="text-text-medium mt-1">Bảng điều khiển học tập của bạn</p>
           </div>
         </div>
         <div className="mt-4 sm:mt-0 flex space-x-3">
@@ -4746,7 +4806,7 @@ const TeacherDashboard = () => {
           />
           <div>
             <h1 className="text-2xl font-extrabold font-heading text-text-dark">Welcome, {user?.name}</h1>
-            <p className="text-text-medium mt-1">Your teaching dashboard</p>
+            <p className="text-text-medium mt-1">Bảng điều khiển giảng dạy của bạn</p>
           </div>
         </div>
         <button
@@ -5296,17 +5356,36 @@ import { toast } from 'react-toastify';
 // DỮ LIỆU CỐ ĐỊNH CHO CÁC PHẦN
 // ==============================================================
 const ALL_STUDENTS_DATA = [
-  // Dữ liệu mô phỏng từ ảnh 83ea95.jpg và 83ea59.jpg
-  { id: 1, name: "Hằng Thị Giang Thu", score: "6.5", type: "IELTS", imgSrc: "https://i.ibb.co/3WqP49g/s1.jpg" },
-  { id: 2, name: "Nguyễn Hữu Minh Duy", score: "6.5", type: "IELTS", imgSrc: "https://i.ibb.co/9vB220P/s2.jpg" },
-  { id: 3, name: "Nông Thị Trang Nhung", score: "7.0", type: "IELTS", imgSrc: "https://i.ibb.co/VTHq9H1/s3.jpg" },
-  { id: 4, name: "Bùi Phương Thảo", score: "6.5", type: "IELTS", imgSrc: "https://i.ibb.co/6yqTj5Y/s4.jpg" },
-  { id: 5, name: "Trường Hoàng Dũng", score: "710", type: "TOEIC", imgSrc: "https://i.ibb.co/wJvB0zR/s5.jpg" },
-  { id: 6, name: "Nguyễn Quốc Thắng", score: "7.0", type: "IELTS", imgSrc: "https://i.ibb.co/1Kk2W0W/s6.jpg" },
-  { id: 7, name: "Phạm Thị Nhật Ngân", score: "7.0", type: "IELTS", imgSrc: "https://i.ibb.co/YjVq0W2/s7.jpg" },
-  { id: 8, name: "Phạm Thùy Dương", score: "6.5", type: "IELTS", imgSrc: "https://i.ibb.co/F83Q8Jm/s8.jpg" },
-  { id: 9, name: "Lê Ánh Thư", score: "7.0", type: "IELTS", imgSrc: "https://i.ibb.co/tZ5W25w/s9.jpg" },
-  { id: 10, name: "Nguyễn Khánh Vân", score: "7.5", type: "IELTS", imgSrc: "https://i.ibb.co/f2P617B/s10.jpg" },
+  // Dùng các ảnh ngẫu nhiên khác nhau để tạo sự đa dạng
+  { id: 1, name: "Hằng Thị Giang Thu", score: "6.5", type: "IELTS", 
+    imgSrc: "https://randomuser.me/api/portraits/women/62.jpg" }, 
+  
+  { id: 2, name: "Nguyễn Hữu Minh Duy", score: "6.5", type: "IELTS", 
+    imgSrc: "https://randomuser.me/api/portraits/men/45.jpg" },
+  
+  { id: 3, name: "Nông Thị Trang Nhung", score: "7.0", type: "IELTS", 
+    imgSrc: "https://randomuser.me/api/portraits/women/50.jpg" },
+  
+  { id: 4, name: "Bùi Phương Thảo", score: "6.5", type: "IELTS", 
+    imgSrc: "https://picsum.photos/id/1011/400/500" }, // Ảnh ngẫu nhiên 400x500 (Đa dạng)
+  
+  { id: 5, name: "Trường Hoàng Dũng", score: "710", type: "TOEIC", 
+    imgSrc: "https://randomuser.me/api/portraits/men/33.jpg" },
+  
+  { id: 6, name: "Nguyễn Quốc Thắng", score: "7.0", type: "IELTS", 
+    imgSrc: "https://randomuser.me/api/portraits/men/12.jpg" },
+  
+  { id: 7, name: "Phạm Thị Nhật Ngân", score: "7.0", type: "IELTS", 
+    imgSrc: "https://randomuser.me/api/portraits/women/77.jpg" },
+  
+  { id: 8, name: "Phạm Thùy Dương", score: "6.5", type: "IELTS", 
+    imgSrc: "https://picsum.photos/id/1025/400/500" }, // Ảnh ngẫu nhiên 400x500 (Đa dạng)
+  
+  { id: 9, name: "Lê Ánh Thư", score: "7.0", type: "IELTS", 
+    imgSrc: "https://randomuser.me/api/portraits/women/35.jpg" },
+  
+  { id: 10, name: "Nguyễn Khánh Vân", score: "7.5", type: "IELTS", 
+    imgSrc: "https://randomuser.me/api/portraits/women/8.jpg" },
 ];
 
 const REVIEWS_DATA = [
@@ -5335,21 +5414,24 @@ const STEP_DATA = [
         title: "Thiết kế lộ trình học cá nhân hóa",
         description: "Prep sẽ luôn đồng hành cùng bạn xuyên suốt hành trình khổ luyện cho đến ngày 'hái quả ngọt'.",
         substep: "Bước 1: Thiết kế lộ trình học cá nhân hóa",
-        imgSrc: "/img/step1.jpg", // Placeholder
+        // Đã sửa: Đường dẫn tuyệt đối bắt đầu bằng '/'
+        imgSrc: "/thie_ke_lo_trinh_hoc_ca_nhan_1.png", // Dùng tên file chính xác
     },
     {
         step: 2,
         title: "Học và theo dõi tiến bộ",
         description: "Học tập, thực hành, chấm chữa toàn diện và phản tích, theo dõi sự tiến bộ qua từng ngày.",
         substep: "Bước 2: Học và theo dõi tiến bộ",
-        imgSrc: "/img/step2.jpg", // Placeholder
+        // Đã sửa
+        imgSrc: "/thiet_ke_lo_trinh_2.png", // Dùng tên file chính xác
     },
     {
         step: 3,
         title: "Hỗ trợ đăng ký thi, báo điểm, nhận quà vinh danh siêu xịn",
         description: "Prep sẵn sàng hỗ trợ học viên đăng ký thi với ưu đãi tốt nhất. Bạn còn nhận được những phần quà siêu xịn khi đủ điều kiện là học viên điểm cao và được Vinh danh trên cộng đồng Preppies.",
         substep: "Bước 3: Hỗ trợ đăng ký thi, báo điểm, nhận quà vinh danh siêu xịn",
-        imgSrc: "/img/step3.jpg", // Placeholder
+        // Đã sửa
+        imgSrc: "/thiet_ke_lo_trinh_3.png", // Dùng tên file chính xác
     },
 ];
 
@@ -5544,12 +5626,15 @@ const ThreeStepSlider = () => {
                                 className="absolute inset-0 p-6 flex items-center justify-center"
                             >
                                 <div className="text-center w-full h-full">
-                                    <p className="text-sm font-semibold text-white/70 mb-2">{currentStep.substep}</p>
-                                    {/* Placeholder Image for the step */}
-                                    <div className="w-64 h-64 mx-auto bg-gray-200 rounded-lg flex items-center justify-center border-4 border-blue-400">
-                                        [Image for Step {currentStep.step}]
-                                    </div>
+                                <p className="text-sm font-semibold text-white/70 mb-2">{currentStep.substep}</p>
+                                <div className="w-full max-w-sm h-auto mx-auto rounded-lg flex items-center justify-center overflow-hidden border-4 border-primary-400 shadow-xl">
+                                    <img 
+                                        src={currentStep.imgSrc} 
+                                        alt={currentStep.title} 
+                                        className="w-full h-full object-contain" 
+                                    />
                                 </div>
+                            </div>
                             </motion.div>
                         </AnimatePresence>
                     </div>
@@ -5844,7 +5929,7 @@ const Home = () => {
   >
     {/* GIẢM CỠ CHỮ TẠI ĐÂY */}
     <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 drop-shadow-2xl">
-      Chào các bạn!, <span className="text-yellow-400">Chúng tôi là NTTU HUB</span>
+      Chào bạn!, <span className="text-yellow-400">Chúng tôi là NTTU HUB</span>
     </h1>
 
     <p className="text-lg md:text-xl text-white/90 mb-10 max-w-3xl mx-auto font-light leading-relaxed drop-shadow-lg">
@@ -6041,8 +6126,12 @@ const Home = () => {
                         {/* Cột 1: Ảnh, Tên, Điểm */}
                         <div className="w-1/2 flex flex-col items-center">
                           {/* Placeholder cho ảnh */}
-                          <div className="w-24 h-24 bg-gray-200 rounded-full mb-3 border-4 border-primary-400">
-                             {/* Thực tế sẽ là một component ảnh với mask */}
+                          <div className="w-24 h-24 rounded-full mb-3 border-4 border-primary-400 overflow-hidden">
+                              <img 
+                                  src="/avatar-trang.jpg" 
+                                  alt="Avatar Học viên" 
+                                  className="w-full h-full object-cover" 
+                              />
                           </div>
                           
                           <p className="text-lg font-bold text-gray-900">{t.name}</p>
@@ -7927,6 +8016,7 @@ export default Quizzes;
 ==================================================
 FILE_PATH: client\src\pages\quizzes\TakeQuiz.js
 ==================================================
+// FILE_PATH: client\src\pages\quizzes\TakeQuiz.js
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -7948,8 +8038,8 @@ const TakeQuiz = () => {
   const [submitting, setSubmitting] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
   const [error, setError] = useState(null);
-  const [resultId, setResultId] = useState(null); // Added missing state variable
-  const [startTime, setStartTime] = useState(null); // Add start time tracking
+  const [resultId, setResultId] = useState(null); 
+  const [startTime, setStartTime] = useState(null); 
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -7973,6 +8063,7 @@ const TakeQuiz = () => {
           const quizData = res.data.data;
           setQuiz(quizData);
           
+        
           // Initialize answers with proper checks
           if (quizData.questions && Array.isArray(quizData.questions) && quizData.questions.length > 0) {
             const initialAnswers = {};
@@ -7980,7 +8071,9 @@ const TakeQuiz = () => {
               if (q && q._id) {
                 // Initialize based on question type
                 if (q.type === 'multiple') {
-                  initialAnswers[q._id] = [];
+                  initialAnswers[q._id] = []; // Stores array of option IDs
+                } else if (q.type === 'single') {
+                  initialAnswers[q._id] = null; // Stores index of selected option
                 } else {
                   initialAnswers[q._id] = '';
                 }
@@ -7991,7 +8084,7 @@ const TakeQuiz = () => {
           } else {
             console.warn("Quiz has no questions or questions array is not valid");
           }
-          
+        
           if (quizData.timeLimit && typeof quizData.timeLimit === 'number') {
             setTimeLeft(quizData.timeLimit * 60);
           }
@@ -8045,6 +8138,7 @@ const TakeQuiz = () => {
           [questionId]: newAnswers
         };
       } else {
+        // Store index for single choice, or text for text answer
         return {
           ...prev,
           [questionId]: value
@@ -8053,7 +8147,8 @@ const TakeQuiz = () => {
     });
   };
   
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault(); // Handle case where it's called by timer
     setSubmitting(true);
     try {
       const token = localStorage.getItem('token');
@@ -8078,16 +8173,24 @@ const TakeQuiz = () => {
             selectedOptions: Array.isArray(answer) ? answer : []
           };
         } else {
-          // Single choice - convert option index to option ID
-          const selectedOptionId = question.options[answer]?._id;
+          // [FIX START] Handle single choice by converting index to option ID
+          const selectedOptionIndex = answer; // 'answer' for single is the index stored in handleAnswerChange
+          
+          // Check if a valid index was stored and convert the index to the option ID
+          let selectedOptionId;
+          if (typeof selectedOptionIndex === 'number' && question.options && question.options[selectedOptionIndex]) {
+             selectedOptionId = question.options[selectedOptionIndex]._id;
+          }
           
           return {
             question: questionId,
-            selectedOption: selectedOptionId
+            selectedOption: selectedOptionId // <-- Gửi đi ID của tùy chọn đã chọn
           };
+          // [FIX END]
         }
       }).filter(Boolean); // Remove null entries
       
+ 
       console.log('Submitting answers:', formattedAnswers);
       
       const res = await axios.post(
@@ -8201,7 +8304,6 @@ const TakeQuiz = () => {
               <h3 className="text-sm font-medium text-red-800">{error}</h3>
             </div>
           </div>
-        </div>
         <button
           onClick={() => navigate('/dashboard')}
           className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-md"
@@ -8209,6 +8311,7 @@ const TakeQuiz = () => {
           Go to Dashboard
         </button>
       </div>
+    </div>
     );
   }
 
@@ -8348,6 +8451,7 @@ const TakeQuiz = () => {
             </button>
           )}
         </div>
+        
         {/* Question navigation */}
         <div className="px-8 py-4 border-t border-primary-50 bg-white/70 rounded-b-2xl">
           <p className="text-sm text-gray-600 mb-2 font-semibold">Question Navigation:</p>
@@ -8378,7 +8482,6 @@ const TakeQuiz = () => {
 };
 
 export default TakeQuiz;
-
 
 ==================================================
 FILE_PATH: client\src\pages\Register.js
@@ -8877,7 +8980,7 @@ const IELTS_STEP_DATA = [
         description: "Bắt đầu với các kiến thức cơ bản nhất về Ngữ pháp, Từ vựng học thuật, và Format bài thi IELTS. Chuẩn bị vững chắc trước khi bước vào luyện đề.",
         substep: "Bước 1: Nền tảng vững chắc (Foundation)",
       
-        image: { tag: 'Xây dựng nền tảng từ A đến Z', file: '/img/ielts-step-1-foundation.jpg' }
+        image: { tag: 'Xây dựng nền tảng từ A đến Z', file: '/lotrinhtoeic_buoc1.gif' }
     },
     {
         step: 2,
@@ -8885,14 +8988,14 @@ const IELTS_STEP_DATA = [
         description: "Luyện tập Speaking & Writing với AI chấm chữa chi tiết, sửa lỗi phát âm, ngữ pháp và gợi ý nâng cấp từ vựng theo tiêu chí Band Score.",
         // Dòng này đã được FIX LỖI CÚ PHÁP
         substep: "Bước 2: Luyện tập chuyên sâu 4 kỹ năng (Skill Boost)", 
-        image: { tag: 'Phòng luyện IELTS ảo PREP AI', file: '/img/ielts-step-2-ai-practice.jpg' }
+        image: { tag: 'Phòng luyện IELTS ảo PREP AI', file: '/lotrinhtoeic_buoc2.gif' }
     },
     {
         step: 3,
         title: "Thực chiến & Bứt phá điểm số",
         description: "Làm quen với áp lực phòng thi thật qua kho đề thi thử mô phỏng sát đề thi mới nhất.Giáo viên chấm chữa chuyên sâu 1-1 để bứt phá band score mục tiêu.",
         substep: "Bước 3: Thực chiến và Về đích (Exam Simulation)",
-        image: { tag: 'Thực chiến & Bứt phá điểm số', file: '/img/ielts-step-3-exam.jpg' }
+        image: { tag: 'Thực chiến & Bứt phá điểm số', file: '/lotrinhtoeic_buoc3.gif' }
     },
 ];
 
@@ -9039,8 +9142,15 @@ const IELTSStepSlider = () => {
                                     
           
                                     <div className="w-full h-[85%] mx-auto bg-gray-100 rounded-lg flex items-center justify-center border-4 border-primary-400 overflow-hidden">
-                                        [Image of: {currentStep.image.tag}]
-                     
+                                        
+                                        {/* THAY THẾ PLACEHOLDER BẰNG THẺ IMG */}
+                                        <img 
+                                            src={currentStep.image.file} 
+                                            alt={currentStep.image.tag} 
+                                            // Sử dụng object-contain để đảm bảo toàn bộ GIF hiển thị, hoặc object-cover nếu bạn muốn nó lấp đầy khung.
+                                            className="w-full h-full object-contain"
+                                        />
+                                        
                                     </div>
                                 </div>
                             </motion.div>
@@ -9120,12 +9230,17 @@ NTTU HUB
                         </div>
                     </div>
 
-                    {/* Cột 2: Hình ảnh (Dùng primary-500 
-thay cho secondary-500) */}
-                    <div className="md:w-1/2 relative bg-primary-500 overflow-hidden flex items-center justify-center">
-                        <div className="absolute inset-0 bg-primary-900 opacity-20"></div>
-                        [Image of: Banner IELTS Mockup]
-              
+                    {/* Cột 2: Hình ảnh */}
+                    <div className="md:w-1/2 relative bg-[#1E90FF] overflow-hidden flex items-center justify-center">
+                        <div className="absolute inset-0 bg-primary-900 opacity-20 z-10"></div>
+                        
+                        
+                        <img 
+                            src="/nguoimau-2.png" 
+                            alt="IELTS Mockup" 
+                            className="relative z-20 w-3/4 h-auto object-contain"
+                        />
+                        
                     </div>
                 </motion.div>
             </div>
@@ -9497,24 +9612,29 @@ const TOEICLevelSelection = () => {
 const TOEIC_STEP_DATA = [
     {
         step: 1,
-        title: "Tứ Phòng Luyện Thi TOEIC Ảo Prep AI Đầu Tiên Việt Nam",
+        
+title: "Tứ Phòng Luyện Thi TOEIC Ảo Prep AI Đầu Tiên Việt Nam",
         description: "Trải nghiệm luyện thi TOEIC thông minh - toàn diện. Bạn sẽ nhận được điểm số chi tiết và trình độ hiện tại ngay sau khi hoàn thành bài thi thử.",
         substep: "Bước 1: Kiểm tra trình độ & Thiết lập lộ trình",
-        image: { tag: 'Kết quả thi thử TOEIC', file: 'image_683e7b.png' }
+        // Đã sửa: dùng đường dẫn tuyệt đối mới
+        image: { tag: 'Kết quả thi thử TOEIC', file: '/lotrinhtoeic_buoc1.gif' }
     },
     {
         step: 2,
-        title: "Nói & Viết trôi chảy với Phòng luyện Speaking/Writing ảo",
+     
+   title: "Nói & Viết trôi chảy với Phòng luyện Speaking/Writing ảo",
         description: "AI chấm chữa phát âm chi tiết, sửa từng lỗi ngữ pháp, nâng cấp từ vựng trong bài, giúp bạn cải thiện rõ rệt cả hai kỹ năng.",
         substep: "Bước 2: Luyện tập chuyên sâu 4 kỹ năng",
-        image: { tag: 'Phản hồi chấm Speaking/Writing', file: 'image_683e5c.jpg' }
+        // Đã sửa: dùng đường dẫn tuyệt đối mới
+        image: { tag: 'Phản hồi chấm Speaking/Writing', file: '/lotrinhtoeic_buoc2.gif' }
     },
     {
         step: 3,
         title: "Học tập trung cùng video bài giảng tương tác",
         description: "Các câu hỏi tương tác được lồng xuyên suốt bài giảng để kiểm tra kiến thức bạn vừa học, tăng khả năng ghi nhớ và áp dụng nội dung ngay lập tức.",
         substep: "Bước 3: Nắm vững kiến thức qua bài giảng tương tác",
-        image: { tag: 'Bài giảng video tương tác', file: 'image_683e26.jpg' }
+        // Đã sửa: dùng đường dẫn tuyệt đối mới
+        image: { tag: 'Bài giảng video tương tác', file: '/lotrinhtoeic_buoc3.gif' }
     },
 ];
 const TOEICStepSlider = () => {
@@ -9638,12 +9758,13 @@ const TOEICStepSlider = () => {
                                     
                                     <div className="w-full h-[85%] mx-auto bg-gray-100 rounded-lg flex items-center justify-center border-4 border-primary-400 overflow-hidden">
                                         {/* Hiển thị hình ảnh tương ứng */}
+        
                                         <img 
                                             src={currentStep.image.file} 
                                             alt={currentStep.image.tag} 
-                                            className="object-contain w-full h-full"
+                                            className="w-full h-full object-contain"
                                         />
-                                    </div>
+                         </div>
                                 </div>
                             </motion.div>
                          </AnimatePresence>
@@ -9709,7 +9830,14 @@ const RoadmapToeic = () => {
 
                     {/* Cột 2: Hình ảnh */}
                     <div className="md:w-1/2 relative bg-[#1E90FF] overflow-hidden flex items-center justify-center">
-                        <div className="absolute inset-0 bg-primary-900 opacity-20"></div>
+                        <div className="absolute inset-0 bg-primary-900 opacity-20 z-10"></div>
+                        
+                        {/* THÊM ẢNH NGUOIMAU-1.PNG TẠI ĐÂY */}
+                        <img 
+                            src="/nguoimau-1.png" 
+                            alt="TOEIC Mockup" 
+                            className="relative z-20 w-3/4 h-auto object-contain"
+                        />
                         
                     </div>
                 </motion.div>
@@ -9813,25 +9941,25 @@ const StudentDashboard = () => {
   
   const stats = [
     {
-      title: 'Enrolled Courses',
+      title: 'Khóa học đã đăng ký',
       value: safeCourses.length,
       icon: <BookOpenIcon className="h-6 w-6 text-blue-500" />,
       color: 'bg-blue-100',
     },
     {
-      title: 'Pending Assignments',
+      title: 'Nhiệm vụ đang chờ',
       value: upcomingAssignments.length,
       icon: <ClipboardCheckIcon className="h-6 w-6 text-yellow-500" />,
       color: 'bg-yellow-100',
     },
     {
-      title: 'Available Quizzes',
+      title: 'Các bài kiểm tra có sẵn',
       value: safeQuizzes.filter(q => !q.submitted).length,
       icon: <DocumentTextIcon className="h-6 w-6 text-green-500" />,
       color: 'bg-green-100',
     },
     {
-      title: 'Completed Assignments',
+      title: 'Bài tập đã hoàn thành',
       value: `${completedAssignments} / ${totalAssignments}`,
       icon: <AcademicCapIcon className="h-6 w-6 text-purple-500" />,
       color: 'bg-purple-100',
@@ -9849,8 +9977,8 @@ const StudentDashboard = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Student Dashboard</h1>
-        <p className="text-gray-600">Welcome back, {user?.name}!</p>
+        <h1 className="text-2xl font-bold text-gray-800">Bảng điều khiển học tập của bạn</h1>
+        <p className="text-gray-600">Chào mừng trở lại, {user?.name}!</p>
       </div>
 
       {/* Stats Cards */}
@@ -9878,7 +10006,7 @@ const StudentDashboard = () => {
 
       {/* Upcoming Deadlines */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Upcoming Deadlines</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Hạn chót sắp tới</h2>
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {upcomingAssignments.length > 0 ?
             (
@@ -9887,17 +10015,17 @@ const StudentDashboard = () => {
                   <div key={assignment._id} className="p-4 hover:bg-gray-50">
                     <h3 className="font-medium text-gray-800">{assignment.title}</h3>
                     <p className="text-sm text-gray-600">
-                      Course: {assignment.course?.title}
+                      Khóa học: {assignment.course?.title}
                     </p>
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-sm text-red-500">
-                        Due: {moment(assignment.deadline).format('MMM D, YYYY')}
+                        Đến hạn: {moment(assignment.deadline).format('MMM D, YYYY')}
                       </span>
                       <Link
                         to={`/assignments/${assignment._id}`}
                         className="text-primary-600 hover:text-primary-700 font-medium text-sm"
                       >
-                        View Details
+                        Xem chi tiết
                       </Link>
                     </div>
                   </div>
@@ -9905,7 +10033,7 @@ const StudentDashboard = () => {
               </div>
             ) : (
               <p className="text-gray-500 text-center py-8">
-                No upcoming deadlines. You're all caught up!
+                Không có hạn chót sắp tới. Bạn đã hoàn tất tất cả!
               </p>
             )}
         </div>
@@ -9913,7 +10041,7 @@ const StudentDashboard = () => {
 
       {/* My Courses */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">My Courses</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Các khóa học của tôi</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {safeCourses.length > 0 ?
             (
@@ -9939,7 +10067,7 @@ const StudentDashboard = () => {
                         to={`/courses/${course._id}`}
                         className="text-primary-600 hover:text-primary-700 font-medium text-sm"
                       >
-                        View Course
+                        Xem Khóa Học
                       </Link>
                       <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                         {course.code}
@@ -9951,9 +10079,9 @@ const StudentDashboard = () => {
             ) : (
               <div className="col-span-full">
                 <p className="text-gray-500 text-center py-8">
-                  You're not enrolled in any courses yet.
+                  Bạn chưa đăng ký khóa học nào cả.
                   <Link to="/courses" className="text-primary-600 hover:underline ml-1">
-                    Browse available courses
+                    Duyệt các khóa học có sẵn
                   </Link>
                 </p>
               </div>
@@ -9963,7 +10091,7 @@ const StudentDashboard = () => {
 
       {/* Available Quizzes */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Available Quizzes</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Các bài kiểm tra có sẵn</h2>
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {safeQuizzes.filter(q => !q.submitted).length > 0 ?
             (
@@ -9974,17 +10102,17 @@ const StudentDashboard = () => {
                     <div key={quiz._id} className="p-4 hover:bg-gray-50">
                       <h3 className="font-medium text-gray-800">{quiz.title}</h3>
                       <p className="text-sm text-gray-600">
-                        Course: {quiz.course?.title}
+                        Khóa học: {quiz.course?.title}
                       </p>
                       <div className="flex justify-between items-center mt-2">
                         <span className="text-sm text-gray-500">
-                          {quiz.questions?.length || 0} Questions
+                          {quiz.questions?.length || 0} Câu hỏi
                         </span>
                         <Link
                           to={`/quizzes/${quiz._id}/take`}
                           className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                         >
-                          Take Quiz
+                          Làm bài kiểm tra
                         </Link>
                       </div>
                     </div>
@@ -9992,7 +10120,7 @@ const StudentDashboard = () => {
               </div>
             ) : (
               <p className="text-gray-500 text-center py-8">
-                No quizzes available at the moment.
+               Hiện tại không có bài kiểm tra nào.
               </p>
             )}
         </div>
@@ -12660,25 +12788,25 @@ const TeacherDashboard = () => {
 
   const statCards = [
     {
-      title: 'Courses',
+      title: 'Khóa học',
       value: stats.totalCourses,
       icon: <BookOpenIcon className="h-6 w-6 text-blue-500" />,
       color: 'bg-blue-100',
     },
     {
-      title: 'Students',
+      title: 'Học sinh',
       value: stats.totalStudents,
       icon: <DocumentTextIcon className="h-6 w-6 text-green-500" />,
       color: 'bg-green-100',
     },
     {
-      title: 'Pending Submissions',
+      title: 'Bản nộp đang chờ',
       value: stats.pendingAssignments,
       icon: <ClipboardCheckIcon className="h-6 w-6 text-yellow-500" />,
       color: 'bg-yellow-100',
     },
     {
-      title: 'Announcements',
+      title: 'Thông báo',
       value: recentActivities.length,
       icon: <BellIcon className="h-6 w-6 text-purple-500" />,
       color: 'bg-purple-100',
@@ -12697,8 +12825,8 @@ const TeacherDashboard = () => {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Teacher Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {user?.name}!</p>
+          <h1 className="text-2xl font-bold text-gray-800">Bảng điều khiển giảng dạy của bạn</h1>
+          <p className="text-gray-600">Chào mừng trở lại, {user?.name}!</p>
         </div>
         <div className="mt-4 md:mt-0">
           <Link
@@ -12706,7 +12834,7 @@ const TeacherDashboard = () => {
             className="inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
           >
             <PlusCircleIcon className="mr-2 h-5 w-5" />
-            Create New Course
+            Tạo Khóa Học Mới
           </Link>
         </div>
       </div>
@@ -12736,7 +12864,7 @@ const TeacherDashboard = () => {
 
       {/* My Courses */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">My Courses</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Các khóa học của tôi</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.length > 0 ? (
             courses.map((course, index) => (
@@ -12757,14 +12885,14 @@ const TeacherDashboard = () => {
                   <h3 className="text-lg font-semibold text-gray-800">{course.title}</h3>
                   <p className="text-gray-600 text-sm mt-1">Code: {course.code}</p>
                   <p className="text-gray-600 text-sm mt-1">
-                    {course.students?.length || 0} Students
+                    {course.students?.length || 0} Học sinh
                   </p>
                   <div className="mt-4">
                     <Link
                       to={`/courses/${course._id}`}
                       className="text-primary-600 hover:text-primary-700 font-medium text-sm"
                     >
-                      View Course
+                      Xem Khóa Học
                     </Link>
                   </div>
                 </div>
@@ -12773,9 +12901,9 @@ const TeacherDashboard = () => {
           ) : (
             <div className="col-span-full">
               <p className="text-gray-500 text-center py-8">
-                You haven't created any courses yet. 
+                Bạn chưa tạo khóa học nào cả. 
                 <Link to="/teacher/courses/create" className="text-primary-600 hover:underline ml-1">
-                  Create your first course
+                  Tạo khóa học đầu tiên của bạn
                 </Link>
               </p>
             </div>
@@ -12785,7 +12913,7 @@ const TeacherDashboard = () => {
 
       {/* Recent Activities */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Recent Activities</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Hoạt động gần đây</h2>
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {recentActivities.length > 0 ? (
             <div className="divide-y divide-gray-200">
@@ -12801,7 +12929,7 @@ const TeacherDashboard = () => {
                         to={activity.link}
                         className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                       >
-                        View Details
+                        Xem chi tiết
                       </Link>
                     )}
                   </div>
@@ -12809,7 +12937,7 @@ const TeacherDashboard = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-8">No recent activities found.</p>
+            <p className="text-gray-500 text-center py-8">Không tìm thấy hoạt động gần đây.</p>
           )}
         </div>
       </div>
@@ -15922,6 +16050,7 @@ exports.submitQuiz = async (req, res) => {
     if (!quiz.isPublished) {
       return res.status(403).json({ message: 'This quiz is not available yet' });
     }
+  
     
     const now = new Date();
     if (quiz.availableFrom > now) {
@@ -15979,40 +16108,47 @@ exports.submitQuiz = async (req, res) => {
           textAnswer: answer.textAnswer,
           isCorrect
         });
-      } else {
+      } else if (question.type === 'multiple') {
         // Handle multiple choice questions
-        if (question.type === 'multiple') {
-          // For multiple choice, check if all selected options are correct and all correct options are selected
-          const selectedOptions = answer.selectedOptions || [];
-          const correctOptions = question.options.filter(opt => opt.isCorrect);
-          
-          const allSelectedAreCorrect = selectedOptions.every(selectedId => {
-            const option = question.options.id(selectedId);
-            return option && option.isCorrect;
-          });
-          
-          const allCorrectAreSelected = correctOptions.every(correctOpt => 
-            selectedOptions.includes(correctOpt._id.toString())
-          );
-          
-          isCorrect = allSelectedAreCorrect && allCorrectAreSelected && selectedOptions.length === correctOptions.length;
-        } else {
-          // For single choice
-          const selectedOption = question.options.id(answer.selectedOption);
-          isCorrect = selectedOption && selectedOption.isCorrect;
-      }
-      
-      processedAnswers.push({
-        question: answer.question,
-          selectedOptions: answer.selectedOptions || [answer.selectedOption],
+        // For multiple choice, check if all selected options are correct and all correct options are selected
+ 
+        const selectedOptions = answer.selectedOptions || [];
+        const correctOptions = question.options.filter(opt => opt.isCorrect);
+        
+        const allSelectedAreCorrect = selectedOptions.every(selectedId => {
+          const option = question.options.id(selectedId);
+          return option && option.isCorrect;
+        });
+        
+        const allCorrectAreSelected = correctOptions.every(correctOpt => 
+          selectedOptions.includes(correctOpt._id.toString())
+        );
+        
+        isCorrect = allSelectedAreCorrect && allCorrectAreSelected && selectedOptions.length === correctOptions.length;
+        
+        processedAnswers.push({
+          question: answer.question,
+          selectedOptions: selectedOptions,
           isCorrect
-      });
+        });
+      } else if (question.type === 'single') {
+        // [FIXED] Handle single choice (sent with selectedOption ID from client)
+        const selectedOptionId = answer.selectedOption;
+        const selectedOption = question.options.id(selectedOptionId);
+        isCorrect = selectedOption && selectedOption.isCorrect;
+
+        processedAnswers.push({
+          question: answer.question,
+          selectedOptions: selectedOptionId ? [selectedOptionId] : [],
+          isCorrect
+        });
       }
       
       if (isCorrect) {
         score += question.points;
       }
     }
+  
     
     // Create result
     const result = {
@@ -16038,7 +16174,6 @@ exports.submitQuiz = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 // @desc    Get student's quiz result
 // @route   GET /api/quizzes/:id/result
 // @access  Private/Student

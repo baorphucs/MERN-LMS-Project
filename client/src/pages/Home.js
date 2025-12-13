@@ -27,17 +27,36 @@ import { toast } from 'react-toastify';
 // DỮ LIỆU CỐ ĐỊNH CHO CÁC PHẦN
 // ==============================================================
 const ALL_STUDENTS_DATA = [
-  // Dữ liệu mô phỏng từ ảnh 83ea95.jpg và 83ea59.jpg
-  { id: 1, name: "Hằng Thị Giang Thu", score: "6.5", type: "IELTS", imgSrc: "https://i.ibb.co/3WqP49g/s1.jpg" },
-  { id: 2, name: "Nguyễn Hữu Minh Duy", score: "6.5", type: "IELTS", imgSrc: "https://i.ibb.co/9vB220P/s2.jpg" },
-  { id: 3, name: "Nông Thị Trang Nhung", score: "7.0", type: "IELTS", imgSrc: "https://i.ibb.co/VTHq9H1/s3.jpg" },
-  { id: 4, name: "Bùi Phương Thảo", score: "6.5", type: "IELTS", imgSrc: "https://i.ibb.co/6yqTj5Y/s4.jpg" },
-  { id: 5, name: "Trường Hoàng Dũng", score: "710", type: "TOEIC", imgSrc: "https://i.ibb.co/wJvB0zR/s5.jpg" },
-  { id: 6, name: "Nguyễn Quốc Thắng", score: "7.0", type: "IELTS", imgSrc: "https://i.ibb.co/1Kk2W0W/s6.jpg" },
-  { id: 7, name: "Phạm Thị Nhật Ngân", score: "7.0", type: "IELTS", imgSrc: "https://i.ibb.co/YjVq0W2/s7.jpg" },
-  { id: 8, name: "Phạm Thùy Dương", score: "6.5", type: "IELTS", imgSrc: "https://i.ibb.co/F83Q8Jm/s8.jpg" },
-  { id: 9, name: "Lê Ánh Thư", score: "7.0", type: "IELTS", imgSrc: "https://i.ibb.co/tZ5W25w/s9.jpg" },
-  { id: 10, name: "Nguyễn Khánh Vân", score: "7.5", type: "IELTS", imgSrc: "https://i.ibb.co/f2P617B/s10.jpg" },
+  // Dùng các ảnh ngẫu nhiên khác nhau để tạo sự đa dạng
+  { id: 1, name: "Hằng Thị Giang Thu", score: "6.5", type: "IELTS", 
+    imgSrc: "https://randomuser.me/api/portraits/women/62.jpg" }, 
+  
+  { id: 2, name: "Nguyễn Hữu Minh Duy", score: "6.5", type: "IELTS", 
+    imgSrc: "https://randomuser.me/api/portraits/men/45.jpg" },
+  
+  { id: 3, name: "Nông Thị Trang Nhung", score: "7.0", type: "IELTS", 
+    imgSrc: "https://randomuser.me/api/portraits/women/50.jpg" },
+  
+  { id: 4, name: "Bùi Phương Thảo", score: "6.5", type: "IELTS", 
+    imgSrc: "https://picsum.photos/id/1011/400/500" }, // Ảnh ngẫu nhiên 400x500 (Đa dạng)
+  
+  { id: 5, name: "Trường Hoàng Dũng", score: "710", type: "TOEIC", 
+    imgSrc: "https://randomuser.me/api/portraits/men/33.jpg" },
+  
+  { id: 6, name: "Nguyễn Quốc Thắng", score: "7.0", type: "IELTS", 
+    imgSrc: "https://randomuser.me/api/portraits/men/12.jpg" },
+  
+  { id: 7, name: "Phạm Thị Nhật Ngân", score: "7.0", type: "IELTS", 
+    imgSrc: "https://randomuser.me/api/portraits/women/77.jpg" },
+  
+  { id: 8, name: "Phạm Thùy Dương", score: "6.5", type: "IELTS", 
+    imgSrc: "https://picsum.photos/id/1025/400/500" }, // Ảnh ngẫu nhiên 400x500 (Đa dạng)
+  
+  { id: 9, name: "Lê Ánh Thư", score: "7.0", type: "IELTS", 
+    imgSrc: "https://randomuser.me/api/portraits/women/35.jpg" },
+  
+  { id: 10, name: "Nguyễn Khánh Vân", score: "7.5", type: "IELTS", 
+    imgSrc: "https://randomuser.me/api/portraits/women/8.jpg" },
 ];
 
 const REVIEWS_DATA = [
@@ -66,21 +85,24 @@ const STEP_DATA = [
         title: "Thiết kế lộ trình học cá nhân hóa",
         description: "Prep sẽ luôn đồng hành cùng bạn xuyên suốt hành trình khổ luyện cho đến ngày 'hái quả ngọt'.",
         substep: "Bước 1: Thiết kế lộ trình học cá nhân hóa",
-        imgSrc: "/img/step1.jpg", // Placeholder
+        // Đã sửa: Đường dẫn tuyệt đối bắt đầu bằng '/'
+        imgSrc: "/thie_ke_lo_trinh_hoc_ca_nhan_1.png", // Dùng tên file chính xác
     },
     {
         step: 2,
         title: "Học và theo dõi tiến bộ",
         description: "Học tập, thực hành, chấm chữa toàn diện và phản tích, theo dõi sự tiến bộ qua từng ngày.",
         substep: "Bước 2: Học và theo dõi tiến bộ",
-        imgSrc: "/img/step2.jpg", // Placeholder
+        // Đã sửa
+        imgSrc: "/thiet_ke_lo_trinh_2.png", // Dùng tên file chính xác
     },
     {
         step: 3,
         title: "Hỗ trợ đăng ký thi, báo điểm, nhận quà vinh danh siêu xịn",
         description: "Prep sẵn sàng hỗ trợ học viên đăng ký thi với ưu đãi tốt nhất. Bạn còn nhận được những phần quà siêu xịn khi đủ điều kiện là học viên điểm cao và được Vinh danh trên cộng đồng Preppies.",
         substep: "Bước 3: Hỗ trợ đăng ký thi, báo điểm, nhận quà vinh danh siêu xịn",
-        imgSrc: "/img/step3.jpg", // Placeholder
+        // Đã sửa
+        imgSrc: "/thiet_ke_lo_trinh_3.png", // Dùng tên file chính xác
     },
 ];
 
@@ -275,12 +297,15 @@ const ThreeStepSlider = () => {
                                 className="absolute inset-0 p-6 flex items-center justify-center"
                             >
                                 <div className="text-center w-full h-full">
-                                    <p className="text-sm font-semibold text-white/70 mb-2">{currentStep.substep}</p>
-                                    {/* Placeholder Image for the step */}
-                                    <div className="w-64 h-64 mx-auto bg-gray-200 rounded-lg flex items-center justify-center border-4 border-blue-400">
-                                        [Image for Step {currentStep.step}]
-                                    </div>
+                                <p className="text-sm font-semibold text-white/70 mb-2">{currentStep.substep}</p>
+                                <div className="w-full max-w-sm h-auto mx-auto rounded-lg flex items-center justify-center overflow-hidden border-4 border-primary-400 shadow-xl">
+                                    <img 
+                                        src={currentStep.imgSrc} 
+                                        alt={currentStep.title} 
+                                        className="w-full h-full object-contain" 
+                                    />
                                 </div>
+                            </div>
                             </motion.div>
                         </AnimatePresence>
                     </div>
@@ -772,8 +797,12 @@ const Home = () => {
                         {/* Cột 1: Ảnh, Tên, Điểm */}
                         <div className="w-1/2 flex flex-col items-center">
                           {/* Placeholder cho ảnh */}
-                          <div className="w-24 h-24 bg-gray-200 rounded-full mb-3 border-4 border-primary-400">
-                             {/* Thực tế sẽ là một component ảnh với mask */}
+                          <div className="w-24 h-24 rounded-full mb-3 border-4 border-primary-400 overflow-hidden">
+                              <img 
+                                  src="/avatar-trang.jpg" 
+                                  alt="Avatar Học viên" 
+                                  className="w-full h-full object-cover" 
+                              />
                           </div>
                           
                           <p className="text-lg font-bold text-gray-900">{t.name}</p>

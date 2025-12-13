@@ -89,7 +89,7 @@ const StudentDashboard = () => {
           />
           <div>
             <h1 className="text-2xl font-extrabold font-heading text-text-dark">Welcome, {user?.name}</h1>
-            <p className="text-text-medium mt-1">Your learning dashboard</p>
+            <p className="text-text-medium mt-1">Bảng điều khiển học tập của bạn</p>
           </div>
         </div>
         <div className="mt-4 sm:mt-0 flex space-x-3">

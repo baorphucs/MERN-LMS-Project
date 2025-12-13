@@ -61,7 +61,7 @@ const TeacherDashboard = () => {
           />
           <div>
             <h1 className="text-2xl font-extrabold font-heading text-text-dark">Welcome, {user?.name}</h1>
-            <p className="text-text-medium mt-1">Your teaching dashboard</p>
+            <p className="text-text-medium mt-1">Bảng điều khiển giảng dạy của bạn</p>
           </div>
         </div>
         <button

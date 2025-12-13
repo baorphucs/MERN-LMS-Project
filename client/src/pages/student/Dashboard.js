@@ -71,25 +71,25 @@ const StudentDashboard = () => {
   
   const stats = [
     {
-      title: 'Enrolled Courses',
+      title: 'Khóa học đã đăng ký',
       value: safeCourses.length,
       icon: <BookOpenIcon className="h-6 w-6 text-blue-500" />,
       color: 'bg-blue-100',
     },
     {
-      title: 'Pending Assignments',
+      title: 'Nhiệm vụ đang chờ',
       value: upcomingAssignments.length,
       icon: <ClipboardCheckIcon className="h-6 w-6 text-yellow-500" />,
       color: 'bg-yellow-100',
     },
     {
-      title: 'Available Quizzes',
+      title: 'Các bài kiểm tra có sẵn',
       value: safeQuizzes.filter(q => !q.submitted).length,
       icon: <DocumentTextIcon className="h-6 w-6 text-green-500" />,
       color: 'bg-green-100',
     },
     {
-      title: 'Completed Assignments',
+      title: 'Bài tập đã hoàn thành',
       value: `${completedAssignments} / ${totalAssignments}`,
       icon: <AcademicCapIcon className="h-6 w-6 text-purple-500" />,
       color: 'bg-purple-100',
@@ -107,8 +107,8 @@ const StudentDashboard = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Student Dashboard</h1>
-        <p className="text-gray-600">Welcome back, {user?.name}!</p>
+        <h1 className="text-2xl font-bold text-gray-800">Bảng điều khiển học tập của bạn</h1>
+        <p className="text-gray-600">Chào mừng trở lại, {user?.name}!</p>
       </div>
 
       {/* Stats Cards */}
@@ -136,7 +136,7 @@ const StudentDashboard = () => {
 
       {/* Upcoming Deadlines */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Upcoming Deadlines</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Hạn chót sắp tới</h2>
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {upcomingAssignments.length > 0 ?
             (
@@ -145,17 +145,17 @@ const StudentDashboard = () => {
                   <div key={assignment._id} className="p-4 hover:bg-gray-50">
                     <h3 className="font-medium text-gray-800">{assignment.title}</h3>
                     <p className="text-sm text-gray-600">
-                      Course: {assignment.course?.title}
+                      Khóa học: {assignment.course?.title}
                     </p>
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-sm text-red-500">
-                        Due: {moment(assignment.deadline).format('MMM D, YYYY')}
+                        Đến hạn: {moment(assignment.deadline).format('MMM D, YYYY')}
                       </span>
                       <Link
                         to={`/assignments/${assignment._id}`}
                         className="text-primary-600 hover:text-primary-700 font-medium text-sm"
                       >
-                        View Details
+                        Xem chi tiết
                       </Link>
                     </div>
                   </div>
@@ -163,7 +163,7 @@ const StudentDashboard = () => {
               </div>
             ) : (
               <p className="text-gray-500 text-center py-8">
-                No upcoming deadlines. You're all caught up!
+                Không có hạn chót sắp tới. Bạn đã hoàn tất tất cả!
               </p>
             )}
         </div>
@@ -171,7 +171,7 @@ const StudentDashboard = () => {
 
       {/* My Courses */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">My Courses</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Các khóa học của tôi</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {safeCourses.length > 0 ?
             (
@@ -197,7 +197,7 @@ const StudentDashboard = () => {
                         to={`/courses/${course._id}`}
                         className="text-primary-600 hover:text-primary-700 font-medium text-sm"
                       >
-                        View Course
+                        Xem Khóa Học
                       </Link>
                       <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                         {course.code}
@@ -209,9 +209,9 @@ const StudentDashboard = () => {
             ) : (
               <div className="col-span-full">
                 <p className="text-gray-500 text-center py-8">
-                  You're not enrolled in any courses yet.
+                  Bạn chưa đăng ký khóa học nào cả.
                   <Link to="/courses" className="text-primary-600 hover:underline ml-1">
-                    Browse available courses
+                    Duyệt các khóa học có sẵn
                   </Link>
                 </p>
               </div>
@@ -221,7 +221,7 @@ const StudentDashboard = () => {
 
       {/* Available Quizzes */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Available Quizzes</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Các bài kiểm tra có sẵn</h2>
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {safeQuizzes.filter(q => !q.submitted).length > 0 ?
             (
@@ -232,17 +232,17 @@ const StudentDashboard = () => {
                     <div key={quiz._id} className="p-4 hover:bg-gray-50">
                       <h3 className="font-medium text-gray-800">{quiz.title}</h3>
                       <p className="text-sm text-gray-600">
-                        Course: {quiz.course?.title}
+                        Khóa học: {quiz.course?.title}
                       </p>
                       <div className="flex justify-between items-center mt-2">
                         <span className="text-sm text-gray-500">
-                          {quiz.questions?.length || 0} Questions
+                          {quiz.questions?.length || 0} Câu hỏi
                         </span>
                         <Link
                           to={`/quizzes/${quiz._id}/take`}
                           className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                         >
-                          Take Quiz
+                          Làm bài kiểm tra
                         </Link>
                       </div>
                     </div>
@@ -250,7 +250,7 @@ const StudentDashboard = () => {
               </div>
             ) : (
               <p className="text-gray-500 text-center py-8">
-                No quizzes available at the moment.
+               Hiện tại không có bài kiểm tra nào.
               </p>
             )}
         </div>

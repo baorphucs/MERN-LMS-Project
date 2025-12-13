@@ -1,3 +1,4 @@
+// FILE_PATH: client\src\pages\quizzes\TakeQuiz.js
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -19,8 +20,8 @@ const TakeQuiz = () => {
   const [submitting, setSubmitting] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
   const [error, setError] = useState(null);
-  const [resultId, setResultId] = useState(null); // Added missing state variable
-  const [startTime, setStartTime] = useState(null); // Add start time tracking
+  const [resultId, setResultId] = useState(null); 
+  const [startTime, setStartTime] = useState(null); 
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -44,6 +45,7 @@ const TakeQuiz = () => {
           const quizData = res.data.data;
           setQuiz(quizData);
           
+        
           // Initialize answers with proper checks
           if (quizData.questions && Array.isArray(quizData.questions) && quizData.questions.length > 0) {
             const initialAnswers = {};
@@ -51,7 +53,9 @@ const TakeQuiz = () => {
               if (q && q._id) {
                 // Initialize based on question type
                 if (q.type === 'multiple') {
-                  initialAnswers[q._id] = [];
+                  initialAnswers[q._id] = []; // Stores array of option IDs
+                } else if (q.type === 'single') {
+                  initialAnswers[q._id] = null; // Stores index of selected option
                 } else {
                   initialAnswers[q._id] = '';
                 }
@@ -62,7 +66,7 @@ const TakeQuiz = () => {
           } else {
             console.warn("Quiz has no questions or questions array is not valid");
           }
-          
+        
           if (quizData.timeLimit && typeof quizData.timeLimit === 'number') {
             setTimeLeft(quizData.timeLimit * 60);
           }
@@ -116,6 +120,7 @@ const TakeQuiz = () => {
           [questionId]: newAnswers
         };
       } else {
+        // Store index for single choice, or text for text answer
         return {
           ...prev,
           [questionId]: value
@@ -124,7 +129,8 @@ const TakeQuiz = () => {
     });
   };
   
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault(); // Handle case where it's called by timer
     setSubmitting(true);
     try {
       const token = localStorage.getItem('token');
@@ -149,16 +155,24 @@ const TakeQuiz = () => {
             selectedOptions: Array.isArray(answer) ? answer : []
           };
         } else {
-          // Single choice - convert option index to option ID
-          const selectedOptionId = question.options[answer]?._id;
+          // [FIX START] Handle single choice by converting index to option ID
+          const selectedOptionIndex = answer; // 'answer' for single is the index stored in handleAnswerChange
+          
+          // Check if a valid index was stored and convert the index to the option ID
+          let selectedOptionId;
+          if (typeof selectedOptionIndex === 'number' && question.options && question.options[selectedOptionIndex]) {
+             selectedOptionId = question.options[selectedOptionIndex]._id;
+          }
           
           return {
             question: questionId,
-            selectedOption: selectedOptionId
+            selectedOption: selectedOptionId // <-- Gửi đi ID của tùy chọn đã chọn
           };
+          // [FIX END]
         }
       }).filter(Boolean); // Remove null entries
       
+ 
       console.log('Submitting answers:', formattedAnswers);
       
       const res = await axios.post(
@@ -272,7 +286,6 @@ const TakeQuiz = () => {
               <h3 className="text-sm font-medium text-red-800">{error}</h3>
             </div>
           </div>
-        </div>
         <button
           onClick={() => navigate('/dashboard')}
           className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-md"
@@ -280,6 +293,7 @@ const TakeQuiz = () => {
           Go to Dashboard
         </button>
       </div>
+    </div>
     );
   }
 
@@ -419,6 +433,7 @@ const TakeQuiz = () => {
             </button>
           )}
         </div>
+        
         {/* Question navigation */}
         <div className="px-8 py-4 border-t border-primary-50 bg-white/70 rounded-b-2xl">
           <p className="text-sm text-gray-600 mb-2 font-semibold">Question Navigation:</p>

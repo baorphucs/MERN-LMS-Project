@@ -24,7 +24,7 @@ router.put('/me', protect, updateUser);
 router.put('/me/password', protect, updatePassword);
 
 // Admin route for managing users
-router.delete('/:id', protect, authorize('admin'), deleteUser);
+router.delete('/:id', protect, authorize('teacher', 'admin'), deleteUser);
 
 // Add student dashboard routes
 router.get('/me/courses', protect, authorize('student'), getEnrolledCourses);

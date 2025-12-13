@@ -75,7 +75,7 @@ const TAB_DATA = {
 // ==============================================================
 const TOEICLevelSelection = () => {
     const [activeTab, setActiveTab] = useState('LR');
-// Khởi tạo state bằng giá trị mặc định của tab LR
+// Khởi tạo state 
     const [currentLevel, setCurrentLevel] = useState(TAB_DATA.LR.currentLevels[0].value);
     const [goalLevel, setGoalLevel] = useState(TAB_DATA.LR.goalLevels[0].value);
     const [selectedPackage, setSelectedPackage] = useState(TAB_DATA.LR.packages[Object.keys(TAB_DATA.LR.packages)[0]]);
@@ -99,14 +99,15 @@ const TOEICLevelSelection = () => {
         const goalLevelInfo = tabData.goalLevels.find(g => g.value === goalLevel);
         const goalMinScore = goalLevelInfo ? goalLevelInfo.minScore : 0;
 
-        // LOGIC KIỂM TRA: Nếu mục tiêu thấp hơn trình độ hiện tại, TỰ ĐỘNG nâng mục tiêu
+  
+       // LOGIC KIỂM TRA: Nếu mục tiêu thấp hơn trình độ hiện tại, TỰ ĐỘNG nâng mục tiêu
         if (goalMinScore < currentMinScore) {
             const newGoal = tabData.goalLevels.find(g => g.minScore >= currentMinScore);
             if (newGoal) {
                 setGoalLevel(newGoal.value);
             }
         }
-        
+       
         // Cập nhật gói học phí sau khi Level/Goal đã được đồng bộ
         const packageKey = `${currentLevel}_${goalLevel}`;
         const newPackage = tabData.packages[packageKey];
@@ -125,7 +126,7 @@ const TOEICLevelSelection = () => {
     const currentLevelInfo = tabData.currentLevels.find(l => l.value === currentLevel);
     const currentMinScore = currentLevelInfo ? currentLevelInfo.minScore : 0;
 
-    // Hàm kiểm tra mục tiêu có hợp lệ hay không (dựa trên currentMinScore)
+    // Hàm kiểm tra mục tiêu có hợp 
     const isGoalAvailable = (goalValue) => {
         const goalInfo = tabData.goalLevels.find(g => g.value === goalValue);
 // Mục tiêu phải lớn hơn hoặc bằng trình độ hiện tại
@@ -149,31 +150,36 @@ const TOEICLevelSelection = () => {
         return (
             <motion.button
                 key={level.value} // Dùng key để đảm bảo animation khi level thay đổi
+      
                 whileHover={{ scale: isDisabled ? 1 : 1.03 }}
                 onClick={onClick}
                 disabled={isDisabled}
                 className={`w-full py-3 rounded-lg font-bold text-center transition-all border-2 
                     ${isCurrentSelection 
-                        ? 'bg-white border-primary-400 text-primary-700 shadow-lg' 
+                  
+                       ? 'bg-white border-primary-400 text-primary-700 shadow-lg' 
                         : isDisabled 
                             ? 'bg-gray-700/50 border-gray-600 text-gray-400 cursor-not-allowed' 
                             : 'bg-white/10 border-white/20 text-white/80 hover:bg-white/20'}`}
+         
             >
                 {level.label}
             </motion.button>
         );
     };
     return (
-        <section className="py-20 bg-[#00429D] text-white">
+        <section className="py-20 bg-[#00429D] text-white" id="roadmap-selector">
             
             {/* Header chung */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-12">
-                <h1 className="text-4xl font-extrabold mb-2">
+            
+             <h1 className="text-4xl font-extrabold mb-2">
                     Thiết kế lộ trình học dành riêng cho bạn, ngay tại đây!
                 </h1>
                 
                 {/* Tab Navigation */}
-                <div className="flex justify-center space-x-4 bg-white/20 rounded-full p-1 mx-auto max-w-fit mt-6">
+                <div className="flex justify-center space-x-4 bg-white/20 rounded-full 
+p-1 mx-auto max-w-fit mt-6">
                     {Object.keys(TAB_DATA).map((tabKey) => (
                          <button 
                              key={tabKey}
@@ -181,125 +187,159 @@ const TOEICLevelSelection = () => {
                              className={`py-2 px-6 rounded-full font-semibold text-sm transition-all ${
                                 activeTab === tabKey ? 'bg-white text-[#00429D] shadow-lg' : 'text-white/80 hover:bg-white/10'
                             }`}
-                         >
+       
+                          >
                             {TAB_DATA[tabKey].title}
                          </button>
                     ))}
                 </div>
+    
             </div>
             
             {/* Vùng Trình độ & Mục tiêu */}
             <div className="max-w-6xl mx-auto px-4">
                 <div className="bg-primary-900/50 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          
                         
                         {/* 1. Trình độ của tôi */}
                         <div>
                             <h3 className="text-xl font-bold mb-4 text-white/90">Trình độ của tôi</h3>
-                            <div className="space-y-3">
+        
+                             <div className="space-y-3">
                                 <AnimatePresence mode="wait">
                                     <motion.div 
-                                        key={activeTab + "current"} 
+                    
+                                     key={activeTab + "current"} 
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -20 }}
                                         className="space-y-3"
-                                    >
+                        
+                                     >
                                         {tabData.currentLevels.map((level) => (
                                             <LevelOption key={level.value} level={level} type="current" />
+         
                                         ))}
                                     </motion.div>
                                 </AnimatePresence>
-                            </div>
+            
+                             </div>
                         </div>
 
                         {/* 2. Mục tiêu của tôi */}
                         <div>
+                 
                             <h3 className="text-xl font-bold mb-4 text-white/90">Mục tiêu của tôi</h3>
                             <div className="space-y-3">
                                 <AnimatePresence mode="wait">
-                                    <motion.div 
+                               
+                                     <motion.div 
                                         key={activeTab + "goal"} 
                                         initial={{ opacity: 0, x: 20 }}
-                                        animate={{ opacity: 1, x: 0 }}
+                 
+                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: 20 }}
+                                      
                                         className="space-y-3"
                                     >
                                         {tabData.goalLevels.map((goal) => (
-                                            <LevelOption key={goal.value} level={goal} type="goal" />
+                               
+                                              <LevelOption key={goal.value} level={goal} type="goal" />
                                         ))}
                                     </motion.div>
-                                </AnimatePresence>
+                  
+                               </AnimatePresence>
                             </div>
                         </div>
                     </div>
                     
-                    {/* Kiểm tra đầu vào */}
+     
+                                 {/* Kiểm tra đầu vào */}
                     <p className="text-center mt-6 text-sm text-white/80">
                         Bạn chưa rõ trình độ bản thân?
                         <a href="#" className="font-semibold text-accent-yellow hover:underline ml-1">Kiểm tra đầu vào</a>
                     </p>
-                </div>
+        
+                 </div>
             </div>
 
             {/* Vùng Chương trình học & Gói học phí */}
             <div className="max-w-6xl mx-auto px-4 mt-12">
                 <AnimatePresence mode="wait">
                     <motion.div 
-                        key={currentLevel + goalLevel}
+                
+                         key={currentLevel + goalLevel}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
+              
+                          transition={{ duration: 0.3 }}
                         className="bg-primary-900/50 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-white/10"
                     >
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-2xl font-extrabold text-white">Chặng 1</h3>
+                    
+                             <h3 className="text-2xl font-extrabold text-white">Chặng 1</h3>
                             <div className="flex items-center text-accent-yellow font-bold text-lg">
                                 Cam kết mục tiêu đầu ra: {selectedPackage.commitment}
-                            </div>
+                            
+                             </div>
                         </div>
                         <p className="text-xl font-semibold text-white/90 mb-6">
                             Chinh phục lộ trình **{selectedPackage.chapter}**
                         </p>
-                        
+   
+                                              
                         {/* Gói học phí (Packages) */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             
-                            {/* Gói 1: Tự học chủ động */}
+     
+                                                 {/* Gói 1: Tự học chủ động */}
                             <motion.div className="bg-white p-6 rounded-xl text-text-dark shadow-xl">
                                 <h4 className="text-lg font-bold mb-4">⭐ Tự học chủ động</h4>
+         
                                 <p className="text-2xl font-extrabold text-primary-600 mb-4">{selectedPackage.priceSelf} VND</p>
-                                <a href="#" className="inline-block bg-primary-600 text-white px-4 py-2 rounded-md font-semibold text-sm">Đăng ký học ngay</a>
+                                <a href="/contact" className="inline-block bg-primary-600 text-white px-4 py-2 rounded-md font-semibold text-sm">Đăng ký học ngay</a>
                                 <div className="mt-4 border-t pt-4 space-y-2">
-                                    <h5 className="font-bold text-gray-700">Quyền lợi:</h5>
+   
+                                     <h5 className="font-bold text-gray-700">Quyền lợi:</h5>
                                     <ul className="text-sm space-y-2">
-                                        {[
+                                     
+                                     {[
                                             'Sở hữu bộ giáo trình tích hợp chuyên sâu',
                                             'Luyện đề Listening & Reading có giải thích đáp án chi tiết',
+ 
                                             'Hỗ trợ trọn bộ & chiến lược làm đề TOEIC hiệu quả',
                                             'Thực chiến với bộ đề TOEIC độc quyền, sát đề thi thật',
                                             'Cá nhân hóa kế hoạch học tập một cách chuyên biệt',
                                         ].map((item, i) => (
-                                            <li key={i} className="flex items-start">
+                
+                                             <li key={i} className="flex items-start">
                                                 <CheckCircleIcon className="h-5 w-5 text-accent-yellow mr-2 flex-shrink-0" />
-                                                <span>{item}</span>
+                          
+                                              <span>{item}</span>
                                             </li>
                                         ))}
-                                    </ul>
+     
+                                 </ul>
                                 </div>
                             </motion.div>
-                            
+                    
+                        
                             {/* Gói 2: Học và luyện đề toàn diện (Đề xuất) */}
                             <motion.div className="bg-white p-6 rounded-xl text-text-dark shadow-xl border-4 border-accent-yellow relative">
-                                <span className="absolute top-0 right-0 bg-accent-yellow text-text-dark text-xs font-bold px-3 py-1 rounded-bl-lg">Đề xuất</span>
+                            
+                                 <span className="absolute top-0 right-0 bg-accent-yellow text-text-dark text-xs font-bold px-3 py-1 rounded-bl-lg">Đề xuất</span>
                                 <h4 className="text-lg font-bold mb-4">🎯 Học và luyện đề toàn diện</h4>
                                 <p className="text-2xl font-extrabold text-primary-600 mb-4">{selectedPackage.priceFull} VND</p>
-                                <a href="#" className="inline-block bg-primary-600 text-white px-4 py-2 rounded-md font-semibold text-sm">Đăng ký học ngay</a>
+                  
+                               <a href="/contact" className="inline-block bg-primary-600 text-white px-4 py-2 rounded-md font-semibold text-sm">Đăng ký học ngay</a>
                                 <div className="mt-4 border-t pt-4 space-y-2">
                                     <h5 className="font-bold text-gray-700">Quyền lợi:</h5>
-                                    <ul className="text-sm space-y-2">
+          
+                                     <ul className="text-sm space-y-2">
                                         {[
+                                           
                                             'Sở hữu bộ giáo trình tích hợp chuyên sâu',
                                             'Luyện đề Listening & Reading có giải thích đáp án chi tiết',
                                             'Nắm trọn bộ kỹ & chiến lược làm đề TOEIC hiệu quả',
@@ -309,19 +349,24 @@ const TOEICLevelSelection = () => {
                                             'Luyện writing ảo hằng ngày với bộ đề độc quyền, sát nhất' 
                                         ].map((item, i) => (
                                             <li key={i} className="flex items-start">
-                                                <CheckCircleIcon className="h-5 w-5 text-accent-yellow mr-2 flex-shrink-0" />
+               
+                                                  <CheckCircleIcon className="h-5 w-5 text-accent-yellow mr-2 flex-shrink-0" />
                                                 <span>{item}</span>
-                                            </li>
+                        
+                                             </li>
                                         ))}
                                     </ul>
-                                </div>
+               
+                                  </div>
                             </motion.div>
                         </div>
                         
+                  
                         <a href="#" className="text-center block mt-6 text-sm text-white/80 hover:underline">
                             Xem chi tiết lộ trình
                         </a>
                         
+                  
                     </motion.div>
                 </AnimatePresence>
             </div>
@@ -336,28 +381,35 @@ const TOEICLevelSelection = () => {
 const TOEIC_STEP_DATA = [
     {
         step: 1,
-        title: "Tứ Phòng Luyện Thi TOEIC Ảo Prep AI Đầu Tiên Việt Nam",
+        
+title: "Tứ Phòng Luyện Thi TOEIC Ảo Prep AI Đầu Tiên Việt Nam",
         description: "Trải nghiệm luyện thi TOEIC thông minh - toàn diện. Bạn sẽ nhận được điểm số chi tiết và trình độ hiện tại ngay sau khi hoàn thành bài thi thử.",
         substep: "Bước 1: Kiểm tra trình độ & Thiết lập lộ trình",
-        image: { tag: 'Kết quả thi thử TOEIC', file: 'image_683e7b.png' }
+        // Đã sửa: dùng đường dẫn tuyệt đối mới
+        image: { tag: 'Kết quả thi thử TOEIC', file: '/lotrinhtoeic_buoc1.gif' }
     },
     {
         step: 2,
-        title: "Nói & Viết trôi chảy với Phòng luyện Speaking/Writing ảo",
+     
+   title: "Nói & Viết trôi chảy với Phòng luyện Speaking/Writing ảo",
+      
         description: "AI chấm chữa phát âm chi tiết, sửa từng lỗi ngữ pháp, nâng cấp từ vựng trong bài, giúp bạn cải thiện rõ rệt cả hai kỹ năng.",
         substep: "Bước 2: Luyện tập chuyên sâu 4 kỹ năng",
-        image: { tag: 'Phản hồi chấm Speaking/Writing', file: 'image_683e5c.jpg' }
+        // Đã sửa: dùng đường dẫn tuyệt đối mới
+        image: { tag: 'Phản hồi chấm Speaking/Writing', file: '/lotrinhtoeic_buoc2.gif' }
     },
     {
         step: 3,
         title: "Học tập trung cùng video bài giảng tương tác",
         description: "Các câu hỏi tương tác được lồng xuyên suốt bài giảng để kiểm tra kiến thức bạn vừa học, tăng khả năng ghi nhớ và áp dụng nội dung ngay lập tức.",
         substep: "Bước 3: Nắm vững kiến thức qua bài giảng tương tác",
-        image: { tag: 'Bài giảng video tương tác', file: 'image_683e26.jpg' }
+        // Đã sửa: dùng đường dẫn tuyệt đối mới
+        image: { tag: 'Bài giảng video tương tác', file: '/lotrinhtoeic_buoc3.gif' }
     },
 ];
 const TOEICStepSlider = () => {
-    const [step, setStep] = useState(0); 
+    const 
+[step, setStep] = useState(0); 
     const sliderRef = useRef(null);
     const debounceTimeout = useRef(null);
     
@@ -369,7 +421,8 @@ const TOEICStepSlider = () => {
             if (nextStep < 0) nextStep = 0;
             if (nextStep >= TOEIC_STEP_DATA.length) nextStep = TOEIC_STEP_DATA.length - 1;
 
-            if (nextStep !== prevStep) {
+            if (nextStep !== prevStep) 
+{
                 debounceTimeout.current = setTimeout(() => {
                     debounceTimeout.current = null;
                 }, 700); 
@@ -389,7 +442,8 @@ const TOEICStepSlider = () => {
             if (sliderElement) {
                 sliderElement.removeEventListener('wheel', handleWheel);
             }
-            clearTimeout(debounceTimeout.current);
+        
+    clearTimeout(debounceTimeout.current);
         };
     }, []);
     const currentStep = TOEIC_STEP_DATA[step];
@@ -401,7 +455,8 @@ const TOEICStepSlider = () => {
         }),
         center: {
             y: 0,
-            opacity: 1
+            opacity: 
+1
         },
         exit: (direction) => ({
             y: direction < 0 ? 500 : -500,
@@ -412,80 +467,102 @@ const TOEICStepSlider = () => {
         <section 
             ref={sliderRef}
             className="py-16 md:py-24 bg-[#00429D] text-white relative overflow-hidden h-[800px] flex items-center" 
+    
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
                 
                 <motion.div 
                     className="text-center mb-16"
                     initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+          
+                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                     viewport={{ once: true }}
                 >
                     <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
-                        Tối ưu hành trình Luyện Thi TOEIC với 3 bước dễ dàng
+          
+               Tối ưu hành trình Luyện Thi TOEIC với 3 bước dễ dàng
                     </h2>
                     <p className="text-lg text-primary-100">
                         Hệ thống TOEIC Prep AI sẽ đồng hành cùng bạn chinh phục mục tiêu điểm số.
-                    </p>
+     
+                     </p>
                 </motion.div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     
                     <div className="space-y-6 flex flex-col justify-center min-h-[400px] relative">
+              
                         <AnimatePresence mode="wait">
                             <motion.div 
                                 key={currentStep.step + "text"}
                                 variants={slideVariants}
-                                initial="enter"
+     
+                                 initial="enter"
                                 animate="center"
                                 exit="exit"
-                                custom={currentStep.step > (step + 1) ? -1 : 1} 
+                    
+                      custom={currentStep.step > (step + 1) ? -1 : 1} 
                                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                 className="absolute inset-0 p-4"
+                 
                             >
                                 <p className="text-6xl md:text-7xl font-extrabold text-white/20 leading-none">
                                     Bước {currentStep.step}
-                                </p>
+                          
+                       </p>
                                 <h3 className="text-3xl font-bold text-white mt-4">
                                     {currentStep.title}
                                 </h3>
-                                <p className="text-lg text-primary-100 mt-4">
+ 
+                                 <p className="text-lg text-primary-100 mt-4">
                                     {currentStep.description}
                                 </p>
+         
                             </motion.div>
                          </AnimatePresence>
                     </div>
 
                     <div className="relative h-96 w-full rounded-3xl overflow-hidden shadow-2xl bg-white">
-                        <AnimatePresence mode="wait"> 
+                    
+                         <AnimatePresence mode="wait"> 
                             <motion.div
                                 key={currentStep.step + "image"}
                                 custom={1} 
+          
                                 variants={slideVariants}
                                 initial="enter"
                                 animate="center"
-                                exit="exit"
+                         
+                                 exit="exit"
                                 transition={{
                                     y: { type: "spring", stiffness: 300, damping: 30 },
-                                    opacity: { duration: 0.3 }
+                            
+                                 opacity: { duration: 0.3 }
                                 }}
                                 className="absolute inset-0 p-6 flex items-center justify-center"
                             >
-                                <div className="text-center w-full h-full">
+  
+                                                               <div className="text-center w-full h-full">
                                     <p className="text-sm font-semibold text-gray-500 mb-2">{currentStep.substep}</p>
                                     
+  
                                     <div className="w-full h-[85%] mx-auto bg-gray-100 rounded-lg flex items-center justify-center border-4 border-primary-400 overflow-hidden">
                                         {/* Hiển thị hình ảnh tương ứng */}
-                                        <img 
+        
+           
+                                         <img 
                                             src={currentStep.image.file} 
-                                            alt={currentStep.image.tag} 
-                                            className="object-contain w-full h-full"
+                                    
+                                             alt={currentStep.image.tag} 
+                                            className="w-full h-full object-contain"
                                         />
-                                    </div>
+                
+                                  </div>
                                 </div>
                             </motion.div>
                          </AnimatePresence>
+                 
                     </div>
 
                 </div>
@@ -493,15 +570,18 @@ const TOEICStepSlider = () => {
                  <div className="text-center mt-12 flex justify-center space-x-3">
                     {TOEIC_STEP_DATA.map((s, index) => (
                         <button
-                            key={s.step}
+                       
+                             key={s.step}
                             onClick={() => setStep(index)}
                             className={`w-3 h-3 rounded-full transition-all duration-300 ${
                                 index === step ? 'bg-white scale-125' : 'bg-primary-300/50 hover:bg-primary-300'
-                            }`}
+   
+                             }`}
                             aria-label={`Go to step ${s.step}`}
                         />
                     ))}
-                </div>
+           
+                     </div>
             </div>
         </section>
     );
@@ -518,41 +598,59 @@ const RoadmapToeic = () => {
             {/* 1. Hero Section */}
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 <motion.div 
+   
                     initial={{ opacity: 0, y: 20 }} 
                     animate={{ opacity: 1, y: 0 }} 
                     transition={{ duration: 0.5 }}
                     className="bg-white rounded-3xl shadow-xl overflow-hidden md:flex"
-                >
+               
+                 >
                     {/* Cột 1: Nội dung */}
                     <div className="md:w-1/2 p-10 bg-[#f0f5ff] flex flex-col justify-center">
                         <h2 className="text-sm font-bold text-primary-600 uppercase mb-2">KHOÁ HỌC TOEIC</h2>
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-secondary-900 mb-4 leading-tight">
+                        <h1 className="text-4xl md:text-5xl font-extrabold 
+text-secondary-900 mb-4 leading-tight">
                             Luyện Thi TOEIC Hiệu Quả!
                         </h1>
                         <p className="text-lg text-gray-700 mb-8 max-w-md">
                             Với Phòng Luyện TOEIC Ảo Prep AI 4 kỹ năng đầu tiên & duy nhất tại Việt Nam
+   
                         </p>
-                        <a href="#" className="inline-block px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-semibold max-w-fit">
+                        <a href="/contact" className="inline-block px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-semibold max-w-fit">
                             Thiết kế lộ trình học
-                        </a>
+                        
+                         </a>
                         <div className="mt-6 flex items-center">
                             <div className="flex -space-x-2 mr-3">
                                 <img className="h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=NV&background=c7d2fe&color=3730a3" alt="Student 1" />
-                                <img className="h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=PT&background=a5b4fc&color=3730a3" alt="Student 2" />
+            
+                                 <img className="h-8 w-8 rounded-full ring-2 ring-white" src="https://ui-avatars.com/api/?name=PT&background=a5b4fc&color=3730a3" alt="Student 2" />
                             </div>
                             <p className="text-sm font-medium text-gray-700">
-                                <strong>30.000+</strong> học viên đạt được TOEIC tại NTTU HUB
+                       
+                                 <strong>30.000+</strong> học viên đạt được TOEIC tại NTTU HUB
                             </p>
                         </div>
                     </div>
 
-                    {/* Cột 2: Hình ảnh */}
+                    {/* Cột 
+                         2: Hình ảnh */}
                     <div className="md:w-1/2 relative bg-[#1E90FF] overflow-hidden flex items-center justify-center">
-                        <div className="absolute inset-0 bg-primary-900 opacity-20"></div>
+                        <div className="absolute inset-0 bg-primary-900 opacity-20 z-10"></div>
+                        
+                        {/* THÊM ẢNH NGUOIMAU-1.PNG 
+                                 TẠI ĐÂY */}
+                        <img 
+                            src="/nguoimau-1.png" 
+                            alt="TOEIC Mockup" 
+                         
+                            className="relative z-20 w-3/4 h-auto object-contain"
+                        />
                         
                     </div>
                 </motion.div>
             </div>
+        
             
             {/* 2. Phần Step Slider */}
             <TOEICStepSlider />
@@ -564,10 +662,11 @@ const RoadmapToeic = () => {
             <div 
                 className="py-12 text-center bg-[#003885] text-white"
             >
-                 <a href="#" className="inline-block px-8 py-3 bg-accent-yellow text-text-dark rounded-full font-bold hover:bg-yellow-400 transition-colors">
+                 <a href="#roadmap-selector" className="inline-block px-8 py-3 bg-accent-yellow text-text-dark rounded-full font-bold hover:bg-yellow-400 transition-colors">
                     Chọn lộ trình học và Trải nghiệm ngay
                 </a>
-            </div>
+          
+             </div>
             
             {/* 5. Footer */}
             <Footer />

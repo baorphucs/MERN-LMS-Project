@@ -246,6 +246,7 @@ exports.submitQuiz = async (req, res) => {
     if (!quiz.isPublished) {
       return res.status(403).json({ message: 'This quiz is not available yet' });
     }
+  
     
     const now = new Date();
     if (quiz.availableFrom > now) {
@@ -303,40 +304,47 @@ exports.submitQuiz = async (req, res) => {
           textAnswer: answer.textAnswer,
           isCorrect
         });
-      } else {
+      } else if (question.type === 'multiple') {
         // Handle multiple choice questions
-        if (question.type === 'multiple') {
-          // For multiple choice, check if all selected options are correct and all correct options are selected
-          const selectedOptions = answer.selectedOptions || [];
-          const correctOptions = question.options.filter(opt => opt.isCorrect);
-          
-          const allSelectedAreCorrect = selectedOptions.every(selectedId => {
-            const option = question.options.id(selectedId);
-            return option && option.isCorrect;
-          });
-          
-          const allCorrectAreSelected = correctOptions.every(correctOpt => 
-            selectedOptions.includes(correctOpt._id.toString())
-          );
-          
-          isCorrect = allSelectedAreCorrect && allCorrectAreSelected && selectedOptions.length === correctOptions.length;
-        } else {
-          // For single choice
-          const selectedOption = question.options.id(answer.selectedOption);
-          isCorrect = selectedOption && selectedOption.isCorrect;
-      }
-      
-      processedAnswers.push({
-        question: answer.question,
-          selectedOptions: answer.selectedOptions || [answer.selectedOption],
+        // For multiple choice, check if all selected options are correct and all correct options are selected
+ 
+        const selectedOptions = answer.selectedOptions || [];
+        const correctOptions = question.options.filter(opt => opt.isCorrect);
+        
+        const allSelectedAreCorrect = selectedOptions.every(selectedId => {
+          const option = question.options.id(selectedId);
+          return option && option.isCorrect;
+        });
+        
+        const allCorrectAreSelected = correctOptions.every(correctOpt => 
+          selectedOptions.includes(correctOpt._id.toString())
+        );
+        
+        isCorrect = allSelectedAreCorrect && allCorrectAreSelected && selectedOptions.length === correctOptions.length;
+        
+        processedAnswers.push({
+          question: answer.question,
+          selectedOptions: selectedOptions,
           isCorrect
-      });
+        });
+      } else if (question.type === 'single') {
+        // [FIXED] Handle single choice (sent with selectedOption ID from client)
+        const selectedOptionId = answer.selectedOption;
+        const selectedOption = question.options.id(selectedOptionId);
+        isCorrect = selectedOption && selectedOption.isCorrect;
+
+        processedAnswers.push({
+          question: answer.question,
+          selectedOptions: selectedOptionId ? [selectedOptionId] : [],
+          isCorrect
+        });
       }
       
       if (isCorrect) {
         score += question.points;
       }
     }
+  
     
     // Create result
     const result = {
@@ -362,7 +370,6 @@ exports.submitQuiz = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 // @desc    Get student's quiz result
 // @route   GET /api/quizzes/:id/result
 // @access  Private/Student
