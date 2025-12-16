@@ -1,38 +1,34 @@
 const express = require('express');
 const router = express.Router();
-const {
-  getCourses,
-  getCourse,
-  createCourse,
-  updateCourse,
+const { 
+  getCourses, 
+  getCourse, 
+  createCourse, 
+  updateCourse, 
   deleteCourse,
   getTeacherCourses,
-  enrollCourse,
-  addStudentToCourse, // NEW
-  removeStudentFromCourse // NEW
+  addStudentToCourse,
+  removeStudentFromCourse,
+  enrollCourse // CHỈ GIỮ DUY NHẤT 1 KHAI BÁO TẠI ĐÂY
 } = require('../controllers/course.controller');
+
 const { protect, authorize } = require('../middleware/auth.middleware');
 
-// IMPORTANT: The order of routes is important for Express
-// More specific routes should come before dynamic routes (those with parameters)
-
-// Public route - no authentication required
+// Routes công khai
 router.get('/', getCourses);
+router.get('/:id', getCourse);
 
-// Teacher-specific route - must be before /:id route
-router.get('/teacher', protect, authorize('teacher'), getTeacherCourses);
+// Routes yêu cầu đăng nhập
+router.post('/:id/enroll', protect, enrollCourse);
 
-// Course by ID - protected 
-router.get('/:id', protect, getCourse);
-router.post('/:id/enroll', protect, authorize('student'), enrollCourse);
+// Routes dành cho giáo viên
+router.post('/', protect, authorize('teacher'), createCourse);
+router.get('/teacher/my-courses', protect, authorize('teacher'), getTeacherCourses);
 router.put('/:id', protect, authorize('teacher'), updateCourse);
 router.delete('/:id', protect, authorize('teacher'), deleteCourse);
 
-// NEW: Routes for managing students
-router.put('/:id/add-student', protect, authorize('teacher'), addStudentToCourse); // NEW
-router.put('/:id/remove-student', protect, authorize('teacher'), removeStudentFromCourse); // NEW
-
-// Course creation
-router.post('/', protect, authorize('teacher'), createCourse);
+// Quản lý sinh viên trong khóa học
+router.put('/:id/add-student', protect, authorize('teacher'), addStudentToCourse);
+router.put('/:id/remove-student', protect, authorize('teacher'), removeStudentFromCourse);
 
 module.exports = router;

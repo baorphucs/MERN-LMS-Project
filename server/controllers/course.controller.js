@@ -1,30 +1,19 @@
 const Course = require('../models/course.model');
 const User = require('../models/user.model');
-// BƯỚC FIX QUAN TRỌNG: Import model Notification
 const Notification = require('../models/notification.model');
+// BƯỚC FIX QUAN TRỌNG: Import model Enrollment để có thể xóa bản ghi đăng ký
+const Enrollment = require('../models/enrollment.model');
 
 // @desc    Get all courses
 // @route   GET /api/courses
 // @access  Public
+// Lấy danh sách tất cả khóa học
 exports.getCourses = async (req, res) => {
   try {
-    console.log('Fetching all courses - debug mode');
-    const courses = await Course.find({})
-      .populate('teacher', 'name email')
-      .lean();
-    
-    console.log(`Found ${courses.length} courses`);
-    return res.status(200).json({
-      success: true,
-      courses: courses || []
-    });
+    const courses = await Course.find({}).populate('teacher', 'name email').lean();
+    res.status(200).json({ success: true, courses: courses || [] });
   } catch (error) {
-    console.error('Error in getCourses controller:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error fetching courses',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Error fetching courses' });
   }
 };
 
@@ -36,21 +25,17 @@ exports.getCourse = async (req, res) => {
     const course = await Course.findById(req.params.id)
       .populate('teacher', 'name email')
       .populate('students', 'name email');
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found'
-      });
-    }
+    
+    if (!course) return res.status(404).json({ success: false, message: 'Course not found' });
 
-    // Fetch related data
     const [assignments, quizzes, materials, notices] = await Promise.all([
       require('../models/assignment.model').find({ courseId: course._id }),
       require('../models/quiz.model').find({ course: course._id }),
       require('../models/material.model').find({ courseId: course._id }),
       require('../models/notice.model').find({ courseId: course._id })
     ]);
-    return res.status(200).json({
+
+    res.status(200).json({
       success: true,
       course,
       students: course.students || [],
@@ -60,11 +45,7 @@ exports.getCourse = async (req, res) => {
       notices: notices || []
     });
   } catch (error) {
-    console.error('Error fetching course:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error fetching course'
-    });
+    res.status(500).json({ success: false, message: 'Error fetching course' });
   }
 };
 
@@ -132,8 +113,12 @@ exports.deleteCourse = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Course not found' });
     }
 
-    await User.updateMany({ courses: course._id }, { $pull: { courses: course._id } });
-    await Course.deleteOne({ _id: course._id });
+    // Xóa liên kết khóa học ở User và xóa tất cả Enrollment liên quan đến khóa này
+    await Promise.all([
+        User.updateMany({ courses: course._id }, { $pull: { courses: course._id } }),
+        Enrollment.deleteMany({ course: course._id }),
+        Course.deleteOne({ _id: course._id })
+    ]);
 
     return res.status(200).json({ success: true, message: 'Course deleted successfully' });
   } catch (error) {
@@ -142,48 +127,72 @@ exports.deleteCourse = async (req, res) => {
   }
 };
 
-// @desc    Enroll in course
-// @route   POST /api/courses/:id/enroll
-// @access  Private/Student
-exports.enrollCourse = async (req, res) => {
+// @desc    Add a student to course (Directly by Teacher)
+// @route   PUT /api/courses/:id/add-student
+// @access  Private/Teacher
+exports.addStudentToCourse = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found'
-      });
-    }
+    const { studentId } = req.body;
+    if (!studentId) return res.status(400).json({ success: false, message: 'Student ID required' }); 
+
+    const course = await Course.findById(req.params.id); 
+    const student = await User.findById(studentId); 
+
+    if (!course || !student) return res.status(404).json({ success: false, message: 'Course or Student not found' }); 
+    if (student.role !== 'student') return res.status(400).json({ success: false, message: 'User is not a student' }); 
+    if (course.students.includes(studentId)) return res.status(400).json({ success: false, message: 'Student already enrolled' }); 
     
-    // Check if student is already enrolled
-    if (course.students.includes(req.user.id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Already enrolled in this course'
-      });
-    }
+    // 1. Add student to course
+    course.students.push(studentId);  
+    await course.save();  
     
-    // Add student to course
-    course.students.push(req.user.id);
-    await course.save();
-    
-    // Add course to student's courses
-    await User.findByIdAndUpdate(
-      req.user.id,
-      { $push: { courses: course._id } },
-      { new: true }
+    // 2. Add course to student's courses
+    student.courses.push(course._id); 
+    await student.save(); 
+
+    // 3. Tạo một bản ghi Enrollment trạng thái 'approved' để đồng bộ dữ liệu
+    await Enrollment.findOneAndUpdate(
+        { course: course._id, student: studentId },
+        { teacher: course.teacher, status: 'approved' },
+        { upsert: true, new: true }
     );
-    return res.json({
-      success: true,
-      message: 'Successfully enrolled in course',
-      course
+
+    // 4. Gửi thông báo cho học sinh
+    await Notification.create({ 
+      user: studentId,
+      text: `You have been added to the course: ${course.title}`,
+      link: `/courses/${course._id}`
     });
+
+    res.json({ success: true, message: 'Student added successfully' }); 
   } catch (error) {
-    console.error('Error enrolling in course:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+    console.error('Error adding student:', error);
+    res.status(500).json({ success: false, message: 'Server error' }); 
+  }
+};
+
+// @desc    Remove a student from course
+// @route   PUT /api/courses/:id/remove-student
+// @access  Private/Teacher
+// Hàm xóa học sinh (Như đã hứa ở bước trước để fix lỗi đăng ký lại không được)
+exports.removeStudentFromCourse = async (req, res) => {
+  try {
+    const { studentId } = req.body;
+    const courseId = req.params.id;
+
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ success: false, message: 'Course not found' });
+
+    course.students.pull(studentId);
+    await course.save();
+    await User.findByIdAndUpdate(studentId, { $pull: { courses: courseId } });
+
+    // FIX: Xóa sạch dấu vết Enrollment cũ để học sinh có thể gửi yêu cầu phê duyệt mới
+    await Enrollment.findOneAndDelete({ course: courseId, student: studentId });
+
+    res.json({ success: true, message: 'Student removed successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -207,67 +216,24 @@ exports.getTeacherCourses = async (req, res) => {
     });
   }
 };
-// @desc    Add a student to course
-// @route   PUT /api/courses/:id/add-student
-// @access  Private/Teacher
-exports.addStudentToCourse = async (req, res) => {
+// @desc    Enroll in course
+// @route   POST /api/courses/:id/enroll
+// Logic ghi danh trực tiếp
+exports.enrollCourse = async (req, res) => {
   try {
-    const { studentId } = req.body;
-    if (!studentId) return res.status(400).json({ success: false, message: 'Student ID required' }); 
-
-    const course = await Course.findById(req.params.id); 
-    const student = await User.findById(studentId); 
-
-    if (!course || !student) return res.status(404).json({ success: false, message: 'Course or Student not found' }); 
-    if (student.role !== 'student') return res.status(400).json({ success: false, message: 'User is not a student' }); 
-    if (course.students.includes(studentId)) return res.status(400).json({ success: false, message: 'Student already enrolled' }); 
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ success: false, message: 'Course not found' });
     
-    // 1. Add student to course
-    course.students.push(studentId);  
-    await course.save();  
+    if (course.students.includes(req.user.id)) {
+      return res.status(400).json({ success: false, message: 'Already enrolled' });
+    }
     
-    // 2. Add course to student's courses (Enrollment logic)
-    student.courses.push(course._id); 
-    await student.save(); 
+    course.students.push(req.user.id);
+    await course.save();
+    await User.findByIdAndUpdate(req.user.id, { $push: { courses: course._id } });
 
-    // 3. Gửi thông báo cho học sinh vừa được thêm
-    await Notification.create({ 
-      user: studentId,
-      text: `You have been added to the course: ${course.title}`,
-      link: `/courses/${course._id}`
-    });
-
-    res.json({ success: true, message: 'Student added successfully' }); 
+    res.json({ success: true, message: 'Enrolled successfully' });
   } catch (error) {
-    console.error('Error adding student:', error);
-    res.status(500).json({ success: false, message: 'Server error' }); 
-  }
-};
-
-// @desc    Remove a student from course
-// @route   PUT /api/courses/:id/remove-student
-// @access  Private/Teacher
-exports.removeStudentFromCourse = async (req, res) => {
-  try {
-    const { studentId } = req.body; 
-    if (!studentId) return res.status(400).json({ success: false, message: 'Student ID required' }); 
-
-    const course = await Course.findById(req.params.id); 
-    const student = await User.findById(studentId); 
-
-    if (!course || !student) return res.status(404).json({ success: false, message: 'Course or Student not found' }); 
-    
-    // 1. Remove student from course
-    course.students.pull(studentId);
-    await course.save(); 
-    
-    // 2. Remove course from student's courses
-    student.courses.pull(course._id); 
-    await student.save(); 
-
-    res.json({ success: true, message: 'Student removed successfully' });  
-  } catch (error) {
-    console.error('Error removing student:', error);
-    res.status(500).json({ success: false, message: 'Server error' }); 
+    res.status(500).json({ success: false, message: error.message });
   }
 };

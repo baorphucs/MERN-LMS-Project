@@ -22,8 +22,9 @@ const materialRoutes = require('./routes/material.routes');
 const submissionRoutes = require('./routes/submission.routes');
 const activityRoutes = require('./routes/activity.routes'); 
 const notificationRoutes = require('./routes/notification.routes');
-// NEW IMPORT
 const chatRoutes = require('./routes/chat.routes'); 
+// NEW IMPORT FOR ENROLLMENT
+const enrollmentRoutes = require('./routes/enrollment.routes');
 
 const app = express();
 // Tạo HTTP server từ app Express
@@ -60,28 +61,15 @@ mongoose
   .then(() => console.log('MongoDB connected'))
   .catch((err) => {
     console.error('MongoDB connection error:', err);
-    // Server still runs, but DB is not connected
   });
 
-// Add debug logging middleware to catch API errors
+// Debug logging middleware
 app.use((req, res, next) => {
   const originalSend = res.send;
   res.send = function(data) {
     console.log(`${req.method} ${req.originalUrl} - Status: ${res.statusCode}`);
-    if (res.statusCode >= 400) {
-      console.error(`Error response: ${data}`);
-    }
     return originalSend.call(this, data);
   };
-  next();
-});
-
-// Add a debug middleware for content routes
-app.use(['/api/materials', '/api/assignments', '/api/quizzes', '/api/notices'], (req, res, next) => {
-  console.log(`DEBUG: ${req.method} ${req.originalUrl}`);
-  console.log('Query params:', req.query);
-  console.log('URL params:', req.params);
-  console.log('Body:', req.body);
   next();
 });
 
@@ -89,41 +77,30 @@ app.use(['/api/materials', '/api/assignments', '/api/quizzes', '/api/notices'], 
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
   
-  // 1. User tham gia phòng chat của chính họ (User ID)
   socket.on('join_room', (userId) => {
     socket.join(userId); 
     console.log(`User ${userId} joined room ${userId}`);
   });
   
-  // 2. Admin tham gia phòng hỗ trợ chung
   socket.on('join_admin_room', () => {
     socket.join('admin_support_room');
     console.log(`Admin joined admin_support_room`);
   });
 
-  // 3. Nhận tin nhắn và gửi lại cho người nhận (Real-time)
   socket.on('send_message', async (data) => {
     const { senderId, receiverId, message } = data;
-
-    // Lưu tin nhắn vào DB (sử dụng logic từ controller)
     const savedMessage = await handleSocketMessage({ senderId, receiverId, message }); 
     
     if (savedMessage) {
-        // Data để gửi đi, bao gồm cả timestamp từ DB
         const responseData = { 
             ...data, 
             messageId: savedMessage._id,
             createdAt: savedMessage.createdAt,
-            sender: savedMessage.sender.toString(), // Gửi lại sender ID
+            sender: savedMessage.sender.toString(),
         };
-
-        // Gửi tin nhắn đến người gửi (để hiển thị tin nhắn của chính họ)
         io.to(senderId).emit('receive_message', responseData);
-        
-        // Gửi tin nhắn đến người nhận/chatRoomId (Student ID)
         io.to(savedMessage.chatRoomId.toString()).emit('receive_message', responseData);
 
-        // Gửi thông báo đến tất cả Admin đang lắng nghe nếu người gửi là Student
         if (senderId === savedMessage.chatRoomId.toString()) {
             io.to('admin_support_room').emit('new_chat_notification', { 
                 chatRoomId: savedMessage.chatRoomId, 
@@ -149,12 +126,13 @@ app.use('/api/materials', materialRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/activities', activityRoutes); 
 app.use('/api/notifications', notificationRoutes);
-// NEW ROUTE
 app.use('/api/chat', chatRoutes); 
+// NEW ROUTE FOR ENROLLMENT
+app.use('/api/enrollments', enrollmentRoutes);
 
-// Global error handler for any uncaught errors in the routes
+// Global API error handler
 app.use('/api/*', (error, req, res, next) => {
-  console.error('API Error caught by middleware:', error);
+  console.error('API Error:', error);
   res.status(500).json({
     success: false,
     message: 'Something went wrong on the server',
@@ -165,17 +143,13 @@ app.use('/api/*', (error, req, res, next) => {
 // Serve static files
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/build')));
-
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
   });
 } else {
   app.use(express.static(path.join(__dirname, '../client/public')));
-
   app.get('*', (req, res, next) => {
-    if (req.url.startsWith('/api')) {
-      return next(); // Let API routes be handled above
-    }
+    if (req.url.startsWith('/api')) return next();
     res.sendFile(path.join(__dirname, '../client/public', 'index.html'));
   });
 }
@@ -183,40 +157,16 @@ if (process.env.NODE_ENV === 'production') {
 // Global error handler
 app.use((err, req, res, next) => {
   console.error('Server Error:', err.stack);
-
   if (err.name === 'MongoServerError' && err.code === 11000) {
-    return res.status(400).json({
-      success: false,
-      message: 'This email is already registered'
-    });
+    return res.status(400).json({ success: false, message: 'This email is already registered' });
   }
-
-  res.status(500).json({
-    success: false,
-    message: err.message || 'Something went wrong on the server'
-  });
+  res.status(500).json({ success: false, message: err.message || 'Internal Server Error' });
 });
 
-// Error handler middleware
-app.use((err, req, res, next) => {
-  console.error('Server error:', err.stack);
-  res.status(500).json({
-    success: false,
-    message: 'Server Error',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-});
-
-// Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
   console.log('UNHANDLED REJECTION! 💥 Shutting down...');
-  console.error('Error:', err.message);
-  // Close server & exit process
-  server.close(() => {
-    process.exit(1);
-  });
+  server.close(() => process.exit(1));
 });
 
-// Start server (Sử dụng server.listen thay vì app.listen)
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
