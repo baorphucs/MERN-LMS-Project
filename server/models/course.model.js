@@ -11,13 +11,26 @@ const CourseSchema = new mongoose.Schema(
     code: {
       type: String,
       trim: true,
-      // Make it optional to avoid validation errors
       maxlength: [20, 'Course code cannot be more than 20 characters'],
     },
     description: {
       type: String,
       trim: true,
     },
+    // --- TRƯỜNG DỮ LIỆU MỚI TÁCH BIỆT CHO LANDING PAGE ---
+    landingPageConfig: {
+      videoUrl: { 
+        type: String, 
+        default: '' 
+      },
+      sections: [
+        {
+          title: { type: String, default: '' },
+          content: { type: String, default: '' }
+        }
+      ]
+    },
+    // ----------------------------------------------------
     thumbnail: {
       type: String,
       default: 'default-course.jpg',

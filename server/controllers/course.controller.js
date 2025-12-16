@@ -4,16 +4,64 @@ const Notification = require('../models/notification.model');
 // BƯỚC FIX QUAN TRỌNG: Import model Enrollment để có thể xóa bản ghi đăng ký
 const Enrollment = require('../models/enrollment.model');
 
-// @desc    Get all courses
+// @desc    Get all courses (ĐÃ CHỈNH SỬA LOGIC ẨN/HIỆN THÔNG MINH)
 // @route   GET /api/courses
-// @access  Public
-// Lấy danh sách tất cả khóa học
+// @access  Public/Private
 exports.getCourses = async (req, res) => {
   try {
-    const courses = await Course.find({}).populate('teacher', 'name email').lean();
-    res.status(200).json({ success: true, courses: courses || [] });
+    let filter = {};
+
+    // Nếu không phải Giáo viên/Admin, chúng ta áp dụng bộ lọc thông minh
+    if (!req.user || req.user.role !== 'teacher') {
+      const studentId = req.user ? req.user.id : null;
+
+      filter = {
+        $or: [
+          { isPublished: true }, // Khóa học đang công khai
+          { students: studentId } // HOẶC Khóa học đang ẩn nhưng học sinh này đã tham gia
+        ]
+      };
+    }
+    // Nếu là Giáo viên, filter = {} (xem được hết để quản lý)
+
+    const courses = await Course.find(filter)
+      .populate('teacher', 'name email')
+      .lean();
+    
+    res.status(200).json({
+      success: true,
+      courses: courses || []
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error fetching courses' });
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Toggle Publish/Hide course (HÀM MỚI)
+// @route   PUT /api/courses/:id/toggle-publish
+// @access  Private/Teacher
+exports.togglePublishCourse = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy khóa học' });
+    }
+
+    // Chỉ giáo viên tạo ra khóa học mới có quyền ẩn/hiện
+    if (course.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(401).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này' });
+    }
+
+    course.isPublished = !course.isPublished;
+    await course.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: course.isPublished ? 'Khóa học hiện đã hiển thị với học sinh' : 'Khóa học đã được ẩn thành công',
+      isPublished: course.isPublished 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Lỗi máy chủ' });
   }
 };
 
