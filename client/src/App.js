@@ -1,5 +1,3 @@
-// FILE_PATH: client\src\App.js (CẬP NHẬT HOÀN CHỈNH)
-
 import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';

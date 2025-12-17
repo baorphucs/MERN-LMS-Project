@@ -1,307 +1,205 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
-import moment from 'moment';
 import AuthContext from '../../context/AuthContext';
-import {
-  ClipboardCheckIcon,  // Changed from ClipboardDocumentCheckIcon
-  SearchIcon,  // Changed from MagnifyingGlassIcon
-  TrashIcon
+import { 
+  SearchIcon, 
+  BookOpenIcon, 
+  BadgeCheckIcon, 
+  UsersIcon, 
+  XIcon, 
+  CheckIcon 
 } from '@heroicons/react/outline';
 
 const Assignments = () => {
   const { user } = useContext(AuthContext);
+  const location = useLocation();
   const [assignments, setAssignments] = useState([]);
-  const [filteredAssignments, setFilteredAssignments] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // 'all', 'pending', 'submitted', 'late', 'graded'
   
+  // State cho Modal quản lý danh sách học sinh
+  const [showManageModal, setShowManageModal] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
+
   const isTeacher = user?.role === 'teacher';
   const isStudent = user?.role === 'student';
-  
+
   useEffect(() => {
-    const fetchAssignments = async () => {
+    const fetchData = async () => {
       try {
+        setLoading(true);
+        // Lấy đúng endpoint dựa trên vai trò
         const endpoint = isTeacher ? '/api/assignments/teacher' : '/api/assignments/student';
         const res = await axios.get(endpoint);
-        
-        const assignmentsWithCourseDetails = res.data.assignments;
-        setAssignments(assignmentsWithCourseDetails);
-        setFilteredAssignments(assignmentsWithCourseDetails);
+        setAssignments(res.data.assignments || []);
         setLoading(false);
-      } catch (error) {
-        console.error('Error fetching assignments:', error);
-        setLoading(false);
+      } catch (err) {
+        console.error("Lỗi lấy dữ liệu bài học:", err);
+        setLoading(false); 
       }
     };
-    
-    fetchAssignments();
-  }, [isTeacher]);
-  
-  // Filter assignments based on search term and filter
-  useEffect(() => {
-    let filtered = assignments;
-    
-    // Apply search filter
-    if (searchTerm.trim() !== '') {
-      filtered = filtered.filter(
-        (assignment) =>
-          assignment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          assignment.course?.title.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    // Apply status filter for students
-    if (isStudent) {
-      if (filter === 'pending') {
-        filtered = filtered.filter(assignment => {
-          const submitted = assignment.submissions?.some(
-            sub => sub.student === user._id
-          );
-          const deadlinePassed = new Date(assignment.deadline) < new Date();
-          return !submitted && !deadlinePassed;
-        });
-      } else if (filter === 'submitted') {
-        filtered = filtered.filter(assignment => 
-          assignment.submissions?.some(
-            sub => sub.student === user._id && !sub.graded
-          )
-        );
-      } else if (filter === 'graded') {
-        filtered = filtered.filter(assignment => 
-          assignment.submissions?.some(
-            sub => sub.student === user._id && sub.graded
-          )
-        );
-      } else if (filter === 'late') {
-        filtered = filtered.filter(assignment => {
-          const submitted = assignment.submissions?.some(
-            sub => sub.student === user._id
-          );
-          const deadlinePassed = new Date(assignment.deadline) < new Date();
-          return !submitted && deadlinePassed;
-        });
-      }
-    }
-    // For teachers, filter by status
-    else if (isTeacher) {
-      if (filter === 'pending') {
-        filtered = filtered.filter(assignment => 
-          assignment.submissions?.some(sub => !sub.graded)
-        );
-      } else if (filter === 'graded') {
-        filtered = filtered.filter(assignment => 
-          assignment.submissions?.every(sub => sub.graded)
-        );
-      } else if (filter === 'upcoming') {
-        filtered = filtered.filter(assignment => 
-          new Date(assignment.deadline) > new Date()
-        );
-      } else if (filter === 'expired') {
-        filtered = filtered.filter(assignment => 
-          new Date(assignment.deadline) < new Date()
-        );
-      }
-    }
-    
-    setFilteredAssignments(filtered);
-  }, [searchTerm, filter, assignments, isStudent, isTeacher, user._id]);
-  
-  const getAssignmentStatus = (assignment) => {
-    if (isStudent) {
-      const submitted = assignment.submissions?.some(
-        sub => sub.student === user._id
-      );
-      
-      if (submitted) {
-        const submission = assignment.submissions.find(
-          sub => sub.student === user._id
-        );
-        
-        if (submission?.graded) {
-          return {
-            label: 'Graded',
-            color: 'bg-green-100 text-green-800'
-          };
-        } else {
-          return {
-            label: 'Submitted',
-            color: 'bg-blue-100 text-blue-800'
-          };
-        }
-      } else if (new Date(assignment.deadline) < new Date()) {
-        return {
-          label: 'Late',
-          color: 'bg-red-100 text-red-800'
-        };
-      } else {
-        return {
-          label: 'Pending',
-          color: 'bg-yellow-100 text-yellow-800'
-        };
-      }
-    } else {
-      // For teachers
-      if (!assignment.submissions || assignment.submissions.length === 0) {
-        return {
-          label: 'No Submissions',
-          color: 'bg-gray-100 text-gray-800'
-        };
-      } else if ((assignment.submissions || []).every(sub => sub.graded)) {
-        return {
-          label: 'All Graded',
-          color: 'bg-green-100 text-green-800'
-        };
-      } else {
-        return {
-          label: `${(assignment.submissions || []).filter(sub => sub.graded).length}/${(assignment.submissions || []).length} Graded`,
-          color: 'bg-blue-100 text-blue-800'
-        };
-      }
-    }
+    fetchData();
+  }, [isTeacher, location.key]);
+
+  // Hàm xử lý khi bấm vào nút QUẢN LÝ
+  const handleOpenManage = (assignment) => {
+    setSelectedAssignment(assignment);
+    setShowManageModal(true);
   };
-  
-  const handleDeleteAssignment = async (assignmentId) => {
-    if (!window.confirm('Are you sure you want to delete this assignment? This action cannot be undone.')) return;
-    try {
-      await axios.delete(`/api/assignments/${assignmentId}`);
-      setAssignments(prev => prev.filter(a => a._id !== assignmentId));
-    } catch (err) {
-      alert('Failed to delete assignment.');
-    }
-  };
-  
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
-      </div>
-    );
-  }
-  
+
+  const filteredAssignments = assignments.filter(a => 
+    a.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) return <div className="text-center p-10 font-bold">Đang tải dữ liệu...</div>;
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">Assignments</h1>
-        <p className="text-gray-600">
-          {isTeacher ? 'Manage and grade assignments' : 'View and submit your assignments'}
-        </p>
-      </div>
-      
-      <div className="flex flex-col md:flex-row gap-4">
-        {/* Search Bar */}
-        <div className="relative flex-grow">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <SearchIcon className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-            placeholder="Search assignments..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        
-        {/* Filter Dropdown */}
-        <div>
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-          >
-            <option value="all">All Assignments</option>
-            {isStudent ? (
-              <>
-                <option value="pending">Pending</option>
-                <option value="submitted">Submitted</option>
-                <option value="graded">Graded</option>
-                <option value="late">Late/Missed</option>
-              </>
-            ) : (
-              <>
-                <option value="pending">Needs Grading</option>
-                <option value="graded">All Graded</option>
-                <option value="upcoming">Upcoming</option>
-                <option value="expired">Deadline Passed</option>
-              </>
-            )}
-          </select>
+    <div className="max-w-6xl mx-auto space-y-8 p-4">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-black text-gray-900 uppercase tracking-tight flex items-center">
+          <BookOpenIcon className="h-8 w-8 mr-3 text-primary-600" />
+          Hệ thống bài học
+        </h1>
+        <div className="relative w-64">
+           <input 
+             type="text" 
+             placeholder="Tìm tên bài học..." 
+             className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 shadow-sm focus:ring-2 focus:ring-primary-500 transition-all" 
+             onChange={(e) => setSearchTerm(e.target.value)} 
+           />
+           <SearchIcon className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
         </div>
       </div>
-      
-      {/* Assignments List */}
-      <div className="space-y-4">
-        {(filteredAssignments || []).length > 0 ? (
-          (filteredAssignments || []).map((assignment, index) => {
-            const status = getAssignmentStatus(assignment);
-            const isPastDeadline = new Date(assignment.deadline) < new Date();
-            
-            return (
-              <motion.div
-                key={assignment._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="bg-white rounded-lg shadow-md p-6"
-              >
-                <div className="sm:flex sm:justify-between sm:items-start">
-                  <div>
-                    <div className="flex items-center mb-2">
-                      <h2 className="text-lg font-semibold text-gray-800 mr-3">
-                        {assignment.title}
-                      </h2>
-                      <span className={`text-xs px-2 py-1 rounded-full ${status.color}`}>
-                        {status.label}
-                      </span>
-                    </div>
-                    
-                    <p className="text-sm text-gray-600 mb-3">
-                      Course: {assignment.course?.title || 'Unknown Course'}
-                    </p>
-                    
-                    <div className="flex items-center text-xs text-gray-500 mb-4">
-                      <ClipboardCheckIcon className="h-4 w-4 mr-1" />
-                      <span className={isPastDeadline ? 'text-red-600 font-medium' : ''}>
-                        Due: {moment(assignment.deadline).format('MMM D, YYYY [at] h:mm A')}
-                      </span>
-                      {isPastDeadline && (
-                        <span className="ml-2 text-red-600 font-medium">
-                          (Deadline passed)
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="mt-3 sm:mt-0 sm:ml-4">
-                    <Link
-                      to={`/assignments/${assignment._id}`}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                    >
-                      {isTeacher ? 'View & Grade' : 'View & Submit'}
-                    </Link>
-                  </div>
+
+      {/* Danh sách thẻ bài học */}
+      <div className="grid grid-cols-1 gap-4">
+        {filteredAssignments.map((assignment, index) => {
+          // Kiểm tra xem student đã hoàn thành chưa (kiểm tra từ database)
+          const studentSubmission = assignment.submissions?.find(s => s.student?._id === user?._id || s.student === user?._id);
+          const isDone = isStudent && studentSubmission;
+
+          return (
+            <div 
+              key={assignment._id} 
+              className={`bg-white rounded-2xl p-5 border flex justify-between items-center shadow-sm transition-all ${
+                isDone ? 'border-green-200 bg-green-50/20' : 'border-gray-100'
+              }`}
+            >
+              <div className="flex items-center gap-4">
+                <div className={`h-12 w-12 rounded-xl flex items-center justify-center font-bold text-lg shadow-sm ${
+                  isDone ? 'bg-green-500 text-white' : 'bg-primary-50 text-primary-600'
+                }`}>
+                  {isDone ? <BadgeCheckIcon className="h-7 w-7" /> : index + 1}
                 </div>
-                {isTeacher && (
-                  <button
-                    onClick={() => handleDeleteAssignment(assignment._id)}
-                    className="ml-2 p-2 rounded-full hover:bg-red-100 text-red-600"
-                    title="Delete Assignment"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
+                
+                <div>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-lg font-extrabold text-gray-800 uppercase tracking-tight">
+                      {assignment.title}
+                    </h2>
+                    
+                    {/* NÚT QUẢN LÝ DÀNH RIÊNG CHO TEACHER */}
+                    {isTeacher && (
+                      <button 
+                        onClick={() => handleOpenManage(assignment)} 
+                        className="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-black hover:bg-indigo-600 hover:text-white border border-indigo-100 transition-all shadow-sm"
+                      >
+                        <UsersIcon className="h-3.5 w-3.5" /> QUẢN LÝ
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400 font-medium italic">
+                    Khóa học: {assignment.courseId?.title || 'General'}
+                  </p>
+                </div>
+              </div>
+
+              <Link 
+                to={`/assignments/${assignment._id}`} 
+                className={`px-8 py-2.5 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95 ${
+                  isDone 
+                  ? 'bg-green-600 text-white hover:bg-green-700' 
+                  : 'bg-primary-600 text-white hover:bg-primary-700 shadow-primary-100'
+                }`}
+              >
+                {isTeacher ? 'Xem nội dung' : (isDone ? 'Xem lại bài' : 'Vào học ngay')}
+              </Link>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* MODAL QUẢN LÝ TIẾN ĐỘ (TEACHER ONLY) */}
+      <AnimatePresence>
+        {showManageModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+              onClick={() => setShowManageModal(false)} 
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.9, opacity: 0, y: 20 }} 
+              className="relative bg-white rounded-3xl w-full max-w-xl shadow-2xl p-7 border border-gray-100"
+            >
+              <div className="flex justify-between items-center mb-6 border-b pb-4">
+                <div>
+                  <h3 className="text-2xl font-black uppercase text-gray-900 tracking-tight">Tiến độ bài học</h3>
+                  <p className="text-sm text-primary-600 font-bold">{selectedAssignment?.title}</p>
+                </div>
+                <button 
+                  onClick={() => setShowManageModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <XIcon className="h-6 w-6 text-gray-400" />
+                </button>
+              </div>
+
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {selectedAssignment?.submissions?.length > 0 ? (
+                  selectedAssignment.submissions.map((sub, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 bg-green-50 rounded-2xl border border-green-100 shadow-sm">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold shadow-sm">
+                          {sub.student?.name?.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-extrabold text-gray-800 leading-tight">{sub.student?.name}</p>
+                          <p className="text-[11px] text-gray-500">{sub.student?.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 text-green-700 font-black text-[10px] bg-white px-3 py-1.5 rounded-full border border-green-200 uppercase tracking-tighter shadow-sm">
+                        <CheckIcon className="h-3 w-3" /> DONE
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-16">
+                    <UsersIcon className="h-14 w-14 text-gray-200 mx-auto mb-3" />
+                    <p className="text-gray-400 font-bold italic">Chưa có học sinh nào hoàn thành bài học này.</p>
+                  </div>
                 )}
-              </motion.div>
-            );
-          })
-        ) : (
-          <div className="text-center py-10 bg-white rounded-lg shadow-md">
-            <p className="text-gray-500">No assignments found matching your criteria.</p>
+              </div>
+              
+              <div className="mt-6 pt-4 border-t flex justify-end">
+                <button 
+                  onClick={() => setShowManageModal(false)}
+                  className="px-8 py-2 bg-gray-900 text-white rounded-xl font-bold text-sm shadow-md hover:bg-black transition-all"
+                >
+                  Đóng
+                </button>
+              </div>
+            </motion.div>
           </div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 };

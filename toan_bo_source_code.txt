@@ -4197,14 +4197,9 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import AuthContext from '../../context/AuthContext';
 import { 
-  PlusCircleIcon, 
-  SearchIcon, 
-  AcademicCapIcon, 
-  UserGroupIcon, 
-  CheckCircleIcon,
-  InformationCircleIcon,
-  XIcon,
-  PlayIcon
+  PlusCircleIcon, SearchIcon, AcademicCapIcon, 
+  UserGroupIcon, CheckCircleIcon, InformationCircleIcon,
+  XIcon, EyeOffIcon, EyeIcon, TrashIcon 
 } from '@heroicons/react/outline';
 
 const Courses = () => {
@@ -4213,8 +4208,6 @@ const Courses = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [pendingRequests, setPendingRequests] = useState([]);
-  
-  // State quản lý Modal mô tả dành riêng cho Student
   const [selectedCourseForModal, setSelectedCourseForModal] = useState(null);
 
   useEffect(() => {
@@ -4232,6 +4225,19 @@ const Courses = () => {
     }
   };
 
+  const handleTogglePublish = async (courseId) => {
+    try {
+      const res = await axios.put(`/api/courses/${courseId}/toggle-publish`);
+      toast.success(res.data.message);
+      // Cập nhật state tại chỗ
+      setCourses(courses.map(c => 
+        c._id === courseId ? { ...c, isPublished: res.data.isPublished } : c
+      ));
+    } catch (err) {
+      toast.error('Thao tác thất bại');
+    }
+  };
+
   const handleEnroll = async (courseId) => {
     try {
       await axios.post('/api/enrollments/register', { courseId });
@@ -4239,6 +4245,18 @@ const Courses = () => {
       setPendingRequests(prev => [...prev, courseId]);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Lỗi đăng ký');
+    }
+  };
+
+  const handleDelete = async (courseId) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa khóa học này?')) {
+      try {
+        await axios.delete(`/api/courses/${courseId}`);
+        toast.success('Đã xóa khóa học thành công');
+        setCourses(courses.filter(c => c._id !== courseId));
+      } catch (err) {
+        toast.error('Lỗi khi xóa khóa học');
+      }
     }
   };
 
@@ -4257,9 +4275,7 @@ const Courses = () => {
           <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">
             {user?.role === 'teacher' ? 'Quản lý khóa học' : 'Khám phá khóa học'}
           </h1>
-          <p className="mt-2 text-gray-600 font-medium">
-            {user?.role === 'teacher' ? 'Tạo và quản lý các nội dung đào tạo của bạn.' : 'Nâng cao kỹ năng với các khóa học chất lượng.'}
-          </p>
+          <p className="mt-2 text-gray-600 font-medium">Hệ thống học tập trực tuyến LMS.</p>
         </div>
         
         <div className="flex items-center gap-4 w-full md:w-auto">
@@ -4267,8 +4283,8 @@ const Courses = () => {
             <SearchIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Tìm tên khóa học hoặc mã..."
-              className="pl-10 pr-4 py-2 w-full border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none"
+              placeholder="Tìm kiếm khóa học..."
+              className="pl-10 pr-4 py-2 w-full border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -4286,138 +4302,114 @@ const Courses = () => {
         {filteredCourses.map((course) => {
           const isEnrolled = course.students?.includes(user?._id);
           const isWaiting = pendingRequests.includes(course._id);
+          const isTeacherOwner = user?.role === 'teacher' && user._id === course.teacher?._id;
 
           return (
             <motion.div
               key={course._id}
               whileHover={{ y: -8 }}
-              className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-50 flex flex-col h-full"
+              className={`bg-white rounded-3xl shadow-xl overflow-hidden border flex flex-col h-full transition-all duration-300 ${
+                !course.isPublished ? 'opacity-60 grayscale border-red-200' : 'border-gray-100'
+              }`}
             >
               <div className="p-6 flex-grow">
-                <span className="bg-primary-50 text-primary-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4 inline-block">
-                  {course.code || 'LMS-COURSE'}
-                </span>
+                <div className="flex justify-between items-start mb-4">
+                  <span className="bg-primary-50 text-primary-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                    {course.code || 'LMS'}
+                  </span>
+                  {!course.isPublished && (
+                    <span className="bg-red-100 text-red-600 text-[10px] font-black px-2 py-0.5 rounded-md uppercase">Đang ẩn</span>
+                  )}
+                </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3 line-clamp-2 uppercase">
                   {course.title}
                 </h3>
-                <div className="space-y-2">
-                  <div className="flex items-center text-gray-500">
-                    <AcademicCapIcon className="h-5 w-5 mr-2 text-primary-400" />
-                    <span className="text-sm">Giảng viên: <span className="text-gray-900 font-semibold">{course.teacher?.name}</span></span>
-                  </div>
+                <div className="flex items-center text-gray-500">
+                  <AcademicCapIcon className="h-5 w-5 mr-2 text-primary-400" />
+                  <span className="text-sm">Giảng viên: <span className="text-gray-900 font-semibold">{course.teacher?.name}</span></span>
                 </div>
               </div>
 
-              <div className="p-6 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between gap-4">
+              <div className="p-6 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between gap-2">
                 
-                {/* --- PHÂN CHIA NÚT CHI TIẾT THEO ROLE --- */}
+                {/* ROLE BASED NAVIGATION */}
                 {user?.role === 'teacher' ? (
-                  /* Giao diện Teacher: Giữ nguyên Link Xem chi tiết cũ */
-                  <Link 
-                    to={`/courses/${course._id}`}
-                    className="text-primary-600 font-bold hover:text-primary-700 transition-colors text-sm underline"
-                  >
+                  <Link to={`/courses/${course._id}`} className="text-primary-600 font-bold hover:text-primary-700 transition-colors text-sm underline">
                     Xem chi tiết
                   </Link>
                 ) : (
-                  /* Giao diện Student: Đổi thành nút mở Modal mô tả */
-                  <button 
-                    onClick={() => setSelectedCourseForModal(course)}
-                    className="flex items-center font-bold text-primary-600 hover:text-primary-800 transition-colors text-sm"
-                  >
-                    <InformationCircleIcon className="h-5 w-5 mr-1" /> Mô tả chi tiết
+                  <button onClick={() => setSelectedCourseForModal(course)} className="flex items-center font-bold text-primary-600 hover:text-primary-800 transition-colors text-sm">
+                    <InformationCircleIcon className="h-5 w-5 mr-1" /> Mô tả
                   </button>
                 )}
 
-                {/* --- PHẦN NÚT ĐĂNG KÝ (DÀNH CHO STUDENT) --- */}
-                {user?.role === 'student' && (
-                  isEnrolled ? (
-                    <button disabled className="bg-gray-400 text-white px-5 py-2 rounded-xl font-bold cursor-not-allowed text-sm">
-                      Bạn đã vào lớp
-                    </button>
-                  ) : isWaiting ? (
-                    <button disabled className="bg-emerald-500 text-white px-5 py-2 rounded-xl font-bold flex items-center gap-2 text-sm animate-pulse">
-                      <CheckCircleIcon className="h-5 w-5" /> Đang chờ duyệt
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleEnroll(course._id)}
-                      className="bg-primary-600 text-white px-5 py-2 rounded-xl font-bold hover:bg-primary-700 transition shadow-lg text-sm"
-                    >
-                      Đăng ký ngay
-                    </button>
-                  )
-                )}
-                
-                {/* Nút sửa nhanh cho giáo viên sở hữu khóa học */}
-                {user?.role === 'teacher' && user._id === course.teacher?._id && (
-                  <Link
-                    to={`/teacher/edit-course/${course._id}`}
-                    className="bg-white border border-orange-500 text-orange-500 px-3 py-1.5 rounded-xl font-bold hover:bg-orange-500 hover:text-white transition-all text-xs"
-                  >
-                    Sửa
-                  </Link>
-                )}
+                {/* ACTION BUTTONS */}
+                <div className="flex items-center gap-2">
+                  {user?.role === 'student' && (
+                    isEnrolled ? (
+                      <button disabled className="bg-gray-400 text-white px-4 py-2 rounded-xl font-bold text-xs">Vào lớp</button>
+                    ) : isWaiting ? (
+                      <button disabled className="bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold text-xs animate-pulse">Chờ duyệt</button>
+                    ) : (
+                      <button onClick={() => handleEnroll(course._id)} className="bg-primary-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-primary-700 text-xs">Đăng ký</button>
+                    )
+                  )}
+
+                  {isTeacherOwner && (
+                    <>
+                      {/* NÚT ẨN/HIỆN */}
+                      <button 
+                        onClick={() => handleTogglePublish(course._id)}
+                        className={`p-2 rounded-xl transition ${course.isPublished ? 'bg-gray-200 text-gray-600 hover:bg-gray-300' : 'bg-green-500 text-white hover:bg-green-600'}`}
+                        title={course.isPublished ? "Ẩn với học sinh" : "Hiện với học sinh"}
+                      >
+                        {course.isPublished ? <EyeOffIcon className="h-5 w-5"/> : <EyeIcon className="h-5 w-5"/>}
+                      </button>
+
+                      <Link to={`/teacher/edit-course/${course._id}`} className="p-2 bg-white border border-orange-500 text-orange-500 rounded-xl hover:bg-orange-500 hover:text-white transition">
+                        <XIcon className="h-5 w-5 rotate-45"/> {/* Thay bằng PencilIcon nếu muốn */}
+                      </Link>
+
+                      <button onClick={() => handleDelete(course._id)} className="p-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition">
+                        <TrashIcon className="h-5 w-5"/>
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </motion.div>
           );
         })}
       </div>
 
-      {/* --- MODAL MÔ TẢ CHI TIẾT DÀNH RIÊNG CHO STUDENT --- */}
+      {/* MODAL MÔ TẢ CHI TIẾT (GIỮ NGUYÊN TỪ BƯỚC TRƯỚC) */}
       <AnimatePresence>
         {selectedCourseForModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-            <motion.div initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }} className="bg-white rounded-[2.5rem] w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+             {/* ... Nội dung Modal đã viết ở bước trước ... */}
+             <motion.div initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }} className="bg-white rounded-[2.5rem] w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
               <div className="p-6 flex justify-between items-center border-b bg-gray-50">
-                <h2 className="text-2xl font-black text-primary-600 uppercase tracking-tight">{selectedCourseForModal.title}</h2>
+                <h2 className="text-2xl font-black text-primary-600 uppercase">{selectedCourseForModal.title}</h2>
                 <button onClick={() => setSelectedCourseForModal(null)} className="p-2 bg-white rounded-full shadow-sm hover:text-red-500 transition-all"><XIcon className="h-7 w-7"/></button>
               </div>
-
-              <div className="p-10 overflow-y-auto space-y-12">
-                {/* Video giới thiệu */}
-                {selectedCourseForModal.landingPageConfig?.videoUrl && (
-                  <div className="aspect-video rounded-[2rem] overflow-hidden shadow-2xl border-8 border-gray-50 bg-black">
-                    <iframe 
-                      width="100%" height="100%" 
-                      src={selectedCourseForModal.landingPageConfig.videoUrl.replace("watch?v=", "embed/")} 
-                      title="Giới thiệu khóa học" frameBorder="0" allowFullScreen
-                    ></iframe>
-                  </div>
-                )}
-
-                {/* Các mục nội dung chi tiết */}
-                <div className="space-y-8">
-                  {selectedCourseForModal.landingPageConfig?.sections?.length > 0 ? (
-                    selectedCourseForModal.landingPageConfig.sections.map((sec, i) => (
-                      <div key={i} className="p-8 bg-blue-50/50 rounded-[2rem] border border-blue-100">
-                        <h4 className="text-xl font-black text-blue-800 mb-4 flex items-center">
-                          <CheckCircleIcon className="h-7 w-7 mr-3 text-green-500" /> {sec.title}
-                        </h4>
-                        <p className="text-gray-700 leading-relaxed whitespace-pre-line text-lg">{sec.content}</p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-center text-gray-400 italic text-lg">Giảng viên chưa cập nhật mô tả chi tiết cho khóa học này.</p>
-                  )}
-                </div>
-              </div>
-              
-              <div className="p-6 bg-white border-t flex justify-center">
-                 <button onClick={() => { handleEnroll(selectedCourseForModal._id); setSelectedCourseForModal(null); }} className="px-10 py-4 bg-primary-600 text-white rounded-2xl font-black text-xl hover:scale-105 transition-transform shadow-xl uppercase">
-                   Đăng ký khóa học ngay
-                 </button>
+              <div className="p-10 overflow-y-auto">
+                 {/* Nội dung video và sections của selectedCourseForModal.landingPageConfig */}
+                 {selectedCourseForModal.landingPageConfig?.videoUrl && (
+                    <div className="aspect-video rounded-3xl overflow-hidden mb-8 border-8 border-gray-100 shadow-lg">
+                       <iframe width="100%" height="100%" src={selectedCourseForModal.landingPageConfig.videoUrl.replace("watch?v=", "embed/")} frameBorder="0" allowFullScreen></iframe>
+                    </div>
+                 )}
+                 {selectedCourseForModal.landingPageConfig?.sections?.map((s, i) => (
+                    <div key={i} className="mb-6 p-6 bg-blue-50 rounded-2xl">
+                       <h4 className="font-bold text-xl text-blue-800 mb-2">{s.title}</h4>
+                       <p className="text-gray-700 whitespace-pre-line">{s.content}</p>
+                    </div>
+                 ))}
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
-
-      {filteredCourses.length === 0 && (
-        <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-          <p className="text-gray-500 text-lg font-medium">Không tìm thấy khóa học nào phù hợp.</p>
-        </div>
-      )}
     </div>
   );
 };
@@ -15329,16 +15321,64 @@ const Notification = require('../models/notification.model');
 // BƯỚC FIX QUAN TRỌNG: Import model Enrollment để có thể xóa bản ghi đăng ký
 const Enrollment = require('../models/enrollment.model');
 
-// @desc    Get all courses
+// @desc    Get all courses (ĐÃ CHỈNH SỬA LOGIC ẨN/HIỆN THÔNG MINH)
 // @route   GET /api/courses
-// @access  Public
-// Lấy danh sách tất cả khóa học
+// @access  Public/Private
 exports.getCourses = async (req, res) => {
   try {
-    const courses = await Course.find({}).populate('teacher', 'name email').lean();
-    res.status(200).json({ success: true, courses: courses || [] });
+    let filter = {};
+
+    // Nếu không phải Giáo viên/Admin, chúng ta áp dụng bộ lọc thông minh
+    if (!req.user || req.user.role !== 'teacher') {
+      const studentId = req.user ? req.user.id : null;
+
+      filter = {
+        $or: [
+          { isPublished: true }, // Khóa học đang công khai
+          { students: studentId } // HOẶC Khóa học đang ẩn nhưng học sinh này đã tham gia
+        ]
+      };
+    }
+    // Nếu là Giáo viên, filter = {} (xem được hết để quản lý)
+
+    const courses = await Course.find(filter)
+      .populate('teacher', 'name email')
+      .lean();
+    
+    res.status(200).json({
+      success: true,
+      courses: courses || []
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error fetching courses' });
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Toggle Publish/Hide course (HÀM MỚI)
+// @route   PUT /api/courses/:id/toggle-publish
+// @access  Private/Teacher
+exports.togglePublishCourse = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy khóa học' });
+    }
+
+    // Chỉ giáo viên tạo ra khóa học mới có quyền ẩn/hiện
+    if (course.teacher.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(401).json({ success: false, message: 'Bạn không có quyền thực hiện thao tác này' });
+    }
+
+    course.isPublished = !course.isPublished;
+    await course.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: course.isPublished ? 'Khóa học hiện đã hiển thị với học sinh' : 'Khóa học đã được ẩn thành công',
+      isPublished: course.isPublished 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Lỗi máy chủ' });
   }
 };
 
@@ -17891,23 +17931,28 @@ const {
   getTeacherCourses,
   addStudentToCourse,
   removeStudentFromCourse,
-  enrollCourse // CHỈ GIỮ DUY NHẤT 1 KHAI BÁO TẠI ĐÂY
+  togglePublishCourse, // THÊM: Import hàm ẩn/hiện khóa học
+  enrollCourse 
 } = require('../controllers/course.controller');
 
 const { protect, authorize } = require('../middleware/auth.middleware');
 
-// Routes công khai
-router.get('/', getCourses);
+// Routes công khai (Lưu ý: getCourses giờ đã có logic lọc isPublished)
+router.get('/', protect, getCourses); 
 router.get('/:id', getCourse);
 
-// Routes yêu cầu đăng nhập
+// Routes yêu cầu đăng nhập (Học sinh)
 router.post('/:id/enroll', protect, enrollCourse);
 
-// Routes dành cho giáo viên
+// Routes dành cho giáo viên (Quản lý khóa học)
 router.post('/', protect, authorize('teacher'), createCourse);
 router.get('/teacher/my-courses', protect, authorize('teacher'), getTeacherCourses);
 router.put('/:id', protect, authorize('teacher'), updateCourse);
 router.delete('/:id', protect, authorize('teacher'), deleteCourse);
+
+// Route mới: Ẩn/Hiện khóa học
+// Chỉ giáo viên sở hữu khóa học mới có quyền gọi route này
+router.put('/:id/toggle-publish', protect, authorize('teacher'), togglePublishCourse);
 
 // Quản lý sinh viên trong khóa học
 router.put('/:id/add-student', protect, authorize('teacher'), addStudentToCourse);
